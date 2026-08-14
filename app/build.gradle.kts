@@ -3,14 +3,26 @@ plugins {
     id("com.gradleup.shadow") version "9.5.1"
 }
 
-val id: String = providers.gradleProperty("id").get()
+val id = providers.gradleProperty("id").get()
 
 base {
     archivesName = "${id}-app"
 }
 
+val lwjglVersion = providers.gradleProperty("lwjgl_version").get()
+
 dependencies {
     implementation(project(":common"))
+
+    implementation(platform("org.lwjgl:lwjgl-bom:${lwjglVersion}"))
+    implementation("org.lwjgl:lwjgl")
+    implementation("org.lwjgl:lwjgl-glfw")
+    implementation("org.lwjgl:lwjgl-opengl")
+    implementation("org.lwjgl:lwjgl-stb")
+
+    runtimeOnly("org.lwjgl:lwjgl-glfw::natives-windows")
+    runtimeOnly("org.lwjgl:lwjgl-opengl::natives-windows")
+    runtimeOnly("org.lwjgl:lwjgl-stb::natives-windows")
 }
 
 tasks.shadowJar {

@@ -5,7 +5,6 @@ plugins {
     id("java")
     id("net.neoforged.moddev") version "2.0.143"
     id("maven-publish")
-    id("com.gradleup.shadow") version "9.5.1"
 }
 
 val mod_version: String = providers.gradleProperty("version").get()
@@ -23,10 +22,6 @@ val mod_description: String = providers.gradleProperty("mod_description").get()
 val parchment_mappings_version: String = providers.gradleProperty("parchment_mappings_version").get()
 val parchment_minecraft_version: String = providers.gradleProperty("parchment_minecraft_version").get()
 
-val shade: Configuration = configurations.create("shade")
-configurations.named("implementation") {
-    extendsFrom(shade)
-}
 
 base {
     archivesName = "${mod_id}-neoforge"
@@ -56,7 +51,7 @@ sourceSets.main.get().resources.srcDir("src/generated/resources")
 sourceSets.main.get().resources.srcDir(generateModMetadata.map { it.destinationDir })
 
 dependencies {
-    shade(project(":common"))
+    implementation(project(":common"))
 }
 
 neoForge {
@@ -83,24 +78,15 @@ neoForge {
     ideSyncTask(generateModMetadata)
 }
 
-tasks.shadowJar {
-    archiveClassifier = ""
-    configurations = listOf(shade)
-    from(project(":common").sourceSets.main.get().output)
-}
-
-tasks.build {
-    dependsOn(tasks.shadowJar)
-}
-
 tasks.jar {
-    enabled = false
+    archiveClassifier = ""
+    from(project(":common").sourceSets.main.get().output)
 }
 
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
-            from(components["shadow"])
+            from(components["java"])
             artifactId = mod_id
         }
     }

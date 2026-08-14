@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "top.untoldstudio.simpleui.mixin",
+  "package": "top.untoldstudio.simpleui.neoforge.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
     "GameRendererMixin",
