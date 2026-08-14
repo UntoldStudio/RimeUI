@@ -1,0 +1,10 @@
+{
+  "providers": [
+    {
+      "type": "ttf",
+      "file": "simpleui:jetbrains_mono.ttf",
+      "size": 12,
+      "oversample": 5.0
+    }
+  ]
+}
