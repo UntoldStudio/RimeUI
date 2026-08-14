@@ -4,10 +4,8 @@ import top.untoldstudio.simpleui.event.*;
 import top.untoldstudio.simpleui.signal.SignalBus;
 import top.untoldstudio.simpleui.signal.SignalType;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
+
 import static top.untoldstudio.simpleui.signal.SignalType.*;
 
 /**
@@ -17,6 +15,7 @@ import static top.untoldstudio.simpleui.signal.SignalType.*;
  * 如果你不需要接触这些,你只是想造一个可复用的界面,那么我推荐你造一个不继承任何节点的类里面有一个父Frame以及许多子预设节点而非直接继承某个节点
  */
 public abstract class GuiNode implements Comparable<GuiNode> {
+    protected String name = getClass().getName();
     protected final SignalBus signalBus = new SignalBus();
     protected int renderLevel = 0;
     protected Gui gui;
@@ -28,6 +27,16 @@ public abstract class GuiNode implements Comparable<GuiNode> {
 
     protected void sendSingle(SignalType type){
         signalBus.send(this, type);
+    }
+
+    public String getName(){
+        return name;
+    }
+    public void setName(String name){
+        if (!this.name.equals(name)){
+            this.name = name;
+            sendSingle(SET_NAME);
+        }
     }
 
     public final void onKeyEventWithChildren(KeyEvent event){
@@ -216,6 +225,13 @@ public abstract class GuiNode implements Comparable<GuiNode> {
             child.parent = null;
             child.gui = null;
             sendSingle(REMOVE_CHILD);
+        }
+    }
+    public void removeChild(String childName){
+        for (GuiNode child : children){
+            if (child.getName().equals(childName)){
+                removeChild(child);
+            }
         }
     }
     public GuiNode getParent(){
