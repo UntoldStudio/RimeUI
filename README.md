@@ -1,8 +1,8 @@
-# SimpleUI
+# RimeUI
 
-SimpleUI is a UI library for NeoForge that aims to make Minecraft UI creation easier.
+RimeUI is an embedded UI library that only requires a rendering callback called per frame and a window handle. It also has other modes, such as creating windows on its own
 
-> **Warning:** Currently, none of the library's GUI nodes can modify vanilla GUIs. All GUI nodes will render on top of vanilla GUIs.
+Note: This library requires the host to provide dependencies for LWJGL and JOML
 
 To use this library, add the following to your build script:
 
