@@ -16,7 +16,7 @@ dependencies {
 }
 ```
 
-Documentation is available [here](https://untoldstudio.github.io/SimpleUI).
+Documentation is available [here](https://untoldstudio.github.io/RimeUI).
 
 If you encounter any bugs, feel free to open an issue!
 
