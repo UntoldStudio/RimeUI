@@ -1,7 +1,10 @@
 [versions]
 lwjgl = "3.3.3"
-joml = "1.10.7"
+joml = "1.10.8"
 shadow = "9.6.1"
+log4j = "2.24.1"
+slf4j-api = "2.0.9"
+jansi = "1.18"
 
 [libraries]
 joml = { module = "org.joml:joml", version.ref = "joml" }
@@ -12,9 +15,15 @@ lwjgl-glfw = { module = "org.lwjgl:lwjgl-glfw" }
 lwjgl-stb = { module = "org.lwjgl:lwjgl-stb" }
 lwjgl-freetype = { module = "org.lwjgl:lwjgl-freetype" }
 lwjgl-harfbuzz = { module = "org.lwjgl:lwjgl-harfbuzz" }
+log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
+log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
+log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j-api" }
+jansi = { module = "org.fusesource.jansi:jansi", version.ref = "jansi" }
 
 [bundles]
 lwjgl-all = ["lwjgl", "lwjgl-opengl", "lwjgl-glfw", "lwjgl-stb", "lwjgl-freetype", "lwjgl-harfbuzz"]
+log-all = ["log4j-core", "log4j-api", "slf4j-api", "log4j-slf4j2-impl"]
 
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

@@ -5,6 +5,8 @@ plugins {
 val id: String = project.property("id") as String
 
 dependencies {
+    compileOnly(libs.bundles.log.all)
+
     compileOnly(platform(rootProject.libs.lwjgl.bom))
     compileOnly(rootProject.libs.bundles.lwjgl.all)
 

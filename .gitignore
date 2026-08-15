@@ -3,5 +3,6 @@
 /build/
 
 /application/build/
+/application/run/
 
 /core/build/
