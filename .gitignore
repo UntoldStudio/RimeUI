@@ -1,7 +1,7 @@
 /.gradle/
 /.idea/
 /build/
-/neoforge/build/
-/neoforge/run/
-/app/build
-/common/build/
+
+/application/build/
+
+/core/build/

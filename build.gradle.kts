@@ -6,38 +6,43 @@ import java.io.File
 import java.io.InputStreamReader
 
 plugins {
-    id("base")
-    id("idea")
+    id("java")
 }
 
 val version: String = project.property("version") as String
-val group_id: String = project.property("group_id") as String
+val groupId: String = project.property("group_id") as String
 
 subprojects {
-    version = version
-    group = group_id
+    pluginManager.apply("java")
+
+    group = version
+    version = groupId
 
     repositories {
         mavenCentral()
-        mavenLocal()
     }
 
-    pluginManager.withPlugin("java") {
-        extensions.configure<JavaPluginExtension> {
-            toolchain {
-                languageVersion.set(JavaLanguageVersion.of(21))
-            }
-            withSourcesJar()
-        }
+    dependencies {
+        compileOnly(platform(rootProject.libs.lwjgl.bom))
+        compileOnly(rootProject.libs.bundles.lwjgl.all)
+
+        compileOnly(rootProject.libs.joml)
     }
 }
 
-idea {
-    module {
-        isDownloadSources = true
-        isDownloadJavadoc = true
-    }
+tasks.build {
+    dependsOn(subprojects.map { it.tasks.named("build") })
 }
+tasks.named<JavaCompile>("compileJava") {
+    enabled = false
+}
+tasks.jar {
+    enabled = false
+}
+tasks.named<Jar>("jar") {
+    enabled = false
+}
+tasks.withType<Javadoc>().configureEach { enabled = false }
 
 abstract class PushChangesTask : DefaultTask() {
     @TaskAction

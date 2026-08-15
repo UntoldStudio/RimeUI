@@ -1,0 +1,20 @@
+[versions]
+lwjgl = "3.3.3"
+joml = "1.10.7"
+shadow = "9.6.1"
+
+[libraries]
+joml = { module = "org.joml:joml", version.ref = "joml" }
+lwjgl-bom = { module = "org.lwjgl:lwjgl-bom", version.ref = "lwjgl" }
+lwjgl = { module = "org.lwjgl:lwjgl" }
+lwjgl-opengl = { module = "org.lwjgl:lwjgl-opengl" }
+lwjgl-glfw = { module = "org.lwjgl:lwjgl-glfw" }
+lwjgl-stb = { module = "org.lwjgl:lwjgl-stb" }
+lwjgl-freetype = { module = "org.lwjgl:lwjgl-freetype" }
+lwjgl-harfbuzz = { module = "org.lwjgl:lwjgl-harfbuzz" }
+
+[bundles]
+lwjgl-all = ["lwjgl", "lwjgl-opengl", "lwjgl-glfw", "lwjgl-stb", "lwjgl-freetype", "lwjgl-harfbuzz"]
+
+[plugins]
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
