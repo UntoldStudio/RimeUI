@@ -1,6 +1,6 @@
 # RimeUI
 
-RimeUI is an embedded UI library that only requires a rendering callback called per frame and a window handle. It also has other modes, such as creating windows on its own
+RimeUI is an embedded UI library that only requires calling one rendering callback and one window handle per frame. The core module is the module you need to rely on, and the application is used to create an independent UI app.
 
 Note: This library requires the host to provide dependencies for LWJGL and JOML
 

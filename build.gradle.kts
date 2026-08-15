@@ -21,13 +21,6 @@ subprojects {
     repositories {
         mavenCentral()
     }
-
-    dependencies {
-        compileOnly(platform(rootProject.libs.lwjgl.bom))
-        compileOnly(rootProject.libs.bundles.lwjgl.all)
-
-        compileOnly(rootProject.libs.joml)
-    }
 }
 
 tasks.build {
