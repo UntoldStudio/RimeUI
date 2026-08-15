@@ -5,8 +5,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import top.untoldstudio.simpleui.neoforge.event.MouseScrollEvent;
-import top.untoldstudio.simpleui.neoforge.gui.Gui;
+import top.untoldstudio.simpleui.common.event.MouseScrollEvent;
+import top.untoldstudio.simpleui.common.gui.Gui;
 
 @Mixin(MouseHandler.class)
 public abstract class MouseHandlerMixin {

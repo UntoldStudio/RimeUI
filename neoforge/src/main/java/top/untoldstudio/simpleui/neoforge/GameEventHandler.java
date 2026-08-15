@@ -6,8 +6,8 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import top.untoldstudio.simpleui.neoforge.event.MouseClickEvent;
-import top.untoldstudio.simpleui.neoforge.gui.Gui;
+import top.untoldstudio.simpleui.common.event.MouseClickEvent;
+import top.untoldstudio.simpleui.common.gui.Gui;
 
 public final class GameEventHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(GameEventHandler.class);

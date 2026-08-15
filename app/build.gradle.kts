@@ -10,9 +10,16 @@ base {
 }
 
 val lwjglVersion = providers.gradleProperty("lwjgl_version").get()
+val log4jCoreVersion = providers.gradleProperty("log4j_core_version").get()
+val log4jApiVersion = providers.gradleProperty("log4j_api_version").get()
+val slf4jApiVersion = providers.gradleProperty("slf4j_api_version").get()
 
 dependencies {
     implementation(project(":common"))
+
+    implementation("org.apache.logging.log4j:log4j-core:${log4jCoreVersion}")
+    implementation("org.apache.logging.log4j:log4j-api:${log4jApiVersion}")
+    implementation("org.slf4j:slf4j-api:${slf4jApiVersion}")
 
     implementation(platform("org.lwjgl:lwjgl-bom:${lwjglVersion}"))
     implementation("org.lwjgl:lwjgl")

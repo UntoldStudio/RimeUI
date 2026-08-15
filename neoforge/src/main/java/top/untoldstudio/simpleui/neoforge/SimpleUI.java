@@ -8,7 +8,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.untoldstudio.simpleui.common.Platform;
-import top.untoldstudio.simpleui.neoforge.gui.Gui;
+import top.untoldstudio.simpleui.common.gui.Gui;
 
 @Mod(value = SimpleUI.MOD_ID, dist = Dist.CLIENT)
 public final class SimpleUI {
