@@ -9,14 +9,14 @@ plugins {
     id("java")
 }
 
-val version: String = project.property("version") as String
+val versionString: String = project.property("version") as String
 val groupId: String = project.property("group_id") as String
 
 subprojects {
     pluginManager.apply("java")
 
-    group = version
-    version = groupId
+    group = groupId
+    version = versionString
 
     repositories {
         mavenCentral()
@@ -75,8 +75,8 @@ abstract class PushChangesTask : DefaultTask() {
 }
 
 tasks.named("build") {
-    dependsOn(":app:build")
-    dependsOn(":neoforge:build")
+    dependsOn(":application:build")
+    dependsOn(":core:build")
 }
 
 tasks.register<PushChangesTask>("pushChanges") {
