@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.UntoldStudio:SimpleUI:${version}")
+    implementation("com.github.UntoldStudio:RimeUI:${version}")
 }
 ```
 
