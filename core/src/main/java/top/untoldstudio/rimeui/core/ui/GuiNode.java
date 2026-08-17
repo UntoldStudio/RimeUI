@@ -1,6 +1,7 @@
-package top.untoldstudio.rimeui.core.gui;
+package top.untoldstudio.rimeui.core.ui;
 
 import org.jetbrains.annotations.NotNull;
+import top.untoldstudio.rimeui.core.event.WindowSizeChangeEvent;
 import top.untoldstudio.rimeui.core.render.GuiRender;
 import top.untoldstudio.rimeui.core.signal.SignalBus;
 import top.untoldstudio.rimeui.core.signal.SignalType;
@@ -25,6 +26,14 @@ public abstract class GuiNode<T extends GuiNode<T>> {
         }
     }
     protected abstract void render(GuiRender render);
+
+    protected final void onWindowSizeChangeEventWithChildren(WindowSizeChangeEvent event){
+        onWindowSizeChangeEvent(event);
+        for (GuiNode<?> child : children) {
+            child.onWindowSizeChangeEventWithChildren(event);
+        }
+    }
+    protected void onWindowSizeChangeEvent(WindowSizeChangeEvent event){}
 
     protected void sendSignal(SignalType type, Object value) {
         Object lastValue = lastSignalObjectValues.get(type);
@@ -52,7 +61,7 @@ public abstract class GuiNode<T extends GuiNode<T>> {
             if (node.parent != null){
                 node.parent.children.remove(node);
             } else if (node.parentIsGuiMain){
-                GuiMain.getInstance().removeChild(node);
+                MainUi.getInstance().removeChild(node);
             }
             node.parent = this;
             children.add(node);
@@ -119,7 +128,7 @@ public abstract class GuiNode<T extends GuiNode<T>> {
         if (parent != null){
             parent.sortChildren();
         } else if (parentIsGuiMain){
-            GuiMain.getInstance().sortChildren();
+            MainUi.getInstance().sortChildren();
         }
         sendSignal(SignalType.SET_RENDER_LEVEL, renderLevel);
         return self;

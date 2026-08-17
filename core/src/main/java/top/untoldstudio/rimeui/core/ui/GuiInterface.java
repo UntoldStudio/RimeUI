@@ -1,4 +1,4 @@
-package top.untoldstudio.rimeui.core.gui;
+package top.untoldstudio.rimeui.core.ui;
 
 public interface GuiInterface {
     default GuiNode getGuiNode(){

@@ -1,7 +1,7 @@
 package top.untoldstudio.rimeui.core.signal;
 
-import top.untoldstudio.rimeui.core.gui.GuiInterface;
-import top.untoldstudio.rimeui.core.gui.GuiNode;
+import top.untoldstudio.rimeui.core.ui.GuiInterface;
+import top.untoldstudio.rimeui.core.ui.GuiNode;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;

@@ -1,24 +1,42 @@
-package top.untoldstudio.rimeui.core.gui;
+package top.untoldstudio.rimeui.core.ui;
 
 import org.jetbrains.annotations.NotNull;
+import top.untoldstudio.rimeui.core.event.WindowSizeChangeEvent;
 import top.untoldstudio.rimeui.core.render.GuiRender;
+import top.untoldstudio.rimeui.core.render.RenderBackend;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public final class GuiMain {
-    private static GuiMain instance;
+public final class MainUi {
+    private static MainUi instance;
     private final List<GuiNode<?>> children = new ArrayList<>();
     private final GuiRender render;
+    private int windowWidth;
+    private int windowHeight;
 
     public void render(){
+        int oldWidth = windowWidth;
+        int oldHeight = windowHeight;
+        this.windowWidth = RenderBackend.getProvider().getWindowWidth();
+        this.windowHeight = RenderBackend.getProvider().getWindowHeight();
+        if (oldWidth != windowWidth || oldHeight != windowHeight) {
+            onWindowSizeChangeEvent(new WindowSizeChangeEvent(oldWidth, oldHeight, windowWidth, windowHeight));
+        }
         render.begin();
         for (GuiNode<?> node : children){
             node.renderWithChildren(render);
         }
+        render.submitBuffer();
         render.end();
+    }
+
+    private void onWindowSizeChangeEvent(WindowSizeChangeEvent event){
+        for (GuiNode<?> child : children){
+            child.onWindowSizeChangeEventWithChildren(event);
+        }
     }
 
     public boolean hasChild(GuiNode<?> node){
@@ -32,7 +50,7 @@ public final class GuiMain {
         }
         return false;
     }
-    public GuiMain addChild(@NotNull GuiNode<?> node){
+    public MainUi addChild(@NotNull GuiNode<?> node){
         node.parent = null;
         node.parentIsGuiMain = true;
         children.add(node);
@@ -40,24 +58,24 @@ public final class GuiMain {
         node.sendSignal(SignalType.SET_PARENT);
         return this;
     }
-    public GuiMain addChildren(@NotNull GuiNode<?>... children){
+    public MainUi addChildren(@NotNull GuiNode<?>... children){
         for (GuiNode<?> node : children){
             addChild(node);
         }
         return this;
     }
-    public GuiMain removeChild(@NotNull GuiNode<?> node){
+    public MainUi removeChild(@NotNull GuiNode<?> node){
         node.parentIsGuiMain = false;
         node.sendSignal(SignalType.SET_PARENT);
         return this;
     }
-    public GuiMain removeChildren(@NotNull GuiNode<?>... nodes){
+    public MainUi removeChildren(@NotNull GuiNode<?>... nodes){
         for (GuiNode<?> node : nodes){
             removeChild(node);
         }
         return this;
     }
-    public GuiMain removeChild(String name) {
+    public MainUi removeChild(String name) {
         GuiNode<?> target = null;
         for (GuiNode<?> child : children) {
             if (child.getName().equals(name)) {
@@ -70,7 +88,7 @@ public final class GuiMain {
         }
         return this;
     }
-    public GuiMain removeChildren(String... names){
+    public MainUi removeChildren(String... names){
         for (String name : names){
             removeChild(name);
         }
@@ -82,12 +100,20 @@ public final class GuiMain {
     }
 
 
-    public GuiMain(GuiRender render){
+    public MainUi(GuiRender render){
         instance = this;
         this.render = render;
     }
 
-    public static GuiMain getInstance() {
+    public static MainUi getInstance() {
         return instance;
+    }
+
+    public int getWindowWidth() {
+        return windowWidth;
+    }
+
+    public int getWindowHeight() {
+        return windowHeight;
     }
 }

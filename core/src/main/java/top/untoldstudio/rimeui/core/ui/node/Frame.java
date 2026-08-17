@@ -1,7 +1,7 @@
-package top.untoldstudio.rimeui.core.gui.node;
+package top.untoldstudio.rimeui.core.ui.node;
 
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
-import top.untoldstudio.rimeui.core.gui.AbstractFrame;
+import top.untoldstudio.rimeui.core.ui.AbstractFrame;
 import top.untoldstudio.rimeui.core.render.GuiRender;
 
 public final class Frame extends AbstractFrame<Frame> {

@@ -1,6 +1,6 @@
 package top.untoldstudio.rimeui.core;
 
-public class MathTool {
+public final class MathTool {
     public static int round(double value){
         return (int)Math.round(value);
     }

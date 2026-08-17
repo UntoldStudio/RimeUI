@@ -1,7 +1,8 @@
-package top.untoldstudio.rimeui.core.gui;
+package top.untoldstudio.rimeui.core.ui;
 
 import top.untoldstudio.rimeui.core.data.RGBA;
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
+import top.untoldstudio.rimeui.core.event.WindowSizeChangeEvent;
 import top.untoldstudio.rimeui.core.render.GuiRender;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 
@@ -17,26 +18,31 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
 
     public T setPosition(ScaleOffset position) {
         this.position = position;
+        operationPosition();
         sendSignal(SignalType.SET_POSITION, position);
         return self;
     }
     public T setSize(ScaleOffset size) {
         this.size = size;
+        operationPosition();
         sendSignal(SignalType.SET_SIZE, size);
         return self;
     }
     public T setColor(RGBA color) {
         this.color = color;
+        operationPosition();
         sendSignal(SignalType.SET_COLOR, color);
         return self;
     }
     public T setXAnchor(double xAnchor) {
         this.xAnchor = xAnchor;
+        operationPosition();
         sendSignal(SignalType.SET_X_ANCHOR, xAnchor);
         return self;
     }
     public T setYAnchor(double yAnchor) {
         this.yAnchor = yAnchor;
+        operationPosition();
         sendSignal(SignalType.SET_Y_ANCHOR, yAnchor);
         return self;
     }
@@ -61,6 +67,10 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
         } else {
             operationPosition(null, ScaleOffset.ZERO);
         }
+    }
+    @Override
+    protected void onWindowSizeChangeEvent(WindowSizeChangeEvent event){
+        operationPosition();
     }
     protected void operationPosition(AbstractFrame<?> parentFrame, ScaleOffset parentRealPosition) {
         if (parentFrame != null) {
@@ -87,5 +97,6 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
     public AbstractFrame(ScaleOffset position, ScaleOffset size) {
         this.position = position;
         this.size = size;
+        operationPosition();
     }
 }

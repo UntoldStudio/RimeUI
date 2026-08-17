@@ -1,4 +1,4 @@
-package top.untoldstudio.rimeui.core.source;
+package top.untoldstudio.rimeui.core.resource;
 
 import java.io.IOException;
 import java.io.InputStream;

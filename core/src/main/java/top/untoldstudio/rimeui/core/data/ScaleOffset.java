@@ -1,10 +1,29 @@
 package top.untoldstudio.rimeui.core.data;
 
 import top.untoldstudio.rimeui.core.MathTool;
-import top.untoldstudio.rimeui.core.render.RenderBackend;
+import top.untoldstudio.rimeui.core.ui.MainUi;
 
 public record ScaleOffset(double xScale, int xOffset, double yScale, int yOffset) {
     public static final ScaleOffset ZERO = new ScaleOffset(0, 0, 0, 0);
+
+    public ScaleOffset withScale(double xScale, double yScale){
+        return new ScaleOffset(xScale, xOffset, yScale, yOffset);
+    }
+    public ScaleOffset withOffset(int xOffset, int yOffset){
+        return new ScaleOffset(xScale, xOffset, yScale, yOffset);
+    }
+    public ScaleOffset withXScale(double xScale){
+        return withScale(xScale, yScale);
+    }
+    public ScaleOffset withYScale(double yScale){
+        return withScale(xScale, yScale);
+    }
+    public ScaleOffset withXOffset(int xOffset){
+        return withOffset(xOffset, yOffset);
+    }
+    public ScaleOffset withYOffset(int yOffset){
+        return withOffset(xOffset, yOffset);
+    }
 
     public static ScaleOffset fromScale(double xScale, double yScale) {
         return new ScaleOffset(xScale, 0, yScale, 0);
@@ -45,19 +64,19 @@ public record ScaleOffset(double xScale, int xOffset, double yScale, int yOffset
     }
 
     public int getScaleXPixel(){
-        return MathTool.round(RenderBackend.getInstance().getProvider().getWindowWidth() * xScale);
+        return MathTool.round(MainUi.getInstance().getWindowWidth() * xScale);
     }
     public double getScaledX(){
-        return (double)getXPixel() / (double)RenderBackend.getInstance().getProvider().getWindowWidth();
+        return (double)getXPixel() / (double) MainUi.getInstance().getWindowWidth();
     }
     public double getScaledY(){
-        return (double)getYPixel() / (double)RenderBackend.getInstance().getProvider().getWindowHeight();
+        return (double)getYPixel() / (double)MainUi.getInstance().getWindowHeight();
     }
     public int getXPixel(){
         return getScaleXPixel() + xOffset;
     }
     public int getScaleYPixel(){
-        return MathTool.round(RenderBackend.getInstance().getProvider().getWindowHeight() * yScale);
+        return MathTool.round(MainUi.getInstance().getWindowHeight() * yScale);
     }
     public int getYPixel(){
         return getScaleYPixel() + yOffset;

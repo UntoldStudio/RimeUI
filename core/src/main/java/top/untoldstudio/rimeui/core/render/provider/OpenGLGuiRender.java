@@ -5,12 +5,11 @@ import static org.lwjgl.opengl.ARBImaging.GL_BLEND_COLOR;
 
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
-import top.untoldstudio.rimeui.core.data.RGBA;
-import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.error.RenderError;
 import top.untoldstudio.rimeui.core.render.GuiRender;
 import top.untoldstudio.rimeui.core.render.RenderBackend;
-import top.untoldstudio.rimeui.core.source.ResourceReader;
+import top.untoldstudio.rimeui.core.resource.ResourceReader;
+import top.untoldstudio.rimeui.core.ui.MainUi;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -81,16 +80,25 @@ public final class OpenGLGuiRender extends GuiRender {
     private float savedSampleCoverageValue;
     private boolean savedSampleCoverageInvert;
 
-    private int baseShaderProgram;
-    private int projectLocation;
-    private int vao;
-    private int vbo;
+    private final long windowHandle;
+    private final int baseShaderProgram;
+    private final int projectLocation;
+    private final int vao;
+    private final int vbo;
     private FloatBuffer vertexBuffer;
-    private int maxVertices;
     private int vertexCount = 0;
     private int vboCapacityBytes;
+    private final Matrix4f projectionMatrix = new Matrix4f();
+    private final float[] projectionMatrixArray = new float[16];
+    private final IntBuffer intBuffer = BufferUtils.createIntBuffer(1);
+    private final IntBuffer int4Buffer = BufferUtils.createIntBuffer(4);
+    private final FloatBuffer floatBuffer = BufferUtils.createFloatBuffer(4);
+    private final ByteBuffer byteBuffer = BufferUtils.createByteBuffer(1);
+    private final DoubleBuffer doubleBuffer = BufferUtils.createDoubleBuffer(2);
 
-    public OpenGLGuiRender(){
+    public OpenGLGuiRender(long windowHandle){
+        this.windowHandle = windowHandle;
+
         String baseFragSource;
         try {
             baseFragSource = ResourceReader.readString("/shader/base/frag.glsl");
@@ -125,6 +133,7 @@ public final class OpenGLGuiRender extends GuiRender {
         glDeleteShader(baseVertexShader);
         glDeleteShader(baseFragShader);
         projectLocation = glGetUniformLocation(baseShaderProgram, "uProjection");
+        System.out.println("projectLocation = " + projectLocation);
         vao = glGenVertexArrays();
         glBindVertexArray(vao);
         vbo = glGenBuffers();
@@ -134,7 +143,7 @@ public final class OpenGLGuiRender extends GuiRender {
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(1, 4, GL_FLOAT, false, stride, 2 * Float.BYTES);
         glEnableVertexAttribArray(1);
-        maxVertices = 65536 * 3;
+        int maxVertices = 65536 * 3;
         vertexBuffer = BufferUtils.createFloatBuffer(maxVertices * 6);
         vboCapacityBytes = maxVertices * 6 * Float.BYTES;
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -190,15 +199,16 @@ public final class OpenGLGuiRender extends GuiRender {
     public void begin(){
         saveContext();
 
-        int windowWidth = RenderBackend.getInstance().getProvider().getWindowWidth();
-        int windowHeight = RenderBackend.getInstance().getProvider().getWindowHeight();
-        Matrix4f projection = new Matrix4f().ortho(0.0f, windowWidth, windowHeight, 0.0f, -1.0f, 1.0f);
-
-        FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
-        projection.get(matrixBuffer);
-
         glUseProgram(baseShaderProgram);
-        glUniformMatrix4fv(projectLocation, false, matrixBuffer);
+        int windowWidth = MainUi.getInstance().getWindowWidth();
+        int windowHeight = MainUi.getInstance().getWindowHeight();
+        glViewport(0, 0, windowWidth, windowHeight);
+
+        projectionMatrix.setOrtho(0.0f, windowWidth, windowHeight, 0.0f, -1.0f, 1.0f);
+
+        projectionMatrix.get(projectionMatrixArray);
+
+        glUniformMatrix4fv(projectLocation, false, projectionMatrixArray);
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -214,32 +224,18 @@ public final class OpenGLGuiRender extends GuiRender {
     }
 
     public void saveContext() {
-        IntBuffer intBuffer = BufferUtils.createIntBuffer(1);
-        IntBuffer int4Buffer = BufferUtils.createIntBuffer(4);
-        FloatBuffer floatBuffer = BufferUtils.createFloatBuffer(4);
-        ByteBuffer byteBuffer = BufferUtils.createByteBuffer(1);
-        DoubleBuffer doubleBuffer = BufferUtils.createDoubleBuffer(2);
+        intBuffer.clear(); glGetIntegerv(GL_CURRENT_PROGRAM, intBuffer); savedProgram = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_VERTEX_ARRAY_BINDING, intBuffer); savedVao = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, intBuffer); savedEbo = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_FRAMEBUFFER_BINDING, intBuffer); savedFbo = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_RENDERBUFFER_BINDING, intBuffer); savedRbo = intBuffer.get(0);
 
-        glGetIntegerv(GL_CURRENT_PROGRAM, intBuffer);
-        savedProgram = intBuffer.get(0);
-        glGetIntegerv(GL_VERTEX_ARRAY_BINDING, intBuffer);
-        savedVao = intBuffer.get(0);
-        glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, intBuffer);
-        savedEbo = intBuffer.get(0);
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, intBuffer);
-        savedFbo = intBuffer.get(0);
-        glGetIntegerv(GL_RENDERBUFFER_BINDING, intBuffer);
-        savedRbo = intBuffer.get(0);
-
-        glGetIntegerv(GL_ACTIVE_TEXTURE, intBuffer);
-        savedActiveTexture = intBuffer.get(0);
-        glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, intBuffer);
-        savedTextureUnitCount = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_ACTIVE_TEXTURE, intBuffer); savedActiveTexture = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, intBuffer); savedTextureUnitCount = intBuffer.get(0);
         savedTextureBinding.clear();
         for (int i = 0; i < savedTextureUnitCount; i++) {
             glActiveTexture(GL_TEXTURE0 + i);
-            glGetIntegerv(GL_TEXTURE_BINDING_2D, intBuffer);
-            savedTextureBinding.add(intBuffer.get(0));
+            intBuffer.clear(); glGetIntegerv(GL_TEXTURE_BINDING_2D, intBuffer); savedTextureBinding.add(intBuffer.get(0));
         }
 
         savedEnabledMap.clear();
@@ -262,122 +258,80 @@ public final class OpenGLGuiRender extends GuiRender {
         savedEnabledMap.put(GL_FRAMEBUFFER_SRGB, glIsEnabled(GL_FRAMEBUFFER_SRGB));
         savedEnabledMap.put(GL_PROGRAM_POINT_SIZE, glIsEnabled(GL_PROGRAM_POINT_SIZE));
 
-        glGetIntegerv(GL_BLEND_SRC_RGB, intBuffer);
-        savedBlendSrcRGB = intBuffer.get(0);
-        glGetIntegerv(GL_BLEND_SRC_ALPHA, intBuffer);
-        savedBlendSrcAlpha = intBuffer.get(0);
-        glGetIntegerv(GL_BLEND_DST_RGB, intBuffer);
-        savedBlendDstRGB = intBuffer.get(0);
-        glGetIntegerv(GL_BLEND_DST_ALPHA, intBuffer);
-        savedBlendDstAlpha = intBuffer.get(0);
-        glGetIntegerv(GL_BLEND_EQUATION_RGB, intBuffer);
-        savedBlendEquationRGB = intBuffer.get(0);
-        glGetIntegerv(GL_BLEND_EQUATION_ALPHA, intBuffer);
-        savedBlendEquationAlpha = intBuffer.get(0);
-        glGetFloatv(GL_BLEND_COLOR, floatBuffer);
+        intBuffer.clear(); glGetIntegerv(GL_BLEND_SRC_RGB, intBuffer); savedBlendSrcRGB = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_BLEND_SRC_ALPHA, intBuffer); savedBlendSrcAlpha = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_BLEND_DST_RGB, intBuffer); savedBlendDstRGB = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_BLEND_DST_ALPHA, intBuffer); savedBlendDstAlpha = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_BLEND_EQUATION_RGB, intBuffer); savedBlendEquationRGB = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_BLEND_EQUATION_ALPHA, intBuffer); savedBlendEquationAlpha = intBuffer.get(0);
+        floatBuffer.clear(); glGetFloatv(GL_BLEND_COLOR, floatBuffer);
         savedBlendColor[0] = floatBuffer.get(0);
         savedBlendColor[1] = floatBuffer.get(1);
         savedBlendColor[2] = floatBuffer.get(2);
         savedBlendColor[3] = floatBuffer.get(3);
 
-        glGetIntegerv(GL_DEPTH_FUNC, intBuffer);
-        savedDepthFunc = intBuffer.get(0);
-        glGetBooleanv(GL_DEPTH_WRITEMASK, byteBuffer);
-        savedDepthMask = byteBuffer.get(0) == GL_TRUE;
-        glGetFloatv(GL_DEPTH_CLEAR_VALUE, floatBuffer);
-        savedDepthClearValue = floatBuffer.get(0);
-        glGetDoublev(GL_DEPTH_RANGE, doubleBuffer);
+        intBuffer.clear(); glGetIntegerv(GL_DEPTH_FUNC, intBuffer); savedDepthFunc = intBuffer.get(0);
+        byteBuffer.clear(); glGetBooleanv(GL_DEPTH_WRITEMASK, byteBuffer); savedDepthMask = byteBuffer.get(0) == GL_TRUE;
+        floatBuffer.clear(); glGetFloatv(GL_DEPTH_CLEAR_VALUE, floatBuffer); savedDepthClearValue = floatBuffer.get(0);
+        doubleBuffer.clear(); glGetDoublev(GL_DEPTH_RANGE, doubleBuffer);
         savedDepthRange[0] = doubleBuffer.get(0);
         savedDepthRange[1] = doubleBuffer.get(1);
 
-        glGetIntegerv(GL_STENCIL_FUNC, intBuffer);
-        savedStencilFuncFront = intBuffer.get(0);
-        glGetIntegerv(GL_STENCIL_REF, intBuffer);
-        savedStencilRefFront = intBuffer.get(0);
-        glGetIntegerv(GL_STENCIL_VALUE_MASK, intBuffer);
-        savedStencilValueMaskFront = intBuffer.get(0);
-        glGetIntegerv(GL_STENCIL_WRITEMASK, intBuffer);
-        savedStencilWriteMaskFront = intBuffer.get(0);
-        glGetIntegerv(GL_STENCIL_FAIL, intBuffer);
-        savedStencilFailFront = intBuffer.get(0);
-        glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, intBuffer);
-        savedStencilPassDepthFailFront = intBuffer.get(0);
-        glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, intBuffer);
-        savedStencilPassDepthPassFront = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_STENCIL_FUNC, intBuffer); savedStencilFuncFront = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_STENCIL_REF, intBuffer); savedStencilRefFront = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_STENCIL_VALUE_MASK, intBuffer); savedStencilValueMaskFront = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_STENCIL_WRITEMASK, intBuffer); savedStencilWriteMaskFront = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_STENCIL_FAIL, intBuffer); savedStencilFailFront = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, intBuffer); savedStencilPassDepthFailFront = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, intBuffer); savedStencilPassDepthPassFront = intBuffer.get(0);
 
-        glGetIntegerv(GL_STENCIL_BACK_FUNC, intBuffer);
-        savedStencilFuncBack = intBuffer.get(0);
-        glGetIntegerv(GL_STENCIL_BACK_REF, intBuffer);
-        savedStencilRefBack = intBuffer.get(0);
-        glGetIntegerv(GL_STENCIL_BACK_VALUE_MASK, intBuffer);
-        savedStencilValueMaskBack = intBuffer.get(0);
-        glGetIntegerv(GL_STENCIL_BACK_WRITEMASK, intBuffer);
-        savedStencilWriteMaskBack = intBuffer.get(0);
-        glGetIntegerv(GL_STENCIL_BACK_FAIL, intBuffer);
-        savedStencilFailBack = intBuffer.get(0);
-        glGetIntegerv(GL_STENCIL_BACK_PASS_DEPTH_FAIL, intBuffer);
-        savedStencilPassDepthFailBack = intBuffer.get(0);
-        glGetIntegerv(GL_STENCIL_BACK_PASS_DEPTH_PASS, intBuffer);
-        savedStencilPassDepthPassBack = intBuffer.get(0);
-        glGetIntegerv(GL_STENCIL_CLEAR_VALUE, intBuffer);
-        savedStencilClearValue = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_STENCIL_BACK_FUNC, intBuffer); savedStencilFuncBack = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_STENCIL_BACK_REF, intBuffer); savedStencilRefBack = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_STENCIL_BACK_VALUE_MASK, intBuffer); savedStencilValueMaskBack = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_STENCIL_BACK_WRITEMASK, intBuffer); savedStencilWriteMaskBack = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_STENCIL_BACK_FAIL, intBuffer); savedStencilFailBack = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_STENCIL_BACK_PASS_DEPTH_FAIL, intBuffer); savedStencilPassDepthFailBack = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_STENCIL_BACK_PASS_DEPTH_PASS, intBuffer); savedStencilPassDepthPassBack = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_STENCIL_CLEAR_VALUE, intBuffer); savedStencilClearValue = intBuffer.get(0);
 
-        glGetIntegerv(GL_CULL_FACE_MODE, intBuffer);
-        savedCullFaceMode = intBuffer.get(0);
-        glGetIntegerv(GL_FRONT_FACE, intBuffer);
-        savedFrontFace = intBuffer.get(0);
-        glGetIntegerv(GL_POLYGON_MODE, intBuffer);
-        savedPolygonMode = intBuffer.get(0);
-        glGetFloatv(GL_POLYGON_OFFSET_FACTOR, floatBuffer);
-        savedPolygonOffsetFactor = floatBuffer.get(0);
-        glGetFloatv(GL_POLYGON_OFFSET_UNITS, floatBuffer);
-        savedPolygonOffsetUnits = floatBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_CULL_FACE_MODE, intBuffer); savedCullFaceMode = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_FRONT_FACE, intBuffer); savedFrontFace = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_POLYGON_MODE, intBuffer); savedPolygonMode = intBuffer.get(0);
+        floatBuffer.clear(); glGetFloatv(GL_POLYGON_OFFSET_FACTOR, floatBuffer); savedPolygonOffsetFactor = floatBuffer.get(0);
+        floatBuffer.clear(); glGetFloatv(GL_POLYGON_OFFSET_UNITS, floatBuffer); savedPolygonOffsetUnits = floatBuffer.get(0);
 
-        glGetIntegerv(GL_VIEWPORT, int4Buffer);
+        int4Buffer.clear(); glGetIntegerv(GL_VIEWPORT, int4Buffer);
         savedViewport[0] = int4Buffer.get(0);
         savedViewport[1] = int4Buffer.get(1);
         savedViewport[2] = int4Buffer.get(2);
         savedViewport[3] = int4Buffer.get(3);
 
-        glGetIntegerv(GL_SCISSOR_BOX, int4Buffer);
+        int4Buffer.clear(); glGetIntegerv(GL_SCISSOR_BOX, int4Buffer);
         savedScissorBox[0] = int4Buffer.get(0);
         savedScissorBox[1] = int4Buffer.get(1);
         savedScissorBox[2] = int4Buffer.get(2);
         savedScissorBox[3] = int4Buffer.get(3);
 
-        glGetFloatv(GL_COLOR_CLEAR_VALUE, floatBuffer);
+        floatBuffer.clear(); glGetFloatv(GL_COLOR_CLEAR_VALUE, floatBuffer);
         savedColorClearValue[0] = floatBuffer.get(0);
         savedColorClearValue[1] = floatBuffer.get(1);
         savedColorClearValue[2] = floatBuffer.get(2);
         savedColorClearValue[3] = floatBuffer.get(3);
 
-        glGetIntegerv(GL_UNPACK_ALIGNMENT, intBuffer);
-        savedUnpackAlignment = intBuffer.get(0);
-        glGetIntegerv(GL_UNPACK_ROW_LENGTH, intBuffer);
-        savedUnpackRowLength = intBuffer.get(0);
-        glGetIntegerv(GL_UNPACK_SKIP_PIXELS, intBuffer);
-        savedUnpackSkipPixels = intBuffer.get(0);
-        glGetIntegerv(GL_UNPACK_SKIP_ROWS, intBuffer);
-        savedUnpackSkipRows = intBuffer.get(0);
-        glGetIntegerv(GL_PACK_ALIGNMENT, intBuffer);
-        savedPackAlignment = intBuffer.get(0);
-        glGetIntegerv(GL_PACK_ROW_LENGTH, intBuffer);
-        savedPackRowLength = intBuffer.get(0);
-        glGetIntegerv(GL_PACK_SKIP_PIXELS, intBuffer);
-        savedPackSkipPixels = intBuffer.get(0);
-        glGetIntegerv(GL_PACK_SKIP_ROWS, intBuffer);
-        savedPackSkipRows = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_UNPACK_ALIGNMENT, intBuffer); savedUnpackAlignment = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_UNPACK_ROW_LENGTH, intBuffer); savedUnpackRowLength = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_UNPACK_SKIP_PIXELS, intBuffer); savedUnpackSkipPixels = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_UNPACK_SKIP_ROWS, intBuffer); savedUnpackSkipRows = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_PACK_ALIGNMENT, intBuffer); savedPackAlignment = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_PACK_ROW_LENGTH, intBuffer); savedPackRowLength = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_PACK_SKIP_PIXELS, intBuffer); savedPackSkipPixels = intBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_PACK_SKIP_ROWS, intBuffer); savedPackSkipRows = intBuffer.get(0);
 
-        glGetFloatv(GL_LINE_WIDTH, floatBuffer);
-        savedLineWidth = floatBuffer.get(0);
-        glGetFloatv(GL_POINT_SIZE, floatBuffer);
-        savedPointSize = floatBuffer.get(0);
-        glGetIntegerv(GL_LOGIC_OP_MODE, intBuffer);
-        savedLogicOpMode = intBuffer.get(0);
-        glGetFloatv(GL_SAMPLE_COVERAGE_VALUE, floatBuffer);
-        savedSampleCoverageValue = floatBuffer.get(0);
-        glGetBooleanv(GL_SAMPLE_COVERAGE_INVERT, byteBuffer);
-        savedSampleCoverageInvert = byteBuffer.get(0) == GL_TRUE;
+        floatBuffer.clear(); glGetFloatv(GL_LINE_WIDTH, floatBuffer); savedLineWidth = floatBuffer.get(0);
+        floatBuffer.clear(); glGetFloatv(GL_POINT_SIZE, floatBuffer); savedPointSize = floatBuffer.get(0);
+        intBuffer.clear(); glGetIntegerv(GL_LOGIC_OP_MODE, intBuffer); savedLogicOpMode = intBuffer.get(0);
+        floatBuffer.clear(); glGetFloatv(GL_SAMPLE_COVERAGE_VALUE, floatBuffer); savedSampleCoverageValue = floatBuffer.get(0);
+        byteBuffer.clear(); glGetBooleanv(GL_SAMPLE_COVERAGE_INVERT, byteBuffer); savedSampleCoverageInvert = byteBuffer.get(0) == GL_TRUE;
     }
 
     public void restoreContext() {
@@ -440,5 +394,9 @@ public final class OpenGLGuiRender extends GuiRender {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, savedEbo);
         glBindVertexArray(savedVao);
         glUseProgram(savedProgram);
+    }
+
+    public long getWindowHandle() {
+        return windowHandle;
     }
 }

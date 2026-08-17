@@ -5,8 +5,8 @@ import top.untoldstudio.rimeui.core.data.ScaleOffset;
 
 public abstract class GuiRender {
     public void drawSquare(ScaleOffset min, ScaleOffset max, RGBA color){
-        ScaleOffset pointA = min.addXOffset(max.getXPixel());
-        ScaleOffset pointB = min.addYOffset(max.getYPixel());
+        ScaleOffset pointA = min.withXOffset(max.getXPixel());
+        ScaleOffset pointB = min.withYOffset(max.getYPixel());
         drawTriangle(min, pointA, pointB, color, color, color);
         drawTriangle(max, pointA, pointB, color, color, color);
     }
@@ -17,7 +17,7 @@ public abstract class GuiRender {
         drawTriangle(positionA.getXPixel(), positionA.getYPixel(), positionB.getXPixel(), positionB.getYPixel(), positionC.getXPixel(), positionC.getYPixel(),
                 colorA.red(), colorA.green(), colorA.blue(), colorA.alpha(),
                 colorB.red(), colorB.green(), colorB.blue(), colorB.alpha(),
-                colorB.red(), colorB.green(), colorB.blue(), colorB.alpha()
+                colorC.red(), colorC.green(), colorC.blue(), colorC.alpha()
         );
     }
     public abstract void drawTriangle(int ax, int ay, int bx, int by, int cx, int cy,
