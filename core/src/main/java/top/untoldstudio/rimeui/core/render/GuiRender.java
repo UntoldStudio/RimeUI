@@ -13,6 +13,8 @@ public abstract class GuiRender {
 
     public abstract void begin();
     public abstract void end();
+    public abstract void saveContext();
+    public abstract void restoreContext();
     public void drawTriangle(ScaleOffset positionA, ScaleOffset positionB, ScaleOffset positionC, RGBA colorA, RGBA colorB, RGBA colorC){
         drawTriangle(positionA.getXPixel(), positionA.getYPixel(), positionB.getXPixel(), positionB.getYPixel(), positionC.getXPixel(), positionC.getYPixel(),
                 colorA.red(), colorA.green(), colorA.blue(), colorA.alpha(),
@@ -20,9 +22,27 @@ public abstract class GuiRender {
                 colorC.red(), colorC.green(), colorC.blue(), colorC.alpha()
         );
     }
+    public void drawTexture(int textureId, ScaleOffset min, ScaleOffset max, RGBA color){
+        int red = color.red();
+        int green = color.green();
+        int blue = color.blue();
+        int alpha = color.alpha();
+        drawTexture(textureId, min.getXPixel(), min.getYPixel(), max.getXPixel(), max.getYPixel(),
+                red, green, blue, alpha,
+                red, green, blue, alpha,
+                red, green, blue, alpha,
+                red, green, blue, alpha
+        );
+    }
     public abstract void drawTriangle(int ax, int ay, int bx, int by, int cx, int cy,
                                       int aRed, int aGreen, int aBlue, int aAlpha,
                                       int bRed, int bGreen, int bBlue, int bAlpha,
                                       int cRed, int cGreen, int cBlue, int cAlpha);
     public abstract void submitBuffer();
+    public abstract void drawTexture(int textureId, int ax, int ay, int bx, int by,
+                                   int aRed, int aGreen, int aBlue, int aAlpha,
+                                   int bRed, int bGreen, int bBlue, int bAlpha,
+                                   int cRed, int cGreen, int cBlue, int cAlpha,
+                                   int dRed, int dGreen, int dBlue, int dAlpha
+    );
 }

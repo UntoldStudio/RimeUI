@@ -1,5 +1,6 @@
 package top.untoldstudio.rimeui.core.ui;
 
+import top.untoldstudio.rimeui.core.MathTool;
 import top.untoldstudio.rimeui.core.data.RGBA;
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.event.WindowSizeChangeEvent;
@@ -12,7 +13,7 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
     protected ScaleOffset realPosition;
     protected ScaleOffset realPositionMax;
     protected ScaleOffset realSize;
-    protected RGBA color;
+    protected RGBA color = RGBA.WHITE;
     protected double xAnchor = 0;
     protected double yAnchor = 0;
 
@@ -34,6 +35,10 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
         sendSignal(SignalType.SET_COLOR, color);
         return self;
     }
+    public T setTransparency(double transparency){
+        setColor(color.withAlpha(MathTool.round((1 - transparency) * 255)));
+        return self;
+    }
     public T setXAnchor(double xAnchor) {
         this.xAnchor = xAnchor;
         operationPosition();
@@ -50,6 +55,24 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
         setXAnchor(xAnchor);
         setYAnchor(yAnchor);
         return self;
+    }
+    public double getTransparency(){
+        return (double)(255 - color.alpha()) / (double)255;
+    }
+    public double getXAnchor(){
+        return xAnchor;
+    }
+    public double getYAnchor(){
+        return yAnchor;
+    }
+    public RGBA getColor(){
+        return color;
+    }
+    public ScaleOffset getPosition(){
+        return position;
+    }
+    public ScaleOffset getSize(){
+        return size;
     }
 
     protected abstract void render(GuiRender render);

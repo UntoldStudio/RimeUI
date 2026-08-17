@@ -6,8 +6,8 @@ import static org.lwjgl.opengl.ARBImaging.GL_BLEND_COLOR;
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 import top.untoldstudio.rimeui.core.error.RenderError;
+import top.untoldstudio.rimeui.core.error.ResourceError;
 import top.untoldstudio.rimeui.core.render.GuiRender;
-import top.untoldstudio.rimeui.core.render.RenderBackend;
 import top.untoldstudio.rimeui.core.resource.ResourceReader;
 import top.untoldstudio.rimeui.core.ui.MainUi;
 
@@ -82,11 +82,17 @@ public final class OpenGLGuiRender extends GuiRender {
 
     private final long windowHandle;
     private final int baseShaderProgram;
+    private final int textureShaderProgram;
     private final int projectLocation;
-    private final int vao;
-    private final int vbo;
-    private FloatBuffer vertexBuffer;
-    private int vertexCount = 0;
+    private final int baseVao;
+    private final int baseVbo;
+    private final int textureVao;
+    private final int textureVbo;
+    private final int textureProjectionLocation;
+    private final int textureSamplerLocation;
+    private final FloatBuffer textureVertBuffer = BufferUtils.createFloatBuffer(32);
+    private FloatBuffer vertBuffer;
+    private int vertCount = 0;
     private int vboCapacityBytes;
     private final Matrix4f projectionMatrix = new Matrix4f();
     private final float[] projectionMatrixArray = new float[16];
@@ -99,55 +105,128 @@ public final class OpenGLGuiRender extends GuiRender {
     public OpenGLGuiRender(long windowHandle){
         this.windowHandle = windowHandle;
 
+        String baseVertSource;
+        try {
+            baseVertSource = ResourceReader.readString("/shader/base/vert.glsl");
+        } catch (IOException e){
+            throw new ResourceError("Cannot read base glsl vertex shader!");
+        }
         String baseFragSource;
         try {
             baseFragSource = ResourceReader.readString("/shader/base/frag.glsl");
         } catch (IOException e){
-            throw new RenderError("Cannot read base glsl frag shader!");
+            throw new ResourceError("Cannot read base glsl frag shader!");
         }
-        String baseVertexSource;
+        baseShaderProgram = loadProgram(baseVertSource, baseFragSource);
+        String textureVertSource;
         try {
-            baseVertexSource = ResourceReader.readString("/shader/base/vert.glsl");
+            textureVertSource = ResourceReader.readString("/shader/texture/vert.glsl");
         } catch (IOException e){
-            throw new RenderError("Cannot read base glsl vert shader!");
+            throw new ResourceError("Cannot read texture glsl vertex shader!");
         }
-        int baseVertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(baseVertexShader, baseVertexSource);
-        glCompileShader(baseVertexShader);
-        if (glGetShaderi(baseVertexShader, GL_COMPILE_STATUS) == GL_FALSE) {
-            throw new RenderError(glGetShaderInfoLog(baseVertexShader));
+        String textureFragSource;
+        try {
+            textureFragSource = ResourceReader.readString("/shader/texture/frag.glsl");
+        } catch (IOException e){
+            throw new ResourceError("Cannot read texture glsl frag shader!");
         }
-        int baseFragShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(baseFragShader, baseFragSource);
-        glCompileShader(baseFragShader);
-        if (glGetShaderi(baseFragShader, GL_COMPILE_STATUS) == GL_FALSE) {
-            throw new RenderError(glGetShaderInfoLog(baseFragShader));
-        }
-        baseShaderProgram = glCreateProgram();
-        glAttachShader(baseShaderProgram, baseVertexShader);
-        glAttachShader(baseShaderProgram, baseFragShader);
-        glLinkProgram(baseShaderProgram);
-        if (glGetProgrami(baseShaderProgram, GL_LINK_STATUS) == GL_FALSE) {
-            throw new RenderError(glGetProgramInfoLog(baseShaderProgram));
-        }
-        glDeleteShader(baseVertexShader);
-        glDeleteShader(baseFragShader);
+
+        textureShaderProgram = loadProgram(textureVertSource, textureFragSource);
+        textureProjectionLocation = glGetUniformLocation(textureShaderProgram, "uProjection");
+        textureSamplerLocation = glGetUniformLocation(textureShaderProgram, "uTexture");
+        textureVao = glGenVertexArrays();
+        textureVbo = glGenBuffers();
+        int textureEbo = glGenBuffers();
+        glBindVertexArray(textureVao);
+        int textureStride = 8 * Float.BYTES;
+        glBindBuffer(GL_ARRAY_BUFFER, textureVbo);
+        glVertexAttribPointer(0, 2, GL_FLOAT, false, textureStride, 0);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, textureStride, 2 * Float.BYTES);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(2, 4, GL_FLOAT, false, textureStride, 4 * Float.BYTES);
+        glEnableVertexAttribArray(2);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textureEbo);
+        int[] indices = { 0, 1, 2, 0, 2, 3 };
+        IntBuffer indexBuffer = BufferUtils.createIntBuffer(indices.length);
+        indexBuffer.put(indices).flip();
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, textureVbo);
+        glBufferData(GL_ARRAY_BUFFER, 32 * Float.BYTES, GL_STREAM_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+
         projectLocation = glGetUniformLocation(baseShaderProgram, "uProjection");
-        System.out.println("projectLocation = " + projectLocation);
-        vao = glGenVertexArrays();
-        glBindVertexArray(vao);
-        vbo = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        baseVao = glGenVertexArrays();
+        glBindVertexArray(baseVao);
+        baseVbo = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, baseVbo);
         int stride = 6 * Float.BYTES;
         glVertexAttribPointer(0, 2, GL_FLOAT, false, stride, 0);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(1, 4, GL_FLOAT, false, stride, 2 * Float.BYTES);
         glEnableVertexAttribArray(1);
         int maxVertices = 65536 * 3;
-        vertexBuffer = BufferUtils.createFloatBuffer(maxVertices * 6);
+        vertBuffer = BufferUtils.createFloatBuffer(maxVertices * 6);
         vboCapacityBytes = maxVertices * 6 * Float.BYTES;
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, baseVbo);
         glBufferData(GL_ARRAY_BUFFER, vboCapacityBytes, GL_STATIC_DRAW);
+    }
+
+    @Override
+    public void drawTexture(int textureId, int ax, int ay, int bx, int by,
+                                   int aRed, int aGreen, int aBlue, int aAlpha,
+                                   int bRed, int bGreen, int bBlue, int bAlpha,
+                                   int cRed, int cGreen, int cBlue, int cAlpha,
+                                   int dRed, int dGreen, int dBlue, int dAlpha)
+    {
+
+        textureVertBuffer.clear();
+        textureVertBuffer.put((float) ax).put((float) ay).put(0.0f).put(0.0f).put(aRed / 255f).put(aGreen / 255f).put(aBlue / 255f).put(aAlpha / 255f);
+        textureVertBuffer.put((float) bx).put((float) ay).put(1.0f).put(0.0f).put(bRed / 255f).put(bGreen / 255f).put(bBlue / 255f).put(bAlpha / 255f);
+        textureVertBuffer.put((float) bx).put((float) by).put(1.0f).put(1.0f).put(cRed / 255f).put(cGreen / 255f).put(cBlue / 255f).put(cAlpha / 255f);
+        textureVertBuffer.put((float) ax).put((float) by).put(0.0f).put(1.0f).put(dRed / 255f).put(dGreen / 255f).put(dBlue / 255f).put(dAlpha / 255f);
+        textureVertBuffer.flip();
+
+        glBindBuffer(GL_ARRAY_BUFFER, textureVbo);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, textureVertBuffer);
+
+        glUseProgram(textureShaderProgram);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textureId);
+        glUniform1i(textureSamplerLocation, 0);
+
+        glBindVertexArray(textureVao);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        glBindVertexArray(0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    private static int loadProgram(String vertSource, String fragSource){
+        int vertShader = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertShader, vertSource);
+        glCompileShader(vertShader);
+        if (glGetShaderi(vertShader, GL_COMPILE_STATUS) == GL_FALSE) {
+            throw new RenderError(glGetShaderInfoLog(vertShader));
+        }
+        int fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragShader, fragSource);
+        glCompileShader(fragShader);
+        if (glGetShaderi(fragShader, GL_COMPILE_STATUS) == GL_FALSE) {
+            throw new RenderError(glGetShaderInfoLog(fragShader));
+        }
+        int program = glCreateProgram();
+        glAttachShader(program, vertShader);
+        glAttachShader(program, fragShader);
+        glLinkProgram(program);
+        if (glGetProgrami(program, GL_LINK_STATUS) == GL_FALSE) {
+            throw new RenderError(glGetProgramInfoLog(program));
+        }
+        glDeleteShader(vertShader);
+        glDeleteShader(fragShader);
+        return program;
     }
 
     public void drawTriangle(int ax, int ay, int bx, int by, int cx, int cy,
@@ -156,29 +235,29 @@ public final class OpenGLGuiRender extends GuiRender {
                              int cRed, int cGreen, int cBlue, int cAlpha
     ){
         detectCpuBuffer(3);
-        vertexBuffer.put(ax).put(ay).put(aRed / 255f).put(aGreen / 255f).put(aBlue / 255f).put(aAlpha / 255f);
-        vertexBuffer.put(bx).put(by).put(bRed / 255f).put(bGreen / 255f).put(bBlue / 255f).put(bAlpha / 255f);
-        vertexBuffer.put(cx).put(cy).put(cRed / 255f).put(cGreen / 255f).put(cBlue / 255f).put(cAlpha / 255f);
-        vertexCount += 3;
+        vertBuffer.put(ax).put(ay).put(aRed / 255f).put(aGreen / 255f).put(aBlue / 255f).put(aAlpha / 255f);
+        vertBuffer.put(bx).put(by).put(bRed / 255f).put(bGreen / 255f).put(bBlue / 255f).put(bAlpha / 255f);
+        vertBuffer.put(cx).put(cy).put(cRed / 255f).put(cGreen / 255f).put(cBlue / 255f).put(cAlpha / 255f);
+        vertCount += 3;
     }
 
     private void detectCpuBuffer(int trianglesToAdd) {
         int neededFloats = trianglesToAdd * 18;
-        if (vertexBuffer.remaining() < neededFloats) {
-            int oldCapacity = vertexBuffer.capacity();
-            int requiredCapacity = vertexBuffer.position() + neededFloats;
+        if (vertBuffer.remaining() < neededFloats) {
+            int oldCapacity = vertBuffer.capacity();
+            int requiredCapacity = vertBuffer.position() + neededFloats;
             int newCapacity = Math.max(oldCapacity * 2, requiredCapacity);
             FloatBuffer newBuffer = BufferUtils.createFloatBuffer(newCapacity);
-            vertexBuffer.flip();
-            newBuffer.put(vertexBuffer);
-            vertexBuffer = newBuffer;
+            vertBuffer.flip();
+            newBuffer.put(vertBuffer);
+            vertBuffer = newBuffer;
         }
     }
     private void detectGpuBuffer() {
-        int neededBytes = vertexCount * 6 * Float.BYTES;
+        int neededBytes = vertCount * 6 * Float.BYTES;
         if (neededBytes > vboCapacityBytes) {
             int newCapacity = Math.max(vboCapacityBytes * 2, neededBytes);
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, baseVbo);
             glBufferData(GL_ARRAY_BUFFER, newCapacity, GL_STREAM_DRAW);
             vboCapacityBytes = newCapacity;
         }
@@ -187,19 +266,18 @@ public final class OpenGLGuiRender extends GuiRender {
     @Override
     public void submitBuffer(){
         detectGpuBuffer();
-        vertexBuffer.flip();
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, vertexBuffer);
-        glBindVertexArray(vao);
+        vertBuffer.flip();
+        glBindBuffer(GL_ARRAY_BUFFER, baseVbo);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, vertBuffer);
+        glBindVertexArray(baseVao);
         glUseProgram(baseShaderProgram);
-        glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+        glDrawArrays(GL_TRIANGLES, 0, vertCount);
     }
 
     @Override
     public void begin(){
-        saveContext();
-
         glUseProgram(baseShaderProgram);
+
         int windowWidth = MainUi.getInstance().getWindowWidth();
         int windowHeight = MainUi.getInstance().getWindowHeight();
         glViewport(0, 0, windowWidth, windowHeight);
@@ -210,19 +288,23 @@ public final class OpenGLGuiRender extends GuiRender {
 
         glUniformMatrix4fv(projectLocation, false, projectionMatrixArray);
 
+        glUseProgram(textureShaderProgram);
+        glUniformMatrix4fv(textureProjectionLocation, false, projectionMatrixArray);
+        glUseProgram(baseShaderProgram);
+
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
 
-        vertexBuffer.clear();
-        vertexCount = 0;
+        vertBuffer.clear();
+        vertCount = 0;
     }
     @Override
     public void end(){
-        restoreContext();
     }
 
+    @Override
     public void saveContext() {
         intBuffer.clear(); glGetIntegerv(GL_CURRENT_PROGRAM, intBuffer); savedProgram = intBuffer.get(0);
         intBuffer.clear(); glGetIntegerv(GL_VERTEX_ARRAY_BINDING, intBuffer); savedVao = intBuffer.get(0);
@@ -334,6 +416,7 @@ public final class OpenGLGuiRender extends GuiRender {
         byteBuffer.clear(); glGetBooleanv(GL_SAMPLE_COVERAGE_INVERT, byteBuffer); savedSampleCoverageInvert = byteBuffer.get(0) == GL_TRUE;
     }
 
+    @Override
     public void restoreContext() {
         glViewport(savedViewport[0], savedViewport[1], savedViewport[2], savedViewport[3]);
         glScissor(savedScissorBox[0], savedScissorBox[1], savedScissorBox[2], savedScissorBox[3]);

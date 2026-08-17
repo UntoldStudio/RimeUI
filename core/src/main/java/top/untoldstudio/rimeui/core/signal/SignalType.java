@@ -9,6 +9,7 @@ public enum SignalType {
     SET_POSITION,
     SET_SIZE,
     SET_COLOR,
+    SET_TEXTURE_ID,
 
     ADD_CHILD,
 

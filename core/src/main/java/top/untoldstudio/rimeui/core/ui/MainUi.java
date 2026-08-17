@@ -25,11 +25,13 @@ public final class MainUi {
         if (oldWidth != windowWidth || oldHeight != windowHeight) {
             onWindowSizeChangeEvent(new WindowSizeChangeEvent(oldWidth, oldHeight, windowWidth, windowHeight));
         }
+        render.saveContext();
         render.begin();
         for (GuiNode<?> node : children){
             node.renderWithChildren(render);
         }
         render.submitBuffer();
+        render.restoreContext();
         render.end();
     }
 
@@ -115,5 +117,9 @@ public final class MainUi {
 
     public int getWindowHeight() {
         return windowHeight;
+    }
+
+    public GuiRender getRender(){
+        return render;
     }
 }
