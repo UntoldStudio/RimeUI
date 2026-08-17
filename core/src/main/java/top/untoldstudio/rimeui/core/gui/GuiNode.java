@@ -7,17 +7,20 @@ import top.untoldstudio.rimeui.core.signal.SignalType;
 
 import java.util.*;
 
-public abstract class GuiNode {
+public abstract class GuiNode<T extends GuiNode<T>> {
+    @SuppressWarnings("unchecked")
+    protected final T self = (T) this;
     protected String name = getClass().getSimpleName();
     protected final SignalBus signalBus = new SignalBus();
-    protected GuiNode parent;
-    protected final List<GuiNode> children = new ArrayList<>();
+    protected boolean parentIsGuiMain = false;
+    protected GuiNode<?> parent;
+    protected final List<GuiNode<?>> children = new ArrayList<>();
     protected int renderLevel = 0;
     private final Map<SignalType, Object> lastSignalObjectValues = new EnumMap<>(SignalType.class);
 
     protected final void renderWithChildren(GuiRender render){
         render(render);
-        for (GuiNode child : children) {
+        for (GuiNode<?> child : children) {
             child.render(render);
         }
     }
@@ -33,21 +36,23 @@ public abstract class GuiNode {
     protected void sendSignal(SignalType type) {
         signalBus.send(this, type);
     }
-    public boolean hasChildren(GuiNode node){
+    public boolean hasChildren(GuiNode<?> node){
         return children.contains(node);
     }
     public boolean hasChildren(String name){
-        for (GuiNode child : children){
+        for (GuiNode<?> child : children){
             if (child.getName().equals(name)){
                 return true;
             }
         }
         return false;
     }
-    public void addChild(@NotNull GuiNode node){
+    public T addChild(@NotNull GuiNode<?> node){
         if (!children.contains(node)){
             if (node.parent != null){
                 node.parent.children.remove(node);
+            } else if (node.parentIsGuiMain){
+                GuiMain.getInstance().removeChild(node);
             }
             node.parent = this;
             children.add(node);
@@ -55,28 +60,32 @@ public abstract class GuiNode {
             sendSignal(SignalType.ADD_CHILD);
             node.sendSignal(SignalType.SET_PARENT);
         }
+        return self;
     }
-    public void addChildren(@NotNull GuiNode... children){
-        for (GuiNode node : children){
+    public T addChildren(@NotNull GuiNode<?>... children){
+        for (GuiNode<?> node : children){
             addChild(node);
         }
+        return self;
     }
-    public void removeChild(@NotNull GuiNode node){
+    public T removeChild(@NotNull GuiNode<?> node){
         if (node.parent == this){
             node.parent = null;
             children.remove(node);
             sendSignal(SignalType.REMOVE_CHILD);
             node.sendSignal(SignalType.SET_PARENT);
         }
+        return self;
     }
-    public void removeChildren(@NotNull GuiNode... children){
-        for (GuiNode node : children){
+    public T removeChildren(@NotNull GuiNode<?>... children){
+        for (GuiNode<?> node : children){
             removeChild(node);
         }
+        return self;
     }
-    public void removeChild(String name) {
-        GuiNode target = null;
-        for (GuiNode child : children) {
+    public T removeChild(String name) {
+        GuiNode<?> target = null;
+        for (GuiNode<?> child : children) {
             if (child.getName().equals(name)) {
                 target = child;
                 break;
@@ -85,37 +94,44 @@ public abstract class GuiNode {
         if (target != null) {
             removeChild(target);
         }
+        return self;
     }
-    public void removeChildren(String... names){
+    public T removeChildren(String... names){
         for (String name : names){
             removeChild(name);
         }
+        return self;
     }
-    public GuiNode getChild(String name){
-        for (GuiNode child : children){
+    public GuiNode<?> getChild(String name){
+        for (GuiNode<?> child : children){
             if (child.getName().equals(name)){
                 return child;
             }
         }
         return null;
     }
-    public void setParent(@NotNull GuiNode node){
+    public T setParent(@NotNull GuiNode<?> node){
         node.addChild(this);
+        return self;
     }
-    public void setRenderLevel(int renderLevel){
+    public T setRenderLevel(int renderLevel){
         this.renderLevel = renderLevel;
         if (parent != null){
             parent.sortChildren();
+        } else if (parentIsGuiMain){
+            GuiMain.getInstance().sortChildren();
         }
         sendSignal(SignalType.SET_RENDER_LEVEL, renderLevel);
+        return self;
     }
 
-    public GuiNode getParent(){
+    public GuiNode<?> getParent(){
         return parent;
     }
-    public void setName(String name){
+    public T setName(String name){
         this.name = name;
         sendSignal(SignalType.SET_NAME, name);
+        return self;
     }
     public String getName() {
         return name;
