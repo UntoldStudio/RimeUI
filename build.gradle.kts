@@ -7,6 +7,7 @@ import java.io.InputStreamReader
 
 plugins {
     id("java")
+    id("com.diffplug.spotless") version "6.25.0"
 }
 
 val versionString: String = project.property("version") as String
@@ -14,6 +15,13 @@ val groupId: String = project.property("group_id") as String
 
 subprojects {
     pluginManager.apply("java")
+    pluginManager.apply("com.diffplug.spotless")
+    spotless {
+        java {
+            licenseHeaderFile(rootProject.file("HEADER"))
+            targetExclude("**/build/**", "**/generated/**")
+        }
+    }
 
     group = groupId
     version = versionString
@@ -74,12 +82,8 @@ abstract class PushChangesTask : DefaultTask() {
     }
 }
 
-tasks.named("build") {
-    dependsOn(":application:build")
-    dependsOn(":core:build")
-}
-
 tasks.register<PushChangesTask>("pushChanges") {
+    dependsOn(tasks.named("spotlessApply"))
     notCompatibleWithConfigurationCache("任务需要交互式输入并访问项目目录")
     description = "自动add,commit并推送当前分支"
 }
@@ -132,6 +136,7 @@ abstract class ReleaseVersionTask : DefaultTask() {
 }
 
 tasks.register<ReleaseVersionTask>("releaseVersion") {
+    dependsOn(tasks.named("spotlessApply"))
     notCompatibleWithConfigurationCache("任务需要交互式输入并访问项目目录")
     description = "自动add,commit,push并创建发布标签"
 }

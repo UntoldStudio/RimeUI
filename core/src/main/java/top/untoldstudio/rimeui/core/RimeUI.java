@@ -1,29 +1,43 @@
+/*
+ * Copyright 2026 Untold Studio
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package top.untoldstudio.rimeui.core;
 
-import static org.lwjgl.util.freetype.FreeType.*;
-
-import org.lwjgl.PointerBuffer;
-import org.lwjgl.system.MemoryUtil;
 import top.untoldstudio.rimeui.core.render.RenderBackend;
 import top.untoldstudio.rimeui.core.render.provider.OpenGLRenderBackend;
 import top.untoldstudio.rimeui.core.ui.MainUi;
 import top.untoldstudio.rimeui.core.render.provider.OpenGLGuiRender;
 
 public final class RimeUI {
+    private static long ftPointer;
+
     public static void initOpenGL(long windowHandle){
         init();
         RenderBackend.setProvider(new OpenGLRenderBackend(windowHandle));
         new MainUi(new OpenGLGuiRender(windowHandle));
     }
-    private static void init(){
-        PointerBuffer buffer = MemoryUtil.memAllocPointer(1);
-        FT_Init_FreeType(buffer);
-        //TODO
+    public static void init(){
+        FontManager.init();
     }
     public static void render(){
         MainUi.getInstance().render();
     }
     public static MainUi getMainGui(){
         return MainUi.getInstance();
+    }
+    public static long getFtPointer(){
+        return ftPointer;
     }
 }
