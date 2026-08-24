@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.untoldstudio.rimeui.core;
+package top.untoldstudio.rimeui.core.font;
 
 import static org.lwjgl.util.freetype.FreeType.*;
 import static org.lwjgl.util.harfbuzz.HarfBuzz.*;
@@ -26,10 +26,13 @@ import top.untoldstudio.rimeui.core.resource.ResourceReader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
-public class FontManager {
+public final class FontManager {
     private static long ftPointer;
-    private static PointerBuffer buffer = MemoryUtil.memAllocPointer(1);
+    private static final PointerBuffer buffer = MemoryUtil.memAllocPointer(1);
+    private static final Map<String, Font> FONT_MAP = new HashMap<>();
 
     public static void init(){
         buffer.clear();
@@ -40,10 +43,11 @@ public class FontManager {
         ftPointer = buffer.get(0);
     }
 
-    public static void loadFont(String fontPath, int defaultFontSize){
+    public static Font loadFont(String fontPath, int defaultFontSize){
         buffer.clear();
         int error = FT_New_Face(ftPointer, fontPath, 0, buffer);
         long facePointer = -1;
+        ByteBuffer fontBuffer = null;
         if (error != 0){
             byte[] data;
             try {
@@ -51,7 +55,7 @@ public class FontManager {
             } catch (IOException e){
                 throw new ResourceError(fontPath);
             }
-            ByteBuffer fontBuffer = MemoryUtil.memAlloc(data.length);
+            fontBuffer = MemoryUtil.memAlloc(data.length);
             fontBuffer.put(data);
             fontBuffer.flip();
             buffer.clear();
@@ -69,6 +73,12 @@ public class FontManager {
         FT_Set_Pixel_Sizes(face, 0, defaultFontSize);
         long bufferPointer = hb_buffer_create();
         long hbFontPointer = hb_ft_font_create_referenced(facePointer);
-        //TODO
+        hb_font_set_scale(hbFontPointer, defaultFontSize * 64, defaultFontSize * 64);
+        Font font = new Font(face, hbFontPointer, bufferPointer, defaultFontSize, fontPath, fontBuffer);
+        FONT_MAP.put(fontPath, font);
+        return font;
+    }
+    public static Font getFont(String fontPath){
+        return FONT_MAP.get(fontPath);
     }
 }

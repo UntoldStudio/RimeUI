@@ -15,6 +15,7 @@
  */
 package top.untoldstudio.rimeui.core;
 
+import top.untoldstudio.rimeui.core.font.FontManager;
 import top.untoldstudio.rimeui.core.render.RenderBackend;
 import top.untoldstudio.rimeui.core.render.provider.OpenGLRenderBackend;
 import top.untoldstudio.rimeui.core.ui.MainUi;

@@ -7,4 +7,4 @@ pluginManagement {
     }
 }
 
-include("core", "application")
+include("core", "application", "neoforge")
