@@ -31,6 +31,22 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
     protected RGBA color = RGBA.WHITE;
     protected double xAnchor = 0;
     protected double yAnchor = 0;
+    protected boolean isClipChildren = false;
+
+    @Override
+    public void renderWithChildren(GuiRender render){
+        if (isClipChildren) {
+            render.enableScissor(realPosition, realSize);
+        }
+        super.renderWithChildren(render);
+        if (isClipChildren) {
+            render.disableScissor();
+        }
+    }
+
+    public void renderFrameDefaultBackground(GuiRender render){
+        render.drawSquare(realPosition, realPositionMax, color);
+    }
 
     public T setPosition(ScaleOffset position) {
         this.position = position;
@@ -71,6 +87,10 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
         setYAnchor(yAnchor);
         return self;
     }
+    public T setClipChildren(boolean clipChildren) {
+        isClipChildren = clipChildren;
+        return self;
+    }
     public double getTransparency(){
         return (double)(255 - color.alpha()) / (double)255;
     }
@@ -88,6 +108,9 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
     }
     public ScaleOffset getSize(){
         return size;
+    }
+    public boolean isClipChildren(){
+        return isClipChildren;
     }
 
     protected abstract void render(GuiRender render);

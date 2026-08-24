@@ -34,7 +34,7 @@ public abstract class GuiNode<T extends GuiNode<T>> {
     protected int renderLevel = 0;
     private final Map<SignalType, Object> lastSignalObjectValues = new EnumMap<>(SignalType.class);
 
-    protected final void renderWithChildren(GuiRender render){
+    protected void renderWithChildren(GuiRender render){
         render(render);
         for (GuiNode<?> child : children) {
             child.renderWithChildren(render);

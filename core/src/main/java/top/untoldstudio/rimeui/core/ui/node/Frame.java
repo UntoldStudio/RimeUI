@@ -22,7 +22,7 @@ import top.untoldstudio.rimeui.core.render.GuiRender;
 public final class Frame extends AbstractFrame<Frame> {
     @Override
     public void render(GuiRender render){
-        render.drawSquare(realPosition, realPositionMax, color);
+        super.renderFrameDefaultBackground(render);
     }
 
     public Frame(ScaleOffset position, ScaleOffset size) {

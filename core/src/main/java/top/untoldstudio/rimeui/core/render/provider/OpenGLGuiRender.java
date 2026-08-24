@@ -20,9 +20,14 @@ import static org.lwjgl.opengl.ARBImaging.GL_BLEND_COLOR;
 
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.util.freetype.FT_Bitmap;
+import top.untoldstudio.rimeui.core.data.RGBA;
+import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.error.RenderError;
 import top.untoldstudio.rimeui.core.error.ResourceError;
 import top.untoldstudio.rimeui.core.render.GuiRender;
+import top.untoldstudio.rimeui.core.render.RenderBackend;
+import top.untoldstudio.rimeui.core.render.RenderBackendProvider;
 import top.untoldstudio.rimeui.core.resource.ResourceReader;
 import top.untoldstudio.rimeui.core.ui.MainUi;
 
@@ -46,7 +51,6 @@ public final class OpenGLGuiRender extends GuiRender {
     private final List<Integer> savedTextureBinding = new ArrayList<>();
     private final Map<Integer, Boolean> savedEnabledMap = new HashMap<>();
     private int savedTextureUnitCount;
-
     private int savedBlendSrcRGB;
     private int savedBlendSrcAlpha;
     private int savedBlendDstRGB;
@@ -98,14 +102,21 @@ public final class OpenGLGuiRender extends GuiRender {
     private final long windowHandle;
     private final int baseShaderProgram;
     private final int textureShaderProgram;
+    private final int fontShaderProgram;
     private final int projectLocation;
     private final int baseVao;
     private final int baseVbo;
     private final int textureVao;
     private final int textureVbo;
+    private final int fontVao;
+    private final int fontVbo;
     private final int textureProjectionLocation;
     private final int textureSamplerLocation;
+    private final int fontProjectionLocation;
+    private final int fontSamplerLocation;
+    private final int fontColorLocation;
     private final FloatBuffer textureVertBuffer = BufferUtils.createFloatBuffer(32);
+    private final FloatBuffer fontVertBuffer = BufferUtils.createFloatBuffer(32);
     private FloatBuffer vertBuffer;
     private int vertCount = 0;
     private int vboCapacityBytes;
@@ -116,6 +127,16 @@ public final class OpenGLGuiRender extends GuiRender {
     private final FloatBuffer floatBuffer = BufferUtils.createFloatBuffer(4);
     private final ByteBuffer byteBuffer = BufferUtils.createByteBuffer(1);
     private final DoubleBuffer doubleBuffer = BufferUtils.createDoubleBuffer(2);
+    private int fontAtlasTextureId;
+    private int atlasWidth = 1024;
+    private int atlasHeight = 1024;
+    private int atlasCursorX = 0;
+    private int atlasCursorY = 0;
+    private int atlasRowHeight = 0;
+    private FloatBuffer fontBatchVertBuffer;
+    private int fontBatchVertCount = 0;
+    private int fontBatchVboCapacityFloats;
+    private RGBA fontRenderColor;
 
     public OpenGLGuiRender(long windowHandle){
         this.windowHandle = windowHandle;
@@ -151,7 +172,7 @@ public final class OpenGLGuiRender extends GuiRender {
         textureSamplerLocation = glGetUniformLocation(textureShaderProgram, "uTexture");
         textureVao = glGenVertexArrays();
         textureVbo = glGenBuffers();
-        int textureEbo = glGenBuffers();
+        int ebo = glGenBuffers();
         glBindVertexArray(textureVao);
         int textureStride = 8 * Float.BYTES;
         glBindBuffer(GL_ARRAY_BUFFER, textureVbo);
@@ -161,7 +182,42 @@ public final class OpenGLGuiRender extends GuiRender {
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(2, 4, GL_FLOAT, false, textureStride, 4 * Float.BYTES);
         glEnableVertexAttribArray(2);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, textureEbo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
+        String fontVertSource;
+        try {
+            fontVertSource = ResourceReader.readString("/shader/font/vert.glsl");
+        } catch (IOException e){
+            throw new ResourceError("Cannot read texture glsl vertex shader!");
+        }
+        String fontFragSource;
+        try {
+            fontFragSource = ResourceReader.readString("/shader/font/frag.glsl");
+        } catch (IOException e){
+            throw new ResourceError("Cannot read texture glsl frag shader!");
+        }
+
+        fontShaderProgram = loadProgram(fontVertSource, fontFragSource);
+        fontColorLocation = glGetUniformLocation(fontShaderProgram, "uColor");
+        fontProjectionLocation = glGetUniformLocation(fontShaderProgram, "uProjection");
+        fontSamplerLocation = glGetUniformLocation(fontShaderProgram, "uTexture");
+        glGetUniformLocation(fontShaderProgram, "uTexture");
+        fontVao = glGenVertexArrays();
+        fontVbo = glGenBuffers();
+        glBindVertexArray(fontVao);
+        int fontStride = 4 * Float.BYTES;
+        glBindBuffer(GL_ARRAY_BUFFER, fontVbo);
+        glBufferData(GL_ARRAY_BUFFER, 16 * Float.BYTES, GL_STREAM_DRAW);
+        glVertexAttribPointer(0, 2, GL_FLOAT, false, fontStride, 0);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, fontStride, 2 * Float.BYTES);
+        glEnableVertexAttribArray(1);
+        int initialFontBatchFloats = 4096 * 4;
+        glBindBuffer(GL_ARRAY_BUFFER, fontVbo);
+        glBufferData(GL_ARRAY_BUFFER, initialFontBatchFloats * Float.BYTES, GL_STREAM_DRAW);
+        fontBatchVboCapacityFloats = initialFontBatchFloats;
+        fontBatchVertBuffer = BufferUtils.createFloatBuffer(initialFontBatchFloats);
+
         int[] indices = { 0, 1, 2, 0, 2, 3 };
         IntBuffer indexBuffer = BufferUtils.createIntBuffer(indices.length);
         indexBuffer.put(indices).flip();
@@ -186,33 +242,138 @@ public final class OpenGLGuiRender extends GuiRender {
         vboCapacityBytes = maxVertices * 6 * Float.BYTES;
         glBindBuffer(GL_ARRAY_BUFFER, baseVbo);
         glBufferData(GL_ARRAY_BUFFER, vboCapacityBytes, GL_STATIC_DRAW);
+
+        fontAtlasTextureId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, fontAtlasTextureId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, atlasWidth, atlasHeight, 0, GL_RED, GL_UNSIGNED_BYTE, (ByteBuffer)null);
+    }
+
+    @Override
+    public void drawGlyph(FT_Bitmap bitmap, int glyphX, int glyphY, RGBA color) {
+        int width = bitmap.width();
+        int height = bitmap.rows();
+        int pitch = bitmap.pitch();
+        if (width == 0 || height == 0) return;
+
+        if (atlasCursorX + width > atlasWidth) {
+            atlasCursorX = 0;
+            atlasCursorY += atlasRowHeight;
+            atlasRowHeight = 0;
+        }
+        if (atlasCursorY + height > atlasHeight) {
+            flushFontBatch();
+            expandAtlas();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, fontAtlasTextureId);
+        }
+
+        ByteBuffer pixelBuffer = bitmap.buffer(pitch * height);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, pitch);
+        assert pixelBuffer != null;
+        glTexSubImage2D(GL_TEXTURE_2D, 0, atlasCursorX, atlasCursorY, width, height, GL_RED, GL_UNSIGNED_BYTE, pixelBuffer);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+        float u0 = (float) atlasCursorX / atlasWidth;
+        float u1 = (float) (atlasCursorX + width) / atlasWidth;
+        float vBottom = (float) atlasCursorY / atlasHeight;
+        float vTop = (float) (atlasCursorY + height) / atlasHeight;
+
+        atlasCursorX += width;
+        if (height > atlasRowHeight) {
+            atlasRowHeight = height;
+        }
+
+        fontRenderColor = color;
+
+        float x1 = glyphX + width;
+        float y1 = glyphY + height;
+
+        putFontVertex((float) glyphX, (float) glyphY, u0, vTop);
+        putFontVertex(x1, (float) glyphY, u1, vTop);
+        putFontVertex(x1, y1, u1, vBottom);
+        putFontVertex((float) glyphX, (float) glyphY, u0, vTop);
+        putFontVertex(x1, y1, u1, vBottom);
+        putFontVertex((float) glyphX, y1, u0, vBottom);
+    }
+
+    private void putFontVertex(float x, float y, float u, float v) {
+        if (fontBatchVertBuffer.remaining() < 4) {
+            int newCapacity = fontBatchVertBuffer.capacity() * 2;
+            FloatBuffer newBuffer = BufferUtils.createFloatBuffer(newCapacity);
+            fontBatchVertBuffer.flip();
+            newBuffer.put(fontBatchVertBuffer);
+            fontBatchVertBuffer = newBuffer;
+        }
+        fontBatchVertBuffer.put(x).put(y).put(u).put(v);
+        fontBatchVertCount += 1;
+    }
+
+    @Override
+    public void beginTextRendering() {
+        atlasCursorX = 0;
+        atlasCursorY = 0;
+        atlasRowHeight = 0;
+        fontBatchVertBuffer.clear();
+        fontBatchVertCount = 0;
+        fontRenderColor = null;
+
+        glUseProgram(fontShaderProgram);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, fontAtlasTextureId);
+        glUniform1i(fontSamplerLocation, 0);
+    }
+    @Override
+    public void endTextRendering() {
+        flushFontBatch();
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     @Override
     public void drawTexture(int textureId, int ax, int ay, int bx, int by,
+                                   float u0, float u1, float v0, float v1,
                                    int aRed, int aGreen, int aBlue, int aAlpha,
                                    int bRed, int bGreen, int bBlue, int bAlpha,
                                    int cRed, int cGreen, int cBlue, int cAlpha,
                                    int dRed, int dGreen, int dBlue, int dAlpha)
     {
-
-        textureVertBuffer.clear();
-        textureVertBuffer.put((float) ax).put((float) ay).put(0.0f).put(0.0f).put(aRed / 255f).put(aGreen / 255f).put(aBlue / 255f).put(aAlpha / 255f);
-        textureVertBuffer.put((float) bx).put((float) ay).put(1.0f).put(0.0f).put(bRed / 255f).put(bGreen / 255f).put(bBlue / 255f).put(bAlpha / 255f);
-        textureVertBuffer.put((float) bx).put((float) by).put(1.0f).put(1.0f).put(cRed / 255f).put(cGreen / 255f).put(cBlue / 255f).put(cAlpha / 255f);
-        textureVertBuffer.put((float) ax).put((float) by).put(0.0f).put(1.0f).put(dRed / 255f).put(dGreen / 255f).put(dBlue / 255f).put(dAlpha / 255f);
-        textureVertBuffer.flip();
-
-        glBindBuffer(GL_ARRAY_BUFFER, textureVbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, textureVertBuffer);
-
+        float oldV0 = v0;
+        float oldV1 = v1;
+        v0 = 1 - oldV1;
+        v1 = 1 - oldV0;
         glUseProgram(textureShaderProgram);
+        drawTexture(
+                textureVertBuffer, textureVao, textureVbo, textureSamplerLocation, textureId, ax, ay, bx, by,
+                u0, u1, v0, v1, aRed, aGreen, aBlue, aAlpha, bRed, bGreen, bBlue, bAlpha, cRed, cGreen, cBlue, cAlpha, dRed, dGreen, dBlue, dAlpha
+        );
+    }
+
+    private static void drawTexture(FloatBuffer vertBuffer, int vao, int vbo, int samplerLocation, int textureId, int ax, int ay, int bx, int by,
+                             float u0, float u1, float v0, float v1,
+                             int aRed, int aGreen, int aBlue, int aAlpha,
+                             int bRed, int bGreen, int bBlue, int bAlpha,
+                             int cRed, int cGreen, int cBlue, int cAlpha,
+                             int dRed, int dGreen, int dBlue, int dAlpha){
+        vertBuffer.clear();
+        vertBuffer.put((float) ax).put((float) ay).put(u0).put(v0).put(aRed / 255f).put(aGreen / 255f).put(aBlue / 255f).put(aAlpha / 255f);
+        vertBuffer.put((float) bx).put((float) ay).put(u1).put(v0).put(bRed / 255f).put(bGreen / 255f).put(bBlue / 255f).put(bAlpha / 255f);
+        vertBuffer.put((float) bx).put((float) by).put(u1).put(v1).put(cRed / 255f).put(cGreen / 255f).put(cBlue / 255f).put(cAlpha / 255f);
+        vertBuffer.put((float) ax).put((float) by).put(u0).put(v1).put(dRed / 255f).put(dGreen / 255f).put(dBlue / 255f).put(dAlpha / 255f);
+        vertBuffer.flip();
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, vertBuffer);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureId);
-        glUniform1i(textureSamplerLocation, 0);
+        glUniform1i(samplerLocation, 0);
 
-        glBindVertexArray(textureVao);
+        glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glBindVertexArray(0);
@@ -305,6 +466,10 @@ public final class OpenGLGuiRender extends GuiRender {
 
         glUseProgram(textureShaderProgram);
         glUniformMatrix4fv(textureProjectionLocation, false, projectionMatrixArray);
+
+        glUseProgram(fontShaderProgram);
+        glUniformMatrix4fv(fontProjectionLocation, false, projectionMatrixArray);
+
         glUseProgram(baseShaderProgram);
 
         glEnable(GL_BLEND);
@@ -496,5 +661,67 @@ public final class OpenGLGuiRender extends GuiRender {
 
     public long getWindowHandle() {
         return windowHandle;
+    }
+
+    private void flushFontBatch() {
+        if (fontBatchVertCount == 0) return;
+
+        int neededFloats = fontBatchVertCount * 4;
+        if (neededFloats > fontBatchVboCapacityFloats) {
+            glBindBuffer(GL_ARRAY_BUFFER, fontVbo);
+            glBufferData(GL_ARRAY_BUFFER, (long) neededFloats * Float.BYTES, GL_STREAM_DRAW);
+            fontBatchVboCapacityFloats = neededFloats;
+        }
+
+        fontBatchVertBuffer.flip();
+        glBindBuffer(GL_ARRAY_BUFFER, fontVbo);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, fontBatchVertBuffer);
+
+        if (fontRenderColor != null) {
+            glUseProgram(fontShaderProgram);
+            glUniform4f(fontColorLocation,
+                    fontRenderColor.red() / 255f,
+                    fontRenderColor.green() / 255f,
+                    fontRenderColor.blue() / 255f,
+                    fontRenderColor.alpha() / 255f);
+        }
+
+        glBindVertexArray(fontVao);
+        glDrawArrays(GL_TRIANGLES, 0, fontBatchVertCount);
+
+        glBindVertexArray(0);
+
+        fontBatchVertBuffer.clear();
+        fontBatchVertCount = 0;
+    }
+
+    private void expandAtlas() {
+        glDeleteTextures(fontAtlasTextureId);
+
+        fontAtlasTextureId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, fontAtlasTextureId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        atlasWidth = atlasWidth * 2;
+        atlasHeight = atlasHeight * 2;
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, atlasWidth, atlasHeight, 0, GL_RED, GL_UNSIGNED_BYTE, (ByteBuffer) null);
+
+        atlasCursorX = 0;
+        atlasCursorY = 0;
+        atlasRowHeight = 0;
+    }
+
+    @Override
+    public void enableScissor(ScaleOffset position, ScaleOffset size) {
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(position.getXPixel(), RenderBackend.getProvider().getWindowHeight() - position.getYPixel() - size.getYPixel(), size.getXPixel(), size.getYPixel());
+    }
+    @Override
+    public void disableScissor() {
+        glDisable(GL_SCISSOR_TEST);
     }
 }
