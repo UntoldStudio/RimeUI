@@ -1,7 +1,7 @@
-#version 330 core
-layout(location = 0) in vec2 aPos;
-layout(location = 1) in vec2 aTexCoord;
-layout(location = 2) in vec4 aColor;
+#version 150 core
+in vec2 aPos;
+in vec2 aTexCoord;
+in vec4 aColor;
 out vec2 TexCoord;
 out vec4 VertexColor;
 uniform mat4 uProjection;

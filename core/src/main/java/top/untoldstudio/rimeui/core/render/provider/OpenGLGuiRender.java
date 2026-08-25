@@ -15,7 +15,7 @@
  */
 package top.untoldstudio.rimeui.core.render.provider;
 
-import static org.lwjgl.opengl.GL33.*;
+import static org.lwjgl.opengl.GL32C.*;
 import static org.lwjgl.opengl.ARBImaging.GL_BLEND_COLOR;
 
 import org.joml.Matrix4f;
@@ -27,7 +27,6 @@ import top.untoldstudio.rimeui.core.error.RenderError;
 import top.untoldstudio.rimeui.core.error.ResourceError;
 import top.untoldstudio.rimeui.core.render.GuiRender;
 import top.untoldstudio.rimeui.core.render.RenderBackend;
-import top.untoldstudio.rimeui.core.render.RenderBackendProvider;
 import top.untoldstudio.rimeui.core.resource.ResourceReader;
 import top.untoldstudio.rimeui.core.ui.MainUi;
 
@@ -153,7 +152,9 @@ public final class OpenGLGuiRender extends GuiRender {
         } catch (IOException e){
             throw new ResourceError("Cannot read base glsl frag shader!");
         }
-        baseShaderProgram = loadProgram(baseVertSource, baseFragSource);
+        int[] baseAttribLocs = {0, 1};
+        String[] baseAttribNames = {"aPos", "aColor"};
+        baseShaderProgram = loadProgram(baseVertSource, baseFragSource, baseAttribLocs, baseAttribNames);
         String textureVertSource;
         try {
             textureVertSource = ResourceReader.readString("/shader/texture/vert.glsl");
@@ -167,7 +168,9 @@ public final class OpenGLGuiRender extends GuiRender {
             throw new ResourceError("Cannot read texture glsl frag shader!");
         }
 
-        textureShaderProgram = loadProgram(textureVertSource, textureFragSource);
+        int[] textureAttribLocs = {0, 1, 2};
+        String[] textureAttribNames = {"aPos", "aTexCoord", "aColor"};
+        textureShaderProgram = loadProgram(textureVertSource, textureFragSource, textureAttribLocs, textureAttribNames);
         textureProjectionLocation = glGetUniformLocation(textureShaderProgram, "uProjection");
         textureSamplerLocation = glGetUniformLocation(textureShaderProgram, "uTexture");
         textureVao = glGenVertexArrays();
@@ -197,7 +200,9 @@ public final class OpenGLGuiRender extends GuiRender {
             throw new ResourceError("Cannot read texture glsl frag shader!");
         }
 
-        fontShaderProgram = loadProgram(fontVertSource, fontFragSource);
+        int[] fontAttribLocs = {0, 1};
+        String[] fontAttribNames = {"aPos", "aTexCoord"};
+        fontShaderProgram = loadProgram(fontVertSource, fontFragSource, fontAttribLocs, fontAttribNames);
         fontColorLocation = glGetUniformLocation(fontShaderProgram, "uColor");
         fontProjectionLocation = glGetUniformLocation(fontShaderProgram, "uProjection");
         fontSamplerLocation = glGetUniformLocation(fontShaderProgram, "uTexture");
@@ -380,7 +385,7 @@ public final class OpenGLGuiRender extends GuiRender {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    private static int loadProgram(String vertSource, String fragSource){
+    private static int loadProgram(String vertSource, String fragSource, int[] attribLocations, String[] attribNames) {
         int vertShader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertShader, vertSource);
         glCompileShader(vertShader);
@@ -393,9 +398,15 @@ public final class OpenGLGuiRender extends GuiRender {
         if (glGetShaderi(fragShader, GL_COMPILE_STATUS) == GL_FALSE) {
             throw new RenderError(glGetShaderInfoLog(fragShader));
         }
+
         int program = glCreateProgram();
         glAttachShader(program, vertShader);
         glAttachShader(program, fragShader);
+
+        for (int i = 0; i < attribLocations.length; i++) {
+            glBindAttribLocation(program, attribLocations[i], attribNames[i]);
+        }
+
         glLinkProgram(program);
         if (glGetProgrami(program, GL_LINK_STATUS) == GL_FALSE) {
             throw new RenderError(glGetProgramInfoLog(program));
@@ -515,7 +526,6 @@ public final class OpenGLGuiRender extends GuiRender {
         savedEnabledMap.put(GL_DITHER, glIsEnabled(GL_DITHER));
         savedEnabledMap.put(GL_MULTISAMPLE, glIsEnabled(GL_MULTISAMPLE));
         savedEnabledMap.put(GL_LINE_SMOOTH, glIsEnabled(GL_LINE_SMOOTH));
-        savedEnabledMap.put(GL_POINT_SMOOTH, glIsEnabled(GL_POINT_SMOOTH));
         savedEnabledMap.put(GL_POLYGON_SMOOTH, glIsEnabled(GL_POLYGON_SMOOTH));
         savedEnabledMap.put(GL_FRAMEBUFFER_SRGB, glIsEnabled(GL_FRAMEBUFFER_SRGB));
         savedEnabledMap.put(GL_PROGRAM_POINT_SIZE, glIsEnabled(GL_PROGRAM_POINT_SIZE));
