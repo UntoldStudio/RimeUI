@@ -215,6 +215,7 @@ public final class OpenGLGuiRender extends GuiRender {
         int initialFontBatchFloats = 4096 * 4;
         glBindBuffer(GL_ARRAY_BUFFER, fontVbo);
         glBufferData(GL_ARRAY_BUFFER, initialFontBatchFloats * Float.BYTES, GL_STREAM_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         fontBatchVboCapacityFloats = initialFontBatchFloats;
         fontBatchVertBuffer = BufferUtils.createFloatBuffer(initialFontBatchFloats);
 
@@ -281,8 +282,8 @@ public final class OpenGLGuiRender extends GuiRender {
 
         float u0 = (float) atlasCursorX / atlasWidth;
         float u1 = (float) (atlasCursorX + width) / atlasWidth;
-        float vBottom = (float) atlasCursorY / atlasHeight;
-        float vTop = (float) (atlasCursorY + height) / atlasHeight;
+        float vTop = 1.0f - (float) atlasCursorY / atlasHeight;
+        float vBottom = 1.0f - (float) (atlasCursorY + height) / atlasHeight;
 
         atlasCursorX += width;
         if (height > atlasRowHeight) {
@@ -342,10 +343,9 @@ public final class OpenGLGuiRender extends GuiRender {
                                    int cRed, int cGreen, int cBlue, int cAlpha,
                                    int dRed, int dGreen, int dBlue, int dAlpha)
     {
-        float oldV0 = v0;
-        float oldV1 = v1;
-        v0 = 1 - oldV1;
-        v1 = 1 - oldV0;
+        float tmp = v0;
+        v0 = v1;
+        v1 = tmp;
         glUseProgram(textureShaderProgram);
         drawTexture(
                 textureVertBuffer, textureVao, textureVbo, textureSamplerLocation, textureId, ax, ay, bx, by,

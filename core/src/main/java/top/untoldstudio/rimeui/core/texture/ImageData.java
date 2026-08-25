@@ -13,24 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.untoldstudio.rimeui.core.signal;
+package top.untoldstudio.rimeui.core.texture;
 
-public enum SignalType {
-    SET_NAME,
-    SET_PARENT,
-    SET_RENDER_LEVEL,
-    SET_X_ANCHOR,
-    SET_Y_ANCHOR,
-    SET_POSITION,
-    SET_SIZE,
-    SET_COLOR,
-    SET_TEXTURE_ID,
-    SET_FONT,
-    SET_FONT_SIZE,
-    SET_TEXT,
-    SET_CAN_FRAME_BACKGROUND_DISPLAY,
-
-    ADD_CHILD,
-
-    REMOVE_CHILD,
+public record ImageData(boolean isNiceGridTexture, int textureId, int width, int height, int left, int right, int top, int bottom) {
+    public ImageData(int textureId, int width, int height){
+        this(false, textureId, width, height, 0, 0, 0, 0);
+    }
+    public ImageData(int textureId, int width, int height, int left, int right, int top, int bottom) {
+        this(true, textureId, width, height, left, right, top, bottom);
+    }
 }

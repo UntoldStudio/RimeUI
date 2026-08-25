@@ -32,7 +32,6 @@ dependencies {
     runtimeOnly("org.lwjgl:lwjgl-glfw:${lwjglVersion}:${lwjglNatives}")
     runtimeOnly("org.lwjgl:lwjgl-stb:${lwjglVersion}:${lwjglNatives}")
     runtimeOnly("org.lwjgl:lwjgl-freetype:${lwjglVersion}:${lwjglNatives}")
-    runtimeOnly("org.lwjgl:lwjgl-harfbuzz:${lwjglVersion}:${lwjglNatives}")
 }
 
 tasks.jar {

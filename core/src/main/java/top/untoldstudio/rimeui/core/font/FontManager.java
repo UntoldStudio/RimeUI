@@ -19,8 +19,10 @@ import static org.lwjgl.util.freetype.FreeType.*;
 import static org.lwjgl.util.harfbuzz.HarfBuzz.*;
 
 import org.lwjgl.PointerBuffer;
+import org.lwjgl.system.Configuration;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.freetype.FT_Face;
+import org.lwjgl.util.freetype.FreeType;
 import top.untoldstudio.rimeui.core.error.ResourceError;
 import top.untoldstudio.rimeui.core.resource.ResourceReader;
 
@@ -35,6 +37,7 @@ public final class FontManager {
     private static final Map<String, Font> FONT_MAP = new HashMap<>();
 
     public static void init(){
+        Configuration.HARFBUZZ_LIBRARY_NAME.set(FreeType.getLibrary());
         buffer.clear();
         int error = FT_Init_FreeType(buffer);
         if (error != 0){
@@ -43,7 +46,11 @@ public final class FontManager {
         ftPointer = buffer.get(0);
     }
 
-    public static Font loadFont(String fontPath, int defaultFontSize){
+    public static Font loadFont(String fontPath){
+        if (FONT_MAP.containsKey(fontPath)){
+            return FONT_MAP.get(fontPath);
+        }
+
         buffer.clear();
         int error = FT_New_Face(ftPointer, fontPath, 0, buffer);
         long facePointer = -1;
@@ -70,15 +77,10 @@ public final class FontManager {
             throw new ResourceError("Cannot load font: " + fontPath);
         }
         FT_Face face = FT_Face.create(facePointer);
-        FT_Set_Pixel_Sizes(face, 0, defaultFontSize);
         long bufferPointer = hb_buffer_create();
         long hbFontPointer = hb_ft_font_create_referenced(facePointer);
-        hb_font_set_scale(hbFontPointer, defaultFontSize * 64, defaultFontSize * 64);
-        Font font = new Font(face, hbFontPointer, bufferPointer, defaultFontSize, fontPath, fontBuffer);
+        Font font = new Font(face, hbFontPointer, bufferPointer, fontPath, fontBuffer);
         FONT_MAP.put(fontPath, font);
         return font;
-    }
-    public static Font getFont(String fontPath){
-        return FONT_MAP.get(fontPath);
     }
 }

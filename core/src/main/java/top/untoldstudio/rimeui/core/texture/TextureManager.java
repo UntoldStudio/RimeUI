@@ -28,23 +28,44 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class TextureManager {
-    private static final Map<String, Integer> imageIdMap = new HashMap<>();
+    private static final Map<String, ImageData> imageMap = new HashMap<>();
     private static final IntBuffer width = BufferUtils.createIntBuffer(1);
     private static final IntBuffer height = BufferUtils.createIntBuffer(1);
     private static final IntBuffer channels = BufferUtils.createIntBuffer(1);
+    private record ImageInitializationData(int textureId, int width, int height){}
 
     static {
         STBImage.stbi_set_flip_vertically_on_load(true);
     }
 
-    public static int loadImage(String imagePath) {
-        if (imageIdMap.containsKey(imagePath)) {
-            return imageIdMap.get(imagePath);
+    public static ImageData loadImageWithoutNiceGrid(String imagePath){
+        if (imageMap.containsKey(imagePath)) {
+            return imageMap.get(imagePath);
         }
 
+        ImageInitializationData data = loadImage(imagePath);
+        ImageData imageData = new ImageData(data.textureId(), data.width(), data.height());
+        imageMap.put(imagePath, imageData);
+        return imageData;
+    }
+    public static ImageData loadImageWithoutNiceGrid(String imagePath, int left, int right, int top, int bottom){
+        if (imageMap.containsKey(imagePath)) {
+            return imageMap.get(imagePath);
+        }
+
+        ImageInitializationData data = loadImage(imagePath);
+        ImageData imageData = new ImageData(data.textureId(), data.width(), data.height(), left, right, top, bottom);
+        imageMap.put(imagePath, imageData);
+        return imageData;
+    }
+
+    private static ImageInitializationData loadImage(String imagePath) {
         width.clear();
         height.clear();
         channels.clear();
+
+        int widthInt = width.get(0);
+        int heightInt = height.get(0);
 
         ByteBuffer pixels = STBImage.stbi_load(imagePath, width, height, channels, 4);
 
@@ -71,15 +92,8 @@ public final class TextureManager {
 
         int id = RenderBackend.getProvider().loadImage(width.get(0), height.get(0), pixels);
 
-        imageIdMap.put(imagePath, id);
         STBImage.stbi_image_free(pixels);
-        return id;
-    }
-    public static int getImageId(String imagePath){
-        if (imageIdMap.containsKey(imagePath)) {
-            return imageIdMap.get(imagePath);
-        } else {
-            return loadImage(imagePath);
-        }
+
+        return new ImageInitializationData(id, widthInt, heightInt);
     }
 }

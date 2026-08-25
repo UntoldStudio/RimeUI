@@ -41,7 +41,7 @@ public final class Window {
 
     public void render(){
         glfwPollEvents();
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         RimeUI.render();
         glfwSwapBuffers(windowHandle);

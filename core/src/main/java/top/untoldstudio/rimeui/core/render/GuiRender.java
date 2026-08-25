@@ -30,6 +30,7 @@ import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.font.Font;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 public abstract class GuiRender {
     public abstract void enableScissor(ScaleOffset position, ScaleOffset size);
@@ -71,9 +72,12 @@ public abstract class GuiRender {
         long hbFont = font.fontPointer();
         FT_Set_Pixel_Sizes(font.face(), 0, fontSize);
         hb_font_set_scale(font.fontPointer(), fontSize * 64, fontSize * 64);
+        FT_Face face = font.face();
+        long ascender = Objects.requireNonNull(face.size()).metrics().ascender();
+        float ascenderPx = ascender / 64.0f;
         hb_buffer_clear_contents(hbBuffer);
-        ByteBuffer textBuffer = MemoryUtil.memUTF8(text);
-        hb_buffer_add_utf8(hbBuffer, textBuffer, 0, -1);
+        ByteBuffer textBuffer = MemoryUtil.memUTF8(text, false);
+        hb_buffer_add_utf8(hbBuffer, textBuffer, 0, textBuffer.remaining());
         hb_buffer_set_direction(hbBuffer, HB_DIRECTION_LTR);
         hb_buffer_set_script(hbBuffer, HB_SCRIPT_UNKNOWN);
         hb_shape(hbFont, hbBuffer, null);
@@ -82,25 +86,26 @@ public abstract class GuiRender {
         hb_glyph_position_t.Buffer positionBuffer = hb_buffer_get_glyph_positions(hbBuffer);
 
         float penX = startDrawPosition.getXPixel();
-        float penY = startDrawPosition.getYPixel();
+        float penY = startDrawPosition.getYPixel() + ascenderPx;
 
         beginTextRendering();
 
         for (int i = 0; i < glyphCount; i++){
-            FT_Face face = font.face();
             assert infoBuffer != null;
             FT_Load_Glyph(face, infoBuffer.get(i).codepoint(), FT_LOAD_RENDER);
             FT_GlyphSlot glyphSlot = face.glyph();
             assert glyphSlot != null;
+            int bitmapLeft = glyphSlot.bitmap_left();
             FT_Bitmap bitmap = glyphSlot.bitmap();
+            int bitmapTop = glyphSlot.bitmap_top();
             assert positionBuffer != null;
             hb_glyph_position_t position = positionBuffer.get(i);
             int xOffset = position.x_offset();
             int yOffset = position.y_offset();
             int xAdvance = position.x_advance();
             int yAdvance = position.y_advance();
-            float glyphX = penX + (xOffset / 64.0f);
-            float glyphY = penY - (yOffset / 64.0f);
+            float glyphX = penX + (xOffset / 64.0f) + bitmapLeft;
+            float glyphY = penY - bitmapTop - (yOffset / 64.0f);
             penX += xAdvance / 64.0f;
             penY += yAdvance / 64.0f;
             drawGlyph(bitmap, MathTool.round(glyphX), MathTool.round(glyphY), color);
@@ -115,7 +120,7 @@ public abstract class GuiRender {
 
     public void drawNiceGridTexture(int textureId, ScaleOffset position, ScaleOffset size,
                                     int textureWidth, int textureHeight,
-                                    int left, int top, int right, int bottom, RGBA color) {
+                                    int left, int right, int top, int bottom, RGBA color) {
         int positionX = position.getXPixel();
         int positionY = position.getYPixel();
         int targetWidth = size.getXPixel();

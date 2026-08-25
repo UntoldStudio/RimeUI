@@ -16,7 +16,9 @@
 package top.untoldstudio.rimeui.core;
 
 import top.untoldstudio.rimeui.core.font.FontManager;
+import top.untoldstudio.rimeui.core.render.GuiRender;
 import top.untoldstudio.rimeui.core.render.RenderBackend;
+import top.untoldstudio.rimeui.core.render.RenderBackendProvider;
 import top.untoldstudio.rimeui.core.render.provider.OpenGLRenderBackend;
 import top.untoldstudio.rimeui.core.ui.MainUi;
 import top.untoldstudio.rimeui.core.render.provider.OpenGLGuiRender;
@@ -28,6 +30,11 @@ public final class RimeUI {
         init();
         RenderBackend.setProvider(new OpenGLRenderBackend(windowHandle));
         new MainUi(new OpenGLGuiRender(windowHandle));
+    }
+    public static void initCustomProvider(GuiRender render, RenderBackendProvider backendProvider){
+        init();
+        RenderBackend.setProvider(backendProvider);
+        new MainUi(render);
     }
     public static void init(){
         FontManager.init();

@@ -84,6 +84,7 @@ public final class MainUi {
     public MainUi removeChild(@NotNull GuiNode<?> node){
         node.parentIsGuiMain = false;
         node.sendSignal(SignalType.SET_PARENT);
+        children.remove(node);
         return this;
     }
     public MainUi removeChildren(@NotNull GuiNode<?>... nodes){
