@@ -34,21 +34,30 @@ public abstract class GuiNode<T extends GuiNode<T>> {
     protected final List<GuiNode<?>> children = new ArrayList<>();
     protected int renderLevel = 0;
     protected boolean isInit = false;
+    protected boolean visible = true;
     private final Map<SignalType, Object> lastSignalObjectValues = new EnumMap<>(SignalType.class);
     private final List<DoubleConsumer> renderCallbacks = new ArrayList<>();
 
     protected void renderWithChildren(GuiRender render, double delta){
         sendSignal(SignalType.BEFORE_RENDER);
-        for (DoubleConsumer renderCallback : renderCallbacks) {
-            renderCallback.accept(delta);
-        }
-        render(render, delta);
-        for (GuiNode<?> child : children) {
-            child.renderWithChildren(render, delta);
+        if (visible){
+            for (DoubleConsumer renderCallback : renderCallbacks) {
+                renderCallback.accept(delta);
+            }
+            render(render, delta);
+            for (GuiNode<?> child : children) {
+                child.renderWithChildren(render, delta);
+            }
         }
         sendSignal(SignalType.AFTER_RENDER);
     }
     protected abstract void render(GuiRender render, double delta);
+    protected boolean isVisible(){
+        return visible;
+    }
+    protected void setVisible(boolean visible){
+        this.visible = visible;
+    }
     public T registerRenderCallback(DoubleConsumer callback){
         renderCallbacks.add(callback);
         sendSignal(SignalType.REGISTER_RENDER_CALLBACK, callback);

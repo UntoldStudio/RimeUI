@@ -36,22 +36,24 @@ public final class ImageButton extends AbstractFrame<ImageButton> implements Ima
     private ImageData defaultImage;
     private ImageData pressedImage;
     private ImageData hoveredImage;
+    private boolean isPressedNow = true;
 
     @Override
     public void render(GuiRender render, double delta){
         Mouse mouse = MainUi.getInstance().getMouse();
         ImageData data = defaultImage;
-        if (super.isMouseInRange() && getTransparency() != 1){
-            if (pressedImage != null){
-                boolean isPressed = false;
-                for (MouseButton button : canTriggerButtons){
-                    if (mouse.isMouseButtonPressed(button)){
-                        isPressed = true;
-                    }
-                }
-                if (isPressed){
-                    data = pressedImage;
-                }
+        boolean isPressed = false;
+        for (MouseButton button : canTriggerButtons){
+            if (mouse.isMouseButtonPressed(button)){
+                isPressed = true;
+            }
+        }
+        if (isPressed){
+            data = pressedImage;
+        }
+        if (super.isMouseInRange() && getTransparency() != 1 && visible){
+            if (pressedImage != null && isPressed){
+                data = pressedImage;
             }
             if (data == defaultImage && hoveredImage != null){
                 data = hoveredImage;
@@ -59,17 +61,25 @@ public final class ImageButton extends AbstractFrame<ImageButton> implements Ima
             render.setCursorShapeInThisFrame(CursorShape.HAND);
         }
         renderImage(render, data, realPosition, realPositionMax, realSize, backgroundColor);
+
+        if (isPressed && !isPressedNow){
+            sendSignal(SignalType.BUTTON_PRESSED);
+            isPressedNow = true;
+        } else if (!isPressed && isPressedNow) {
+            sendSignal(SignalType.BUTTON_RELEASED);
+            isPressedNow = false;
+        }
     }
 
     @Override
     protected void onMouseMoveEvent(MouseMoveEvent event){
-        if (isMouseInRange() && getTransparency() != 1){
+        if (isMouseInRange() && getTransparency() != 1 && visible){
             event.cancel();
         }
     }
     @Override
     protected void onMouseButtonEvent(MouseButtonEvent event){
-        if (isMouseInRange() && getTransparency() != 1){
+        if (isMouseInRange() && getTransparency() != 1 && visible){
             event.cancel();
         }
     }

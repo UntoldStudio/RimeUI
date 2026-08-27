@@ -49,4 +49,7 @@ public enum SignalType {
 
     BEFORE_RENDER,
     AFTER_RENDER,
+
+    BUTTON_PRESSED,
+    BUTTON_RELEASED,
 }

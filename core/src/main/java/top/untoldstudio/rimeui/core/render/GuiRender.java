@@ -208,8 +208,6 @@ public abstract class GuiRender {
     protected abstract void beginTextRendering();
     protected abstract void endTextRendering();
 
-    public abstract void flushBaseBuffer();
-
     public void drawNiceGridTexture(int textureId, ScaleOffset position, ScaleOffset size,
                                     int textureWidth, int textureHeight,
                                     int left, int right, int top, int bottom, RGBA color) {

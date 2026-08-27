@@ -40,7 +40,6 @@ public final class TextLabel extends AbstractFrame<TextLabel> {
     public void render(GuiRender render, double delta){
         if (canFrameBackgroundDisplay){
             super.renderFrameDefaultBackground(render, delta);
-            render.flushBaseBuffer();
         }
         render.drawString(text, font, textRenderPosition, fontSize, textColor, italicSlant, boldStrength);
     }

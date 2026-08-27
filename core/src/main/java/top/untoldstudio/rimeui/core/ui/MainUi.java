@@ -123,6 +123,9 @@ public final class MainUi {
         node.parentIsGuiMain = true;
         children.add(node);
         sortChildren();
+        if (!node.isInit){
+            node.initWithChildren();
+        }
         node.sendSignal(SignalType.SET_PARENT);
         return this;
     }
