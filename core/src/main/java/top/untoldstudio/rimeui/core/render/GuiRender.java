@@ -348,6 +348,10 @@ public abstract class GuiRender {
                             int dRed, int dGreen, int dBlue, int dAlpha
     );
 
+    public long getWindowHandle(){
+        return windowHandle;
+    }
+
     public GuiRender(long windowHandle){
         this.windowHandle = windowHandle;
 

@@ -31,22 +31,12 @@ public final class MainUi {
     private static MainUi instance;
     private final List<GuiNode<?>> children = new ArrayList<>();
     private final GuiRender render;
-    private int windowWidth;
-    private int windowHeight;
     private double lastRenderTime = System.nanoTime() / 1_000_000_000.0;
     private final Window window;
     private final Mouse mouse;
     private long externalSettingCursor = -1;
 
     public void render(){
-        int oldWidth = windowWidth;
-        int oldHeight = windowHeight;
-        window.updateWindowWidthAndHeight();
-        this.windowWidth = window.getWindowWidth();
-        this.windowHeight = window.getWindowHeight();
-        if (oldWidth != windowWidth || oldHeight != windowHeight) {
-            onWindowSizeChangeEvent(new WindowSizeChangeEvent(oldWidth, oldHeight, windowWidth, windowHeight));
-        }
         render.saveContext();
         render.beginFrame();
 
@@ -70,7 +60,7 @@ public final class MainUi {
         this.externalSettingCursor = externalSettingCursor;
     }
 
-    private void onWindowSizeChangeEvent(WindowSizeChangeEvent event){
+    public void onWindowSizeChangeEvent(WindowSizeChangeEvent event){
         for (GuiNode<?> child : children){
             child.onWindowSizeChangeEventWithChildren(event);
         }
@@ -87,6 +77,7 @@ public final class MainUi {
     public void onKeyEvent(KeyEvent event){
         for (int i = children.size() -1; i >= 0; i--){
             children.get(i).onKeyEventWithChildren(event);
+            if (event.isCancelled()) return;
         }
     }
     public void onMouseButtonEvent(MouseButtonEvent event){
@@ -98,6 +89,7 @@ public final class MainUi {
 
         for (int i = children.size() -1; i >= 0; i--){
             children.get(i).onMouseButtonEventWithChildren(event);
+            if (event.isCancelled()) return;
         }
     }
     public void onCursorMoveEvent(MouseMoveEvent event){
@@ -105,11 +97,13 @@ public final class MainUi {
 
         for (int i = children.size() -1; i >= 0; i--){
             children.get(i).onMouseMoveEventWithChildren(event);
+            if (event.isCancelled()) return;
         }
     }
     public void onMouseScrollEvent(MouseScrollEvent event){
         for (int i = children.size() -1; i >= 0; i--){
             children.get(i).onMouseScrollEventWithChildren(event);
+            if (event.isCancelled()) return;
         }
     }
 
@@ -186,11 +180,11 @@ public final class MainUi {
     }
 
     public int getWindowWidth() {
-        return windowWidth;
+        return window.getWidth();
     }
 
     public int getWindowHeight() {
-        return windowHeight;
+        return window.getHeight();
     }
 
     public GuiRender getRender(){

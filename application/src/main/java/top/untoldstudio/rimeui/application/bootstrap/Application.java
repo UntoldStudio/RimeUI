@@ -22,7 +22,9 @@ import top.untoldstudio.rimeui.core.texture.TextureManager;
 import top.untoldstudio.rimeui.core.ui.Window;
 import top.untoldstudio.rimeui.core.ui.node.ImageButton;
 
+import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
+import static org.lwjgl.opengl.GL11.*;
 
 public final class Application {
     private static Application instance;
@@ -42,7 +44,10 @@ public final class Application {
         listener.registerCallback();
         listener.setEnabled(true);
         while (!window.isWindowShouldClose()){
-            window.render();
+            glfwPollEvents();
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            RimeUI.getMainGui().render();
             glfwSwapBuffers(windowHandle);
         }
         window.close();

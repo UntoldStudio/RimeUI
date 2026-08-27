@@ -15,16 +15,11 @@
  */
 package top.untoldstudio.rimeui.core.ui;
 
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL;
-import top.untoldstudio.rimeui.core.RimeUI;
-import top.untoldstudio.rimeui.core.data.RGBA;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
+
+import org.lwjgl.glfw.GLFWWindowSizeCallback;
+import org.lwjgl.opengl.GL;
+import top.untoldstudio.rimeui.core.event.WindowSizeChangeEvent;
 
 /**
  * 如果你已经有一个窗口了你不想再创造一个新的窗口/不能自己控制窗口的生命周期请不要调用create方法!
@@ -37,11 +32,17 @@ public final class Window {
     private boolean isClose = false;
     private int width;
     private int height;
-    private final List<Runnable> beforeRenderCallbacks = new ArrayList<>();
-    private final List<Runnable> afterRenderCallbacks = new ArrayList<>();
+    private final GLFWWindowSizeCallback windowSizeCallback;
 
     public Window(long windowHandle){
         this.windowHandle = windowHandle;
+        windowSizeCallback = glfwSetWindowSizeCallback(windowHandle, (window, newWidth, newHeight) -> {
+            int oldWidth = width;
+            int oldHeight = height;
+            width = newWidth;
+            height = newHeight;
+            MainUi.getInstance().onWindowSizeChangeEvent(new WindowSizeChangeEvent(oldWidth, oldHeight, newWidth, newHeight));
+        });
     }
 
     public static Window create(String title, int width, int height){
@@ -61,62 +62,17 @@ public final class Window {
         return new Window(window);
     }
 
-    public void bootstrap(){
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        RimeUI.initOpenGL(windowHandle);
-        while (!isWindowShouldClose()){
-            for (Runnable beforeRenderCallback : beforeRenderCallbacks){
-                beforeRenderCallback.run();
-            }
-            render();
-            glfwSwapBuffers(windowHandle);
-            for (Runnable afterRenderCallback : afterRenderCallbacks){
-                afterRenderCallback.run();
-            }
-        }
-        close();
-    }
-
-    public void registerBeforeRenderCallback(Runnable runnable){
-        beforeRenderCallbacks.add(runnable);
-    }
-    public void registerAfterRenderCallback(Runnable runnable){
-        afterRenderCallbacks.add(runnable);
-    }
-    public void unregisterBeforeRenderCallback(Runnable runnable){
-        beforeRenderCallbacks.remove(runnable);
-    }
-    public void unregisterAfterRenderCallback(Runnable runnable){
-        afterRenderCallbacks.remove(runnable);
-    }
-
-    public void setBackgroundColor(RGBA customBackground){
-        glClearColor(customBackground.getRedFloat(), customBackground.getGreenFloat(), customBackground.getBlueFloat(), customBackground.getAlphaFloat());
-    }
-
-    public void render(){
-        glfwPollEvents();
-        glClear(GL_COLOR_BUFFER_BIT);
-        RimeUI.render();
-    }
-
     public void close(){
         this.isClose = true;
+        windowSizeCallback.free();
         glfwDestroyWindow(windowHandle);
         glfwTerminate();
     }
 
-    public void updateWindowWidthAndHeight(){
-        int[] width = new int[1];
-        int[] height = new int[1];
-        GLFW.glfwGetFramebufferSize(windowHandle, width, height);
-        this.width = width[0];
-        this.height = height[0];
-    }
-    public int getWindowWidth(){
+    public int getWidth(){
         return width;
     }
-    public int getWindowHeight(){
+    public int getHeight(){
         return height;
     }
     public boolean isClose(){

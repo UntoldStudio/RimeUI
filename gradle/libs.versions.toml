@@ -14,7 +14,6 @@ lwjgl-opengl = { module = "org.lwjgl:lwjgl-opengl" }
 lwjgl-glfw = { module = "org.lwjgl:lwjgl-glfw" }
 lwjgl-stb = { module = "org.lwjgl:lwjgl-stb" }
 lwjgl-freetype = { module = "org.lwjgl:lwjgl-freetype" }
-lwjgl-harfbuzz = { module = "org.lwjgl:lwjgl-harfbuzz" }
 
 log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
 log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
@@ -23,7 +22,7 @@ slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j-api" }
 jansi = { module = "org.fusesource.jansi:jansi", version.ref = "jansi" }
 
 [bundles]
-lwjgl-all = ["lwjgl", "lwjgl-opengl", "lwjgl-glfw", "lwjgl-stb", "lwjgl-freetype", "lwjgl-harfbuzz"]
+lwjgl-all = ["lwjgl", "lwjgl-opengl", "lwjgl-glfw", "lwjgl-stb", "lwjgl-freetype"]
 log-all = ["log4j-core", "log4j-api", "slf4j-api", "log4j-slf4j2-impl"]
 
 [plugins]
