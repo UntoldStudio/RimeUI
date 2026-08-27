@@ -20,13 +20,13 @@ import static org.lwjgl.opengl.ARBImaging.GL_BLEND_COLOR;
 
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.freetype.FT_Bitmap;
 import top.untoldstudio.rimeui.core.data.RGBA;
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.error.RenderError;
 import top.untoldstudio.rimeui.core.error.ResourceError;
 import top.untoldstudio.rimeui.core.render.GuiRender;
-import top.untoldstudio.rimeui.core.render.RenderBackend;
 import top.untoldstudio.rimeui.core.resource.ResourceReader;
 import top.untoldstudio.rimeui.core.ui.MainUi;
 
@@ -137,42 +137,43 @@ public final class OpenGLGuiRender extends GuiRender {
     private int fontBatchVboCapacityFloats;
     private RGBA fontRenderColor;
 
-    public OpenGLGuiRender(long windowHandle){
+    public OpenGLGuiRender(long windowHandle) {
         this.windowHandle = windowHandle;
 
         String baseVertSource;
         try {
             baseVertSource = ResourceReader.readString("/shader/base/vert.glsl");
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new ResourceError("Cannot read base glsl vertex shader!");
         }
         String baseFragSource;
         try {
             baseFragSource = ResourceReader.readString("/shader/base/frag.glsl");
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new ResourceError("Cannot read base glsl frag shader!");
         }
         int[] baseAttribLocs = {0, 1};
         String[] baseAttribNames = {"aPos", "aColor"};
         baseShaderProgram = loadProgram(baseVertSource, baseFragSource, baseAttribLocs, baseAttribNames);
+
         String textureVertSource;
         try {
             textureVertSource = ResourceReader.readString("/shader/texture/vert.glsl");
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new ResourceError("Cannot read texture glsl vertex shader!");
         }
         String textureFragSource;
         try {
             textureFragSource = ResourceReader.readString("/shader/texture/frag.glsl");
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new ResourceError("Cannot read texture glsl frag shader!");
         }
-
         int[] textureAttribLocs = {0, 1, 2};
         String[] textureAttribNames = {"aPos", "aTexCoord", "aColor"};
         textureShaderProgram = loadProgram(textureVertSource, textureFragSource, textureAttribLocs, textureAttribNames);
         textureProjectionLocation = glGetUniformLocation(textureShaderProgram, "uProjection");
         textureSamplerLocation = glGetUniformLocation(textureShaderProgram, "uTexture");
+
         textureVao = glGenVertexArrays();
         textureVbo = glGenBuffers();
         int ebo = glGenBuffers();
@@ -190,43 +191,40 @@ public final class OpenGLGuiRender extends GuiRender {
         String fontVertSource;
         try {
             fontVertSource = ResourceReader.readString("/shader/font/vert.glsl");
-        } catch (IOException e){
-            throw new ResourceError("Cannot read texture glsl vertex shader!");
+        } catch (IOException e) {
+            throw new ResourceError("Cannot read font glsl vertex shader!");
         }
         String fontFragSource;
         try {
             fontFragSource = ResourceReader.readString("/shader/font/frag.glsl");
-        } catch (IOException e){
-            throw new ResourceError("Cannot read texture glsl frag shader!");
+        } catch (IOException e) {
+            throw new ResourceError("Cannot read font glsl frag shader!");
         }
-
         int[] fontAttribLocs = {0, 1};
         String[] fontAttribNames = {"aPos", "aTexCoord"};
         fontShaderProgram = loadProgram(fontVertSource, fontFragSource, fontAttribLocs, fontAttribNames);
         fontColorLocation = glGetUniformLocation(fontShaderProgram, "uColor");
         fontProjectionLocation = glGetUniformLocation(fontShaderProgram, "uProjection");
         fontSamplerLocation = glGetUniformLocation(fontShaderProgram, "uTexture");
-        glGetUniformLocation(fontShaderProgram, "uTexture");
+
         fontVao = glGenVertexArrays();
         fontVbo = glGenBuffers();
         glBindVertexArray(fontVao);
         int fontStride = 4 * Float.BYTES;
         glBindBuffer(GL_ARRAY_BUFFER, fontVbo);
-        glBufferData(GL_ARRAY_BUFFER, 16 * Float.BYTES, GL_STREAM_DRAW);
+        int initialFontBatchFloats = 4096 * 4;
+        glBufferData(GL_ARRAY_BUFFER, initialFontBatchFloats * Float.BYTES, GL_STREAM_DRAW);
         glVertexAttribPointer(0, 2, GL_FLOAT, false, fontStride, 0);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(1, 2, GL_FLOAT, false, fontStride, 2 * Float.BYTES);
         glEnableVertexAttribArray(1);
-        int initialFontBatchFloats = 4096 * 4;
-        glBindBuffer(GL_ARRAY_BUFFER, fontVbo);
-        glBufferData(GL_ARRAY_BUFFER, initialFontBatchFloats * Float.BYTES, GL_STREAM_DRAW);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         fontBatchVboCapacityFloats = initialFontBatchFloats;
         fontBatchVertBuffer = BufferUtils.createFloatBuffer(initialFontBatchFloats);
 
-        int[] indices = { 0, 1, 2, 0, 2, 3 };
+        int[] indices = {0, 1, 2, 0, 2, 3};
         IntBuffer indexBuffer = BufferUtils.createIntBuffer(indices.length);
         indexBuffer.put(indices).flip();
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, textureVbo);
         glBufferData(GL_ARRAY_BUFFER, 32 * Float.BYTES, GL_STREAM_DRAW);
@@ -255,7 +253,7 @@ public final class OpenGLGuiRender extends GuiRender {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, atlasWidth, atlasHeight, 0, GL_RED, GL_UNSIGNED_BYTE, (ByteBuffer)null);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, atlasWidth, atlasHeight, 0, GL_RED, GL_UNSIGNED_BYTE, (ByteBuffer) null);
     }
 
     @Override
@@ -278,12 +276,11 @@ public final class OpenGLGuiRender extends GuiRender {
         }
 
         ByteBuffer pixelBuffer = bitmap.buffer(pitch * height);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        if (pixelBuffer == null) return;
+
         glPixelStorei(GL_UNPACK_ROW_LENGTH, pitch);
-        assert pixelBuffer != null;
         glTexSubImage2D(GL_TEXTURE_2D, 0, atlasCursorX, atlasCursorY, width, height, GL_RED, GL_UNSIGNED_BYTE, pixelBuffer);
         glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
         float u0 = (float) atlasCursorX / atlasWidth;
         float u1 = (float) (atlasCursorX + width) / atlasWidth;
@@ -300,12 +297,12 @@ public final class OpenGLGuiRender extends GuiRender {
         float x1 = glyphX + width;
         float y1 = glyphY + height;
 
-        putFontVertex((float) glyphX, (float) glyphY, u0, vTop);
-        putFontVertex(x1, (float) glyphY, u1, vTop);
+        putFontVertex(glyphX, glyphY, u0, vTop);
+        putFontVertex(x1, glyphY, u1, vTop);
         putFontVertex(x1, y1, u1, vBottom);
-        putFontVertex((float) glyphX, (float) glyphY, u0, vTop);
+        putFontVertex(glyphX, glyphY, u0, vTop);
         putFontVertex(x1, y1, u1, vBottom);
-        putFontVertex((float) glyphX, y1, u0, vBottom);
+        putFontVertex(glyphX, y1, u0, vBottom);
     }
 
     private void putFontVertex(float x, float y, float u, float v) {
@@ -317,27 +314,54 @@ public final class OpenGLGuiRender extends GuiRender {
             fontBatchVertBuffer = newBuffer;
         }
         fontBatchVertBuffer.put(x).put(y).put(u).put(v);
-        fontBatchVertCount += 1;
+        fontBatchVertCount++;
     }
 
     @Override
-    public void beginTextRendering() {
-        atlasCursorX = 0;
-        atlasCursorY = 0;
-        atlasRowHeight = 0;
-        fontBatchVertBuffer.clear();
-        fontBatchVertCount = 0;
-        fontRenderColor = null;
+    protected void beginTextRendering() {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+        glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+        int windowWidth = MainUi.getInstance().getWindowWidth();
+        int windowHeight = MainUi.getInstance().getWindowHeight();
+        if (isUseRenderMapping) {
+            glViewport(renderRegionMin.getXPixel(), renderRegionMin.getYPixel(), renderRegionSize.getXPixel(), renderRegionSize.getYPixel());
+        } else {
+            glViewport(0, 0, windowWidth, windowHeight);
+        }
+        projectionMatrix.setOrtho(0.0f, windowWidth, windowHeight, 0.0f, -1.0f, 1.0f);
+        projectionMatrix.get(projectionMatrixArray);
         glUseProgram(fontShaderProgram);
+        glUniformMatrix4fv(fontProjectionLocation, false, projectionMatrixArray);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, fontAtlasTextureId);
         glUniform1i(fontSamplerLocation, 0);
+
+        fontBatchVertBuffer.clear();
+        fontBatchVertCount = 0;
+        fontRenderColor = null;
     }
+
     @Override
-    public void endTextRendering() {
+    protected void endTextRendering() {
         flushFontBatch();
         glBindTexture(GL_TEXTURE_2D, 0);
+        glBindVertexArray(0);
+        glUseProgram(0);
+    }
+
+    @Override
+    public void flushBaseBuffer(){
+        submitBuffer();
+        vertBuffer.clear();
+        vertCount = 0;
     }
 
     @Override
@@ -463,11 +487,19 @@ public final class OpenGLGuiRender extends GuiRender {
 
     @Override
     public void begin(){
+        atlasCursorX = 0;
+        atlasCursorY = 0;
+        atlasRowHeight = 0;
+
         glUseProgram(baseShaderProgram);
 
         int windowWidth = MainUi.getInstance().getWindowWidth();
         int windowHeight = MainUi.getInstance().getWindowHeight();
-        glViewport(0, 0, windowWidth, windowHeight);
+        if (isUseRenderMapping){
+            glViewport(renderRegionMin.getXPixel(), renderRegionMin.getYPixel(), renderRegionSize.getXPixel(), renderRegionSize.getYPixel());
+        } else {
+            glViewport(0, 0, windowWidth, windowHeight);
+        }
 
         projectionMatrix.setOrtho(0.0f, windowWidth, windowHeight, 0.0f, -1.0f, 1.0f);
 
@@ -483,16 +515,42 @@ public final class OpenGLGuiRender extends GuiRender {
 
         glUseProgram(baseShaderProgram);
 
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glColorMask(true, true, true, true);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
+        glDisable(GL_SCISSOR_TEST);
+        glDisable(GL_STENCIL_TEST);
+        glDisable(GL_COLOR_LOGIC_OP);
 
         vertBuffer.clear();
         vertCount = 0;
     }
     @Override
     public void end(){
+    }
+
+    @Override
+    public int loadImage(int width, int height, ByteBuffer stbData){
+        GuiRender render = MainUi.getInstance().getRender();
+        render.saveContext();
+
+        int textureId = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, textureId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+        glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, stbData);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        render.restoreContext();
+
+        return textureId;
     }
 
     @Override
@@ -687,18 +745,19 @@ public final class OpenGLGuiRender extends GuiRender {
         glBindBuffer(GL_ARRAY_BUFFER, fontVbo);
         glBufferSubData(GL_ARRAY_BUFFER, 0, fontBatchVertBuffer);
 
+        glUseProgram(fontShaderProgram);
         if (fontRenderColor != null) {
-            glUseProgram(fontShaderProgram);
-            glUniform4f(fontColorLocation,
-                    fontRenderColor.red() / 255f,
-                    fontRenderColor.green() / 255f,
-                    fontRenderColor.blue() / 255f,
-                    fontRenderColor.alpha() / 255f);
+            float r = fontRenderColor.red() / 255f;
+            float g = fontRenderColor.green() / 255f;
+            float b = fontRenderColor.blue() / 255f;
+            float a = fontRenderColor.alpha() / 255f;
+            glUniform4f(fontColorLocation, r, g, b, a);
+        } else {
+            glUniform4f(fontColorLocation, 1f, 1f, 1f, 1f);
         }
 
         glBindVertexArray(fontVao);
         glDrawArrays(GL_TRIANGLES, 0, fontBatchVertCount);
-
         glBindVertexArray(0);
 
         fontBatchVertBuffer.clear();
@@ -715,8 +774,8 @@ public final class OpenGLGuiRender extends GuiRender {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        atlasWidth = atlasWidth * 2;
-        atlasHeight = atlasHeight * 2;
+        atlasWidth *= 2;
+        atlasHeight *= 2;
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, atlasWidth, atlasHeight, 0, GL_RED, GL_UNSIGNED_BYTE, (ByteBuffer) null);
 
@@ -728,7 +787,7 @@ public final class OpenGLGuiRender extends GuiRender {
     @Override
     public void enableScissor(ScaleOffset position, ScaleOffset size) {
         glEnable(GL_SCISSOR_TEST);
-        glScissor(position.getXPixel(), RenderBackend.getProvider().getWindowHeight() - position.getYPixel() - size.getYPixel(), size.getXPixel(), size.getYPixel());
+        glScissor(position.getXPixel(), MainUi.getInstance().getWindowHeight() - position.getYPixel() - size.getYPixel(), size.getXPixel(), size.getYPixel());
     }
     @Override
     public void disableScissor() {

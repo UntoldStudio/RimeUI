@@ -28,24 +28,24 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
     protected ScaleOffset realPosition;
     protected ScaleOffset realPositionMax;
     protected ScaleOffset realSize;
-    protected RGBA color = RGBA.WHITE;
+    protected RGBA backgroundColor = RGBA.WHITE;
     protected double xAnchor = 0;
     protected double yAnchor = 0;
     protected boolean isClipChildren = false;
 
     @Override
-    public void renderWithChildren(GuiRender render){
+    public void renderWithChildren(GuiRender render, double delta){
         if (isClipChildren) {
             render.enableScissor(realPosition, realSize);
         }
-        super.renderWithChildren(render);
+        super.renderWithChildren(render, delta);
         if (isClipChildren) {
             render.disableScissor();
         }
     }
 
-    public void renderFrameDefaultBackground(GuiRender render){
-        render.drawSquare(realPosition, realPositionMax, color);
+    public void renderFrameDefaultBackground(GuiRender render, double delta){
+        render.drawSquare(realPosition, realPositionMax, backgroundColor);
     }
 
     public T setPosition(ScaleOffset position) {
@@ -60,14 +60,14 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
         sendSignal(SignalType.SET_SIZE, size);
         return self;
     }
-    public T setColor(RGBA color) {
-        this.color = color;
+    public T setBackgroundColor(RGBA backgroundColor) {
+        this.backgroundColor = backgroundColor;
         operationPosition();
-        sendSignal(SignalType.SET_COLOR, color);
+        sendSignal(SignalType.SET_BACKGROUND_COLOR, backgroundColor);
         return self;
     }
     public T setTransparency(double transparency){
-        setColor(color.withAlpha(MathTool.round((1 - transparency) * 255)));
+        setBackgroundColor(backgroundColor.withAlpha(MathTool.round((1 - transparency) * 255)));
         return self;
     }
     public T setXAnchor(double xAnchor) {
@@ -92,7 +92,7 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
         return self;
     }
     public double getTransparency(){
-        return (double)(255 - color.alpha()) / (double)255;
+        return (double)(255 - backgroundColor.alpha()) / (double)255;
     }
     public double getXAnchor(){
         return xAnchor;
@@ -100,8 +100,8 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
     public double getYAnchor(){
         return yAnchor;
     }
-    public RGBA getColor(){
-        return color;
+    public RGBA getBackgroundColor(){
+        return backgroundColor;
     }
     public ScaleOffset getPosition(){
         return position;
@@ -113,7 +113,8 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
         return isClipChildren;
     }
 
-    protected abstract void render(GuiRender render);
+    @Override
+    protected abstract void render(GuiRender render, double delta);
 
     protected ScaleOffset getRealPosition() {
         return realPosition;
@@ -155,9 +156,13 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
         }
     }
 
+    @Override
+    protected void init(){
+        operationPosition();
+    }
+
     public AbstractFrame(ScaleOffset position, ScaleOffset size) {
         this.position = position;
         this.size = size;
-        operationPosition();
     }
 }

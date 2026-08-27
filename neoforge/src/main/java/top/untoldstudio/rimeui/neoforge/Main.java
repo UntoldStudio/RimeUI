@@ -13,15 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.untoldstudio.rimeui.core.render;
+package top.untoldstudio.rimeui.neoforge;
 
-public class RenderBackend {
-    private static RenderBackendProvider provider;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
 
-    public static RenderBackendProvider getProvider(){
-        return provider;
+@Mod(Main.MOD_ID)
+public final class Main {
+    public static final String MOD_ID = "rimeui";
+    private static Main instance;
+
+    public Main(IEventBus modEventBus, ModContainer modContainer) {
+        instance = this;
+        modEventBus.register(new ModEventHandler());
+        NeoForge.EVENT_BUS.register(new GameEventHandler());
     }
-    public static void setProvider(RenderBackendProvider newProvider){
-        provider = newProvider;
+
+    public static Main getInstance() {
+        return instance;
     }
 }

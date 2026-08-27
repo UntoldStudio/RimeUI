@@ -1,0 +1,42 @@
+/*
+ * Copyright 2026 Untold Studio
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package top.untoldstudio.rimeui.neoforge;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
+import top.untoldstudio.rimeui.core.event.InputEventListener;
+import top.untoldstudio.rimeui.core.event.MouseButtonEvent;
+import top.untoldstudio.rimeui.core.event.MouseScrollEvent;
+import top.untoldstudio.rimeui.core.ui.MainUi;
+
+public final class GameEventHandler {
+    @SubscribeEvent
+    public void onMouseButtonEvent(InputEvent.MouseButton.Pre event){
+        if (MainUi.getInstance() == null) return;
+        MouseButtonEvent customEvent = InputEventListener.onMouseButtonEvent(event.getButton(), event.getAction(), event.getModifiers());
+        if (customEvent.isCancelled()){
+            event.setCanceled(true);
+        }
+    }
+    @SubscribeEvent
+    public void onMouseScrollEvent(InputEvent.MouseScrollingEvent event){
+        if (MainUi.getInstance() == null) return;
+        MouseScrollEvent customEvent = InputEventListener.onMouseScrollEvent(event.getMouseX(), event.getMouseY());
+        if (customEvent.isCancelled()){
+            event.setCanceled(true);
+        }
+    }
+}

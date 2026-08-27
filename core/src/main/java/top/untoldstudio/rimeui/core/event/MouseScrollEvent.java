@@ -13,34 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.untoldstudio.rimeui.core.signal;
+package top.untoldstudio.rimeui.core.event;
 
-public enum SignalType {
-    SET_NAME,
-    SET_PARENT,
-    SET_RENDER_LEVEL,
-    SET_X_ANCHOR,
-    SET_Y_ANCHOR,
-    SET_POSITION,
-    SET_SIZE,
-    SET_BACKGROUND_COLOR,
-    SET_TEXTURE_ID,
-    SET_FONT,
-    SET_FONT_SIZE,
-    SET_TEXT,
-    SET_CAN_FRAME_BACKGROUND_DISPLAY,
-    SET_TEXT_COLOR,
-    SET_ITALIC_ALANT,
-    SET_BOLD_STRENGTH,
-    SET_HORIZONTAL_ALANT,
-    SET_VERTICAL_ALANT,
+public final class MouseScrollEvent extends CancelableEvent {
+    private final double x;
+    private final double y;
 
-    REGISTER_RENDER_CALLBACK,
-    UNREGISTER_RENDER_CALLBACK,
+    public MouseScrollEvent(double x, double y){
+        this.x = x;
+        this.y = y;
+    }
 
-    ADD_CHILD,
-    REMOVE_CHILD,
-
-    BEFORE_RENDER,
-    AFTER_RENDER,
+    public double getX(){
+        return x;
+    }
+    public double getY(){
+        return y;
+    }
 }

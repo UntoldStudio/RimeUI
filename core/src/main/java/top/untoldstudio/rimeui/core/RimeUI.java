@@ -17,24 +17,17 @@ package top.untoldstudio.rimeui.core;
 
 import top.untoldstudio.rimeui.core.font.FontManager;
 import top.untoldstudio.rimeui.core.render.GuiRender;
-import top.untoldstudio.rimeui.core.render.RenderBackend;
-import top.untoldstudio.rimeui.core.render.RenderBackendProvider;
-import top.untoldstudio.rimeui.core.render.provider.OpenGLRenderBackend;
 import top.untoldstudio.rimeui.core.ui.MainUi;
 import top.untoldstudio.rimeui.core.render.provider.OpenGLGuiRender;
+import top.untoldstudio.rimeui.core.ui.Window;
 
 public final class RimeUI {
-    private static long ftPointer;
-
     public static void initOpenGL(long windowHandle){
-        init();
-        RenderBackend.setProvider(new OpenGLRenderBackend(windowHandle));
-        new MainUi(new OpenGLGuiRender(windowHandle));
+        initCustomGuiRender(windowHandle, new OpenGLGuiRender(windowHandle));
     }
-    public static void initCustomProvider(GuiRender render, RenderBackendProvider backendProvider){
+    public static void initCustomGuiRender(long windowHandle, GuiRender render){
         init();
-        RenderBackend.setProvider(backendProvider);
-        new MainUi(render);
+        new MainUi(render, new Window(windowHandle));
     }
     public static void init(){
         FontManager.init();
@@ -44,8 +37,5 @@ public final class RimeUI {
     }
     public static MainUi getMainGui(){
         return MainUi.getInstance();
-    }
-    public static long getFtPointer(){
-        return ftPointer;
     }
 }

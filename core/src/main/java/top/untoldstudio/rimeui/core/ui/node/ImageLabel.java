@@ -25,11 +25,11 @@ public final class ImageLabel extends AbstractFrame<ImageLabel> {
     private ImageData data;
 
     @Override
-    protected void render(GuiRender render){
+    protected void render(GuiRender render, double delta){
         if (data.isNiceGridTexture()){
-            render.drawNiceGridTexture(data.textureId(), realPosition, realSize, data.width(), data.height(), data.left(), data.right(), data.top(), data.bottom(), color);
+            render.drawNiceGridTexture(data.textureId(), realPosition, realSize, data.width(), data.height(), data.left(), data.right(), data.top(), data.bottom(), backgroundColor);
         } else {
-            render.drawTexture(data.textureId(), realPosition, realPositionMax, color);
+            render.drawTexture(data.textureId(), realPosition, realPositionMax, backgroundColor);
         }
     }
 

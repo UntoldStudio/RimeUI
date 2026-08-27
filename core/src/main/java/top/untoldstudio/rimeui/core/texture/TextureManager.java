@@ -18,8 +18,8 @@ package top.untoldstudio.rimeui.core.texture;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
 import top.untoldstudio.rimeui.core.error.ResourceError;
-import top.untoldstudio.rimeui.core.render.RenderBackend;
 import top.untoldstudio.rimeui.core.resource.ResourceReader;
+import top.untoldstudio.rimeui.core.ui.MainUi;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -48,7 +48,7 @@ public final class TextureManager {
         imageMap.put(imagePath, imageData);
         return imageData;
     }
-    public static ImageData loadImageWithoutNiceGrid(String imagePath, int left, int right, int top, int bottom){
+    public static ImageData loadImageWithNiceGrid(String imagePath, int left, int right, int top, int bottom){
         if (imageMap.containsKey(imagePath)) {
             return imageMap.get(imagePath);
         }
@@ -90,7 +90,7 @@ public final class TextureManager {
             throw new ResourceError("Failed to load image " + imagePath + ": " + STBImage.stbi_failure_reason());
         }
 
-        int id = RenderBackend.getProvider().loadImage(width.get(0), height.get(0), pixels);
+        int id = MainUi.getInstance().getRender().loadImage(width.get(0), height.get(0), pixels);
 
         STBImage.stbi_image_free(pixels);
 

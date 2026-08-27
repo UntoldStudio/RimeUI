@@ -19,6 +19,19 @@ import java.awt.*;
 import java.nio.ByteBuffer;
 
 public record RGBA(int red, int green, int blue, int alpha) {
+    public float getRedFloat(){
+        return red / 255f;
+    }
+    public float getGreenFloat(){
+        return green / 255f;
+    }
+    public float getBlueFloat(){
+        return blue / 255f;
+    }
+    public float getAlphaFloat(){
+        return alpha / 255f;
+    }
+
     public RGBA withRed(int red){
         return new RGBA(red, green, blue, alpha);
     }

@@ -16,13 +16,10 @@
 package top.untoldstudio.rimeui.core.font;
 
 import static org.lwjgl.util.freetype.FreeType.*;
-import static org.lwjgl.util.harfbuzz.HarfBuzz.*;
 
 import org.lwjgl.PointerBuffer;
-import org.lwjgl.system.Configuration;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.freetype.FT_Face;
-import org.lwjgl.util.freetype.FreeType;
 import top.untoldstudio.rimeui.core.error.ResourceError;
 import top.untoldstudio.rimeui.core.resource.ResourceReader;
 
@@ -32,54 +29,52 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class FontManager {
-    private static long ftPointer;
-    private static final PointerBuffer buffer = MemoryUtil.memAllocPointer(1);
+    private static long ftLibrary;
+    private static final PointerBuffer faceBuffer = MemoryUtil.memAllocPointer(1);
     private static final Map<String, Font> FONT_MAP = new HashMap<>();
 
-    public static void init(){
-        Configuration.HARFBUZZ_LIBRARY_NAME.set(FreeType.getLibrary());
-        buffer.clear();
-        int error = FT_Init_FreeType(buffer);
-        if (error != 0){
-            throw new ResourceError("Cannot initialize FreeType");
+    public static void init() {
+        faceBuffer.clear();
+        int error = FT_Init_FreeType(faceBuffer);
+        if (error != 0) {
+            throw new ResourceError("Failed to initialize FreeType library");
         }
-        ftPointer = buffer.get(0);
+        ftLibrary = faceBuffer.get(0);
     }
 
-    public static Font loadFont(String fontPath){
-        if (FONT_MAP.containsKey(fontPath)){
-            return FONT_MAP.get(fontPath);
-        }
+    public static Font loadFont(String fontPath) {
+        Font cached = FONT_MAP.get(fontPath);
+        if (cached != null) return cached;
 
-        buffer.clear();
-        int error = FT_New_Face(ftPointer, fontPath, 0, buffer);
+        faceBuffer.clear();
+        int error = FT_New_Face(ftLibrary, fontPath, 0, faceBuffer);
         long facePointer = -1;
         ByteBuffer fontBuffer = null;
-        if (error != 0){
+
+        if (error != 0) {
             byte[] data;
             try {
                 data = ResourceReader.readBytes(fontPath);
-            } catch (IOException e){
-                throw new ResourceError(fontPath);
+            } catch (IOException e) {
+                throw new ResourceError("Cannot load font file: " + fontPath);
             }
             fontBuffer = MemoryUtil.memAlloc(data.length);
-            fontBuffer.put(data);
-            fontBuffer.flip();
-            buffer.clear();
-            error = FT_New_Memory_Face(ftPointer, fontBuffer, 0, buffer);
-            if (error == 0){
-                facePointer = buffer.get(0);
+            fontBuffer.put(data).flip();
+            faceBuffer.clear();
+            error = FT_New_Memory_Face(ftLibrary, fontBuffer, 0, faceBuffer);
+            if (error == 0) {
+                facePointer = faceBuffer.get(0);
             }
         } else {
-            facePointer = buffer.get(0);
+            facePointer = faceBuffer.get(0);
         }
-        if (facePointer == -1){
-            throw new ResourceError("Cannot load font: " + fontPath);
+
+        if (facePointer == -1) {
+            throw new ResourceError("Failed to create font face for: " + fontPath);
         }
+
         FT_Face face = FT_Face.create(facePointer);
-        long bufferPointer = hb_buffer_create();
-        long hbFontPointer = hb_ft_font_create_referenced(facePointer);
-        Font font = new Font(face, hbFontPointer, bufferPointer, fontPath, fontBuffer);
+        Font font = new Font(face, fontPath, fontBuffer);
         FONT_MAP.put(fontPath, font);
         return font;
     }

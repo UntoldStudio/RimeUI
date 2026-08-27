@@ -13,34 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.untoldstudio.rimeui.core.signal;
+package top.untoldstudio.rimeui.core.data;
 
-public enum SignalType {
-    SET_NAME,
-    SET_PARENT,
-    SET_RENDER_LEVEL,
-    SET_X_ANCHOR,
-    SET_Y_ANCHOR,
-    SET_POSITION,
-    SET_SIZE,
-    SET_BACKGROUND_COLOR,
-    SET_TEXTURE_ID,
-    SET_FONT,
-    SET_FONT_SIZE,
-    SET_TEXT,
-    SET_CAN_FRAME_BACKGROUND_DISPLAY,
-    SET_TEXT_COLOR,
-    SET_ITALIC_ALANT,
-    SET_BOLD_STRENGTH,
-    SET_HORIZONTAL_ALANT,
-    SET_VERTICAL_ALANT,
-
-    REGISTER_RENDER_CALLBACK,
-    UNREGISTER_RENDER_CALLBACK,
-
-    ADD_CHILD,
-    REMOVE_CHILD,
-
-    BEFORE_RENDER,
-    AFTER_RENDER,
+public enum HorizontalAlignment {
+    LEFT,
+    CENTER,
+    RIGHT,
 }

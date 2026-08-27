@@ -16,12 +16,13 @@
 package top.untoldstudio.rimeui.core.ui;
 
 import org.jetbrains.annotations.NotNull;
-import top.untoldstudio.rimeui.core.event.WindowSizeChangeEvent;
+import top.untoldstudio.rimeui.core.event.*;
 import top.untoldstudio.rimeui.core.render.GuiRender;
 import top.untoldstudio.rimeui.core.signal.SignalBus;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 
 import java.util.*;
+import java.util.function.DoubleConsumer;
 
 public abstract class GuiNode<T extends GuiNode<T>> {
     @SuppressWarnings("unchecked")
@@ -32,23 +33,64 @@ public abstract class GuiNode<T extends GuiNode<T>> {
     protected GuiNode<?> parent;
     protected final List<GuiNode<?>> children = new ArrayList<>();
     protected int renderLevel = 0;
+    protected boolean isInit = false;
     private final Map<SignalType, Object> lastSignalObjectValues = new EnumMap<>(SignalType.class);
+    private final List<DoubleConsumer> renderCallbacks = new ArrayList<>();
 
-    protected void renderWithChildren(GuiRender render){
-        render(render);
-        for (GuiNode<?> child : children) {
-            child.renderWithChildren(render);
+    protected void renderWithChildren(GuiRender render, double delta){
+        sendSignal(SignalType.BEFORE_RENDER);
+        for (DoubleConsumer renderCallback : renderCallbacks) {
+            renderCallback.accept(delta);
         }
+        render(render, delta);
+        for (GuiNode<?> child : children) {
+            child.renderWithChildren(render, delta);
+        }
+        sendSignal(SignalType.AFTER_RENDER);
     }
-    protected abstract void render(GuiRender render);
+    protected abstract void render(GuiRender render, double delta);
+    public T registerRenderCallback(DoubleConsumer callback){
+        renderCallbacks.add(callback);
+        sendSignal(SignalType.REGISTER_RENDER_CALLBACK, callback);
+        return self;
+    }
+    public T unregisterRenderCallback(DoubleConsumer callback){
+        renderCallbacks.remove(callback);
+        sendSignal(SignalType.UNREGISTER_RENDER_CALLBACK, callback);
+        return self;
+    }
 
-    protected final void onWindowSizeChangeEventWithChildren(WindowSizeChangeEvent event){
+    protected void onWindowSizeChangeEventWithChildren(WindowSizeChangeEvent event){
         onWindowSizeChangeEvent(event);
         for (GuiNode<?> child : children) {
             child.onWindowSizeChangeEventWithChildren(event);
         }
     }
     protected void onWindowSizeChangeEvent(WindowSizeChangeEvent event){}
+    public void onKeyEventWithChildren(KeyEvent event){
+        for (int i = children.size() -1; i >= 0; i--){
+            children.get(i).onKeyEventWithChildren(event);
+        }
+    }
+    protected void onKeyEvent(KeyEvent event){}
+    public void onMouseButtonEventWithChildren(MouseButtonEvent event){
+        for (int i = children.size() -1; i >= 0; i--){
+            children.get(i).onMouseButtonEventWithChildren(event);
+        }
+    }
+    protected void onMouseButtonEvent(MouseButtonEvent event){}
+    public void onCursorPositionEventWithChildren(CursorMoveEvent event){
+        for (int i = children.size() -1; i >= 0; i--){
+            children.get(i).onCursorPositionEventWithChildren(event);
+        }
+    }
+    protected void onCursorPositionEvent(CursorMoveEvent event){}
+    public void onMouseScrollEventWithChildren(MouseScrollEvent event){
+        for (int i = children.size() -1; i >= 0; i--){
+            children.get(i).onMouseScrollEventWithChildren(event);
+        }
+    }
+    protected void onMouseScrollEvent(MouseScrollEvent event){}
 
     protected void sendSignal(SignalType type, Object value) {
         Object lastValue = lastSignalObjectValues.get(type);
@@ -79,6 +121,9 @@ public abstract class GuiNode<T extends GuiNode<T>> {
                 MainUi.getInstance().removeChild(node);
             }
             node.parent = this;
+            if (!node.isInit){
+                node.initWithChildren();
+            }
             children.add(node);
             sortChildren();
             sendSignal(SignalType.ADD_CHILD);
@@ -148,6 +193,14 @@ public abstract class GuiNode<T extends GuiNode<T>> {
         sendSignal(SignalType.SET_RENDER_LEVEL, renderLevel);
         return self;
     }
+    public void initWithChildren(){
+        init();
+        isInit = true;
+        for (GuiNode<?> child : children){
+            child.initWithChildren();
+        }
+    }
+    protected void init(){}
 
     public GuiNode<?> getParent(){
         return parent;

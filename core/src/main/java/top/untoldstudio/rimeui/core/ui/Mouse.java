@@ -15,8 +15,28 @@
  */
 package top.untoldstudio.rimeui.core.ui;
 
-public interface GuiInterface {
-    default GuiNode<?> getGuiNode(){
-        return (GuiNode<?>) this;
+import org.lwjgl.glfw.GLFW;
+
+public final class Mouse {
+    private long window;
+    private double xPosition;
+    private double yPosition;
+
+    public void updateXAndYPosition(){
+        double[] newXPosition = new double[1];
+        double[] newYPosition = new double[1];
+        GLFW.glfwGetCursorPos(window, newXPosition, newYPosition);
+    }
+
+    public double getXPosition() {
+        return xPosition;
+    }
+    public double getYPosition() {
+        return yPosition;
+    }
+
+    public Mouse(long window){
+        this.window = window;
+        updateXAndYPosition();
     }
 }

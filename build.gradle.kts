@@ -16,12 +16,17 @@ val groupId: String = project.property("group_id") as String
 subprojects {
     pluginManager.apply("java")
     pluginManager.apply("com.diffplug.spotless")
+
     spotless {
         java {
             licenseHeaderFile(rootProject.file("HEADER"))
             targetExclude("**/build/**", "**/generated/**")
         }
     }
+
+    extra["id"] = rootProject.findProperty("id")?.toString()
+    extra["version"] = rootProject.version.toString()
+    extra["group_id"] = rootProject.findProperty("group_id")?.toString()
 
     group = groupId
     version = versionString
@@ -33,6 +38,7 @@ subprojects {
 
 tasks.build {
     dependsOn(subprojects.map { it.tasks.named("build") })
+    dependsOn(tasks.named("spotlessApply"))
 }
 tasks.named<JavaCompile>("compileJava") {
     enabled = false

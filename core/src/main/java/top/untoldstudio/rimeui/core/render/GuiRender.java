@@ -16,15 +16,8 @@
 package top.untoldstudio.rimeui.core.render;
 
 import static org.lwjgl.util.freetype.FreeType.*;
-import static org.lwjgl.util.harfbuzz.HarfBuzz.*;
 
-import org.lwjgl.system.MemoryUtil;
-import org.lwjgl.util.freetype.FT_Bitmap;
-import org.lwjgl.util.freetype.FT_Face;
-import org.lwjgl.util.freetype.FT_GlyphSlot;
-import org.lwjgl.util.harfbuzz.hb_glyph_info_t;
-import org.lwjgl.util.harfbuzz.hb_glyph_position_t;
-import top.untoldstudio.rimeui.core.MathTool;
+import org.lwjgl.util.freetype.*;
 import top.untoldstudio.rimeui.core.data.RGBA;
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.font.Font;
@@ -33,8 +26,25 @@ import java.nio.ByteBuffer;
 import java.util.Objects;
 
 public abstract class GuiRender {
+    protected boolean isUseRenderMapping = false;
+    protected ScaleOffset renderRegionMin;
+    protected ScaleOffset renderRegionSize;
+
     public abstract void enableScissor(ScaleOffset position, ScaleOffset size);
     public abstract void disableScissor();
+
+    /**
+     * 注意:如果你调用了该方法则必须调用setRenderRegionMin与setRenderRegionSize,否则会空指针
+     */
+    public void setUseRenderMapping(boolean isUseRenderMapping) {
+        this.isUseRenderMapping = isUseRenderMapping;
+    }
+    public void setRenderRegionMin(ScaleOffset renderRegionMin) {
+        this.renderRegionMin = renderRegionMin;
+    }
+    public void setRenderRegionSize(ScaleOffset renderRegionSize) {
+        this.renderRegionSize = renderRegionSize;
+    }
 
     public void drawSquare(ScaleOffset min, ScaleOffset max, RGBA color){
         ScaleOffset pointA = min.withXOffset(max.getXPixel());
@@ -45,6 +55,11 @@ public abstract class GuiRender {
 
     public abstract void begin();
     public abstract void end();
+    /**
+     * 警告:非特殊情况请从{@link top.untoldstudio.rimeui.core.texture.TextureManager}加载纹理,该方法将被ImageManager的loadImage调用
+     * 它不会释放stbData内存,如果你忘了就会内存泄漏！
+     */
+    public abstract int loadImage(int width, int height, ByteBuffer stbData);
     public abstract void saveContext();
     public abstract void restoreContext();
     public void drawTriangle(ScaleOffset positionA, ScaleOffset positionB, ScaleOffset positionC, RGBA colorA, RGBA colorB, RGBA colorC){
@@ -67,48 +82,87 @@ public abstract class GuiRender {
                 red, green, blue, alpha
         );
     }
-    public void drawString(String text, Font font, ScaleOffset startDrawPosition, int fontSize, RGBA color){
-        long hbBuffer = font.bufferPointer();
-        long hbFont = font.fontPointer();
+
+    public void drawString(String text, Font font, ScaleOffset startDrawPosition, int fontSize, RGBA color) {
+        drawString(text, font, startDrawPosition, fontSize, color, 0.0, 0);
+    }
+
+    public void drawString(String text, Font font, ScaleOffset startDrawPosition, int fontSize, RGBA color,
+                           double italicDegrees, int boldStrength) {
         FT_Set_Pixel_Sizes(font.face(), 0, fontSize);
-        hb_font_set_scale(font.fontPointer(), fontSize * 64, fontSize * 64);
         FT_Face face = font.face();
         long ascender = Objects.requireNonNull(face.size()).metrics().ascender();
         float ascenderPx = ascender / 64.0f;
-        hb_buffer_clear_contents(hbBuffer);
-        ByteBuffer textBuffer = MemoryUtil.memUTF8(text, false);
-        hb_buffer_add_utf8(hbBuffer, textBuffer, 0, textBuffer.remaining());
-        hb_buffer_set_direction(hbBuffer, HB_DIRECTION_LTR);
-        hb_buffer_set_script(hbBuffer, HB_SCRIPT_UNKNOWN);
-        hb_shape(hbFont, hbBuffer, null);
-        int glyphCount = hb_buffer_get_length(hbBuffer);
-        hb_glyph_info_t.Buffer infoBuffer = hb_buffer_get_glyph_infos(hbBuffer);
-        hb_glyph_position_t.Buffer positionBuffer = hb_buffer_get_glyph_positions(hbBuffer);
 
         float penX = startDrawPosition.getXPixel();
         float penY = startDrawPosition.getYPixel() + ascenderPx;
 
         beginTextRendering();
 
-        for (int i = 0; i < glyphCount; i++){
-            assert infoBuffer != null;
-            FT_Load_Glyph(face, infoBuffer.get(i).codepoint(), FT_LOAD_RENDER);
+        int previousGlyphIndex = 0;
+        boolean hasPrevious = false;
+
+        FT_Matrix italicMatrix = null;
+        if (italicDegrees != 0.0) {
+            italicMatrix = FT_Matrix.malloc();
+            italicMatrix.xx(0x10000);
+            italicMatrix.xy((int) Math.round(Math.tan(Math.toRadians(italicDegrees)) * 0x10000));
+            italicMatrix.yx(0);
+            italicMatrix.yy(0x10000);
+        }
+
+        int boldStrength26_6 = boldStrength * 64;
+
+        for (int offset = 0; offset < text.length(); ) {
+            int codepoint = text.codePointAt(offset);
+            offset += Character.charCount(codepoint);
+
+            int glyphIndex = FT_Get_Char_Index(face, codepoint);
+            if (glyphIndex == 0) continue;
+
+            if (hasPrevious) {
+                FT_Vector kerning = FT_Vector.malloc();
+                try {
+                    FT_Get_Kerning(face, previousGlyphIndex, glyphIndex, FT_KERNING_DEFAULT, kerning);
+                    penX += kerning.x() / 64.0f;
+                } finally {
+                    kerning.free();
+                }
+            }
+
+            if (FT_Load_Glyph(face, glyphIndex, FT_LOAD_NO_BITMAP) != 0) continue;
             FT_GlyphSlot glyphSlot = face.glyph();
-            assert glyphSlot != null;
-            int bitmapLeft = glyphSlot.bitmap_left();
+            if (glyphSlot == null) continue;
+
+            if (italicMatrix != null) {
+                FT_Outline_Transform(glyphSlot.outline(), italicMatrix);
+            }
+
+            if (boldStrength > 0) {
+                FT_Outline_Embolden(glyphSlot.outline(), boldStrength26_6);
+            }
+
+            if (FT_Render_Glyph(glyphSlot, FT_RENDER_MODE_NORMAL) != 0) continue;
+
             FT_Bitmap bitmap = glyphSlot.bitmap();
+            int bitmapLeft = glyphSlot.bitmap_left();
             int bitmapTop = glyphSlot.bitmap_top();
-            assert positionBuffer != null;
-            hb_glyph_position_t position = positionBuffer.get(i);
-            int xOffset = position.x_offset();
-            int yOffset = position.y_offset();
-            int xAdvance = position.x_advance();
-            int yAdvance = position.y_advance();
-            float glyphX = penX + (xOffset / 64.0f) + bitmapLeft;
-            float glyphY = penY - bitmapTop - (yOffset / 64.0f);
-            penX += xAdvance / 64.0f;
-            penY += yAdvance / 64.0f;
-            drawGlyph(bitmap, MathTool.round(glyphX), MathTool.round(glyphY), color);
+
+            float glyphX = penX + bitmapLeft;
+            float glyphY = penY - bitmapTop;
+
+            drawGlyph(bitmap, Math.round(glyphX), Math.round(glyphY), color);
+
+            FT_Vector advance = glyphSlot.advance();
+            penX += advance.x() / 64.0f;
+            penY += advance.y() / 64.0f;
+
+            previousGlyphIndex = glyphIndex;
+            hasPrevious = true;
+        }
+
+        if (italicMatrix != null) {
+            italicMatrix.free();
         }
 
         endTextRendering();
@@ -117,6 +171,8 @@ public abstract class GuiRender {
     public abstract void drawGlyph(FT_Bitmap bitmap, int glyphX, int glyphY, RGBA color);
     protected abstract void beginTextRendering();
     protected abstract void endTextRendering();
+
+    public abstract void flushBaseBuffer();
 
     public void drawNiceGridTexture(int textureId, ScaleOffset position, ScaleOffset size,
                                     int textureWidth, int textureHeight,

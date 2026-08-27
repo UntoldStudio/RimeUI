@@ -5,4 +5,7 @@
 /application/build/
 /application/run/
 
+/neoforge/build/
+/neoforge/run/
+
 /core/build/

@@ -21,8 +21,8 @@ import top.untoldstudio.rimeui.core.render.GuiRender;
 
 public final class Frame extends AbstractFrame<Frame> {
     @Override
-    public void render(GuiRender render){
-        super.renderFrameDefaultBackground(render);
+    public void render(GuiRender render, double delta) {
+        super.renderFrameDefaultBackground(render, delta);
     }
 
     public Frame(ScaleOffset position, ScaleOffset size) {

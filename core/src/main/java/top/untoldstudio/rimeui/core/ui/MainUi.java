@@ -16,9 +16,8 @@
 package top.untoldstudio.rimeui.core.ui;
 
 import org.jetbrains.annotations.NotNull;
-import top.untoldstudio.rimeui.core.event.WindowSizeChangeEvent;
+import top.untoldstudio.rimeui.core.event.*;
 import top.untoldstudio.rimeui.core.render.GuiRender;
-import top.untoldstudio.rimeui.core.render.RenderBackend;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 
 import java.util.ArrayList;
@@ -31,21 +30,27 @@ public final class MainUi {
     private final GuiRender render;
     private int windowWidth;
     private int windowHeight;
+    private double lastRenderTime = System.nanoTime() / 1_000_000_000.0;
+    private final Window window;
+    private final Mouse mouse;
 
     public void render(){
         int oldWidth = windowWidth;
         int oldHeight = windowHeight;
-        this.windowWidth = RenderBackend.getProvider().getWindowWidth();
-        this.windowHeight = RenderBackend.getProvider().getWindowHeight();
+        window.updateWindowWidthAndHeight();
+        this.windowWidth = window.getWindowWidth();
+        this.windowHeight = window.getWindowHeight();
         if (oldWidth != windowWidth || oldHeight != windowHeight) {
             onWindowSizeChangeEvent(new WindowSizeChangeEvent(oldWidth, oldHeight, windowWidth, windowHeight));
         }
         render.saveContext();
         render.begin();
+        double startRenderTime = System.nanoTime() / 1_000_000_000.0;
         for (GuiNode<?> node : children){
-            node.renderWithChildren(render);
+            node.renderWithChildren(render, startRenderTime - lastRenderTime);
         }
         render.submitBuffer();
+        lastRenderTime = System.nanoTime();
         render.restoreContext();
         render.end();
     }
@@ -53,6 +58,26 @@ public final class MainUi {
     private void onWindowSizeChangeEvent(WindowSizeChangeEvent event){
         for (GuiNode<?> child : children){
             child.onWindowSizeChangeEventWithChildren(event);
+        }
+    }
+    public void onKeyEvent(KeyEvent event){
+        for (int i = children.size() -1; i >= 0; i--){
+            children.get(i).onKeyEventWithChildren(event);
+        }
+    }
+    public void onMouseButtonEvent(MouseButtonEvent event){
+        for (int i = children.size() -1; i >= 0; i--){
+            children.get(i).onMouseButtonEventWithChildren(event);
+        }
+    }
+    public void onCursorMoveEvent(CursorMoveEvent event){
+        for (int i = children.size() -1; i >= 0; i--){
+            children.get(i).onCursorPositionEventWithChildren(event);
+        }
+    }
+    public void onMouseScrollEvent(MouseScrollEvent event){
+        for (int i = children.size() -1; i >= 0; i--){
+            children.get(i).onMouseScrollEventWithChildren(event);
         }
     }
 
@@ -117,10 +142,11 @@ public final class MainUi {
         children.sort(Comparator.comparingInt(GuiNode::getRenderLevel));
     }
 
-
-    public MainUi(GuiRender render){
+    public MainUi(GuiRender render, Window window){
         instance = this;
         this.render = render;
+        this.window = window;
+        this.mouse = new Mouse(window.getWindowHandle());
     }
 
     public static MainUi getInstance() {
@@ -137,5 +163,12 @@ public final class MainUi {
 
     public GuiRender getRender(){
         return render;
+    }
+
+    public Window getWindow() {
+        return window;
+    }
+    public Mouse getMouse() {
+        return mouse;
     }
 }

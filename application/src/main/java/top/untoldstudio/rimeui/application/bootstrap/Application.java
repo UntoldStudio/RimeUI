@@ -13,38 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.untoldstudio.rimeui.application.ui;
+package top.untoldstudio.rimeui.application.bootstrap;
 
-import top.untoldstudio.rimeui.application.render.Window;
 import top.untoldstudio.rimeui.core.RimeUI;
-import top.untoldstudio.rimeui.core.data.ScaleOffset;
-import top.untoldstudio.rimeui.core.ui.node.Frame;
-import top.untoldstudio.rimeui.core.ui.node.ImageLabel;
-import top.untoldstudio.rimeui.core.ui.node.TextLabel;
+import top.untoldstudio.rimeui.core.ui.Window;
+
+import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 
 public final class Application {
     private static Application instance;
     private final Window window;
 
-    public Application(){
-        window = new Window(800, 600, "RimeUI Layout Builder");
-        instance = this;
-    }
-
-    public void start(){
-        RimeUI.initOpenGL(window.getWindowHandle());
+    public void run(){
+        long windowHandle = window.getWindowHandle();
+        RimeUI.initOpenGL(windowHandle);
         while (!window.isWindowShouldClose()){
-            window.isWindowShouldClose();
             window.render();
+            glfwSwapBuffers(windowHandle);
         }
+        window.close();
         stop();
     }
 
     public void stop(){
-        window.flush();
     }
 
-    public static Application getInstance(){
+    public Application() {
+        instance = this;
+        window = Window.create("RimeUI Layout Builder", 800, 600);
+    }
+    public static Application getInstance() {
         return instance;
     }
 }

@@ -13,10 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.untoldstudio.rimeui.core.ui;
+package top.untoldstudio.rimeui.core.data;
 
-public interface GuiInterface {
-    default GuiNode<?> getGuiNode(){
-        return (GuiNode<?>) this;
+import static org.lwjgl.glfw.GLFW.*;
+
+public record InputModifiers(boolean isShiftPressed, boolean isControlPressed, boolean isAltPressed, boolean isSuperPressed, boolean isCapsLockEnabled, boolean isNumberLockEnabled) {
+    public InputModifiers(int modifiers){
+        this(
+                (modifiers & GLFW_MOD_SHIFT) != 0, (modifiers & GLFW_MOD_CONTROL) != 0,
+                (modifiers & GLFW_MOD_ALT) != 0, (modifiers & GLFW_MOD_SUPER) != 0,
+                (modifiers & GLFW_MOD_CAPS_LOCK) != 0, (modifiers & GLFW_MOD_NUM_LOCK) != 0
+        );
     }
 }

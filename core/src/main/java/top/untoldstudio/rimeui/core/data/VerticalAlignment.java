@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.untoldstudio.rimeui.core.render;
+package top.untoldstudio.rimeui.core.data;
 
-import java.nio.ByteBuffer;
-
-public interface RenderBackendProvider {
-    int getWindowWidth();
-    int getWindowHeight();
-    int loadImage(int width, int height, ByteBuffer stbData);
+public enum VerticalAlignment {
+    TOP,
+    CENTER,
+    BOTTOM,
 }
