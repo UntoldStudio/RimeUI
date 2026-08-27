@@ -1,6 +1,6 @@
 # RimeUI
 
-RimeUI is an embedded UI library that only requires calling one rendering callback and one window handle per frame. The core module is the module you need to rely on, and the application is used to create an independent UI app.
+RimeUI is an embedded UI library that only requires calling one rendering callback and one window handle per frame. The core module is the module you need to rely on, and the neoforge module is a Minecraft Mod bind, application Module is a Independent Editor
 
 Note: This library requires the host to provide dependencies for LWJGL and JOML
 
