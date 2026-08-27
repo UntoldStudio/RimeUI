@@ -61,7 +61,6 @@ public final class ImageButton extends AbstractFrame<ImageButton> implements Ima
         renderImage(render, data, realPosition, realPositionMax, realSize, backgroundColor);
     }
 
-
     @Override
     protected void onMouseMoveEvent(MouseMoveEvent event){
         if (isMouseInRange() && getTransparency() != 1){

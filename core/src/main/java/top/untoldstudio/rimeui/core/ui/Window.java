@@ -23,9 +23,6 @@ import top.untoldstudio.rimeui.core.event.WindowSizeChangeEvent;
 
 /**
  * 如果你已经有一个窗口了你不想再创造一个新的窗口/不能自己控制窗口的生命周期请不要调用create方法!
- * 如果你你不能控制窗口的生命周期请不要调用create,render,close,bootstrap!
- * 尤其是bootstrap,它会开启渲染循环!
- * 就算你能控制窗口生命周期我们不太推荐你调用bootstrap因为它会开启渲染循环...它可以当作渲染循环的一个示例
  */
 public final class Window {
     private final long windowHandle;

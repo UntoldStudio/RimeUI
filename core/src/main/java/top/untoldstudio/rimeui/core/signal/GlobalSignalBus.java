@@ -74,7 +74,7 @@ public final class GlobalSignalBus {
             SubscribeSignal signal = method.getAnnotation(SubscribeSignal.class);
             if (signal != null && Modifier.isStatic(method.getModifiers())) {
                 validateMethod(method);
-                staticMethods.computeIfAbsent(signal.getSingleType(), type -> new CopyOnWriteArrayList<>()).add(method);
+                staticMethods.computeIfAbsent(signal.getSignalType(), type -> new CopyOnWriteArrayList<>()).add(method);
             }
         }
     }
@@ -98,7 +98,7 @@ public final class GlobalSignalBus {
             SubscribeSignal signal = method.getAnnotation(SubscribeSignal.class);
             if (signal != null && !Modifier.isStatic(method.getModifiers())) {
                 validateMethod(method);
-                instanceMethods.computeIfAbsent(signal.getSingleType(), type -> new CopyOnWriteArrayList<>()).add(new InstanceMethod(method, handler));
+                instanceMethods.computeIfAbsent(signal.getSignalType(), type -> new CopyOnWriteArrayList<>()).add(new InstanceMethod(method, handler));
             }
         }
     }
