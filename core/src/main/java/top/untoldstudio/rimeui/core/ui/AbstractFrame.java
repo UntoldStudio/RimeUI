@@ -16,7 +16,6 @@
 package top.untoldstudio.rimeui.core.ui;
 
 import top.untoldstudio.rimeui.core.MathTool;
-import top.untoldstudio.rimeui.core.data.CursorShape;
 import top.untoldstudio.rimeui.core.data.RGBA;
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.event.WindowSizeChangeEvent;
@@ -114,19 +113,21 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
     public ScaleOffset getSize(){
         return size;
     }
+    public ScaleOffset getRealSize(){
+        return realSize;
+    }
+    public ScaleOffset getRealPosition(){
+        return realPosition;
+    }
+    public ScaleOffset getRealPositionMax(){
+        return realPositionMax;
+    }
     public boolean isClipChildren(){
         return isClipChildren;
     }
 
     @Override
     protected abstract void render(GuiRender render, double delta);
-
-    protected ScaleOffset getRealPosition() {
-        return realPosition;
-    }
-    protected ScaleOffset getRealSize() {
-        return realSize;
-    }
 
     protected void operationPosition(){
         if (getParent() != null && getParent() instanceof AbstractFrame<?> parentFrame){
@@ -141,14 +142,14 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
     }
     protected void operationPosition(AbstractFrame<?> parentFrame, ScaleOffset parentRealPosition) {
         if (parentFrame != null) {
-            realSize = ScaleOffset.fromOffset((int) Math.round(size.xScale() * parentFrame.getRealSize().getXPixel()) + size.xOffset(), (int) Math.round(size.yScale() * parentFrame.getRealSize().getYPixel()) + size.yOffset());
+            realSize = ScaleOffset.fromOffset((int) Math.round(size.xScale() * parentFrame.getRealSize().getXPixelInWindow()) + size.xOffset(), (int) Math.round(size.yScale() * parentFrame.getRealSize().getYPixelInWindow()) + size.yOffset());
             realPosition = ScaleOffset.fromOffset(
-                    parentRealPosition.getXPixel() + (int) Math.round(position.xScale() * parentFrame.getRealSize().getXPixel()) + position.xOffset() - (int) Math.round(realSize.getXPixel() * xAnchor),
-                    parentRealPosition.getYPixel() + (int) Math.round(position.yScale() * parentFrame.getRealSize().getYPixel()) + position.yOffset() - (int) Math.round(realSize.getYPixel() * yAnchor)
+                    parentRealPosition.getXPixelInWindow() + (int) Math.round(position.xScale() * parentFrame.getRealSize().getXPixelInWindow()) + position.xOffset() - (int) Math.round(realSize.getXPixelInWindow() * xAnchor),
+                    parentRealPosition.getYPixelInWindow() + (int) Math.round(position.yScale() * parentFrame.getRealSize().getYPixelInWindow()) + position.yOffset() - (int) Math.round(realSize.getYPixelInWindow() * yAnchor)
             );
         } else {
-            realSize = ScaleOffset.fromOffset(size.getXPixel(), size.getYPixel());
-            realPosition = ScaleOffset.fromOffset(position.getXPixel() - (int) Math.round(realSize.getXPixel() * xAnchor), position.getYPixel() - (int) Math.round(realSize.getYPixel() * yAnchor));
+            realSize = ScaleOffset.fromOffset(size.getXPixelInWindow(), size.getYPixelInWindow());
+            realPosition = ScaleOffset.fromOffset(position.getXPixelInWindow() - (int) Math.round(realSize.getXPixelInWindow() * xAnchor), position.getYPixelInWindow() - (int) Math.round(realSize.getYPixelInWindow() * yAnchor));
         }
         realPositionMax = realPosition.add(realSize);
         letChildrenOperationPosition();

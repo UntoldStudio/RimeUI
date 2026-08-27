@@ -44,7 +44,7 @@ public abstract class MouseHandlerMixin {
     private void onHandleAccumulatedMovement(CallbackInfo callbackInfo) {
         if (MainUi.getInstance() != null){
             MouseMoveEvent event = new MouseMoveEvent(xpos, ypos);
-            InputEventListener.onCursorMoveEvent(event);
+            InputEventListener.onMouseMoveEvent(event);
             if (event.isCancelled()) {
                 callbackInfo.cancel();
                 this.accumulatedDX = 0.0;

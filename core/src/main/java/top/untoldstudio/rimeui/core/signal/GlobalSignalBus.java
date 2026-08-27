@@ -66,8 +66,9 @@ public final class GlobalSignalBus {
         }
     }
 
-    public void register(SignalType type, Callback callback){
+    public Callback register(SignalType type, Callback callback){
         callbacks.computeIfAbsent(type, singleType -> new CopyOnWriteArrayList<>()).add(callback);
+        return callback;
     }
     public void register(Class<? extends SignalHandler> clazz){
         for (Method method : clazz.getDeclaredMethods()) {
@@ -93,7 +94,7 @@ public final class GlobalSignalBus {
             entry.getValue().removeIf(method -> method.instance.equals(handler));
         }
     }
-    public void register(SignalHandler handler){
+    public SignalHandler register(SignalHandler handler){
         for (Method method : handler.getClass().getDeclaredMethods()) {
             SubscribeSignal signal = method.getAnnotation(SubscribeSignal.class);
             if (signal != null && !Modifier.isStatic(method.getModifiers())) {
@@ -101,6 +102,7 @@ public final class GlobalSignalBus {
                 instanceMethods.computeIfAbsent(signal.getSignalType(), type -> new CopyOnWriteArrayList<>()).add(new InstanceMethod(method, handler));
             }
         }
+        return handler;
     }
 
     private void validateMethod(Method method) {

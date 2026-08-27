@@ -36,12 +36,12 @@ public final class InputEventListener {
         if (MainUi.getInstance() == null) return;
         MainUi.getInstance().onMouseButtonEvent(event);
     }
-    public static MouseMoveEvent onCursorMoveEvent(double x, double y){
+    public static MouseMoveEvent onMouseMoveEvent(double x, double y){
         MouseMoveEvent event = new MouseMoveEvent(x, y);
-        onCursorMoveEvent(event);
+        onMouseMoveEvent(event);
         return event;
     }
-    public static void onCursorMoveEvent(MouseMoveEvent event){
+    public static void onMouseMoveEvent(MouseMoveEvent event){
         if (MainUi.getInstance() == null) return;
         MainUi.getInstance().onCursorMoveEvent(event);
     }

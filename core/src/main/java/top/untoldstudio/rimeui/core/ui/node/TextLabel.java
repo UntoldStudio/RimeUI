@@ -124,14 +124,14 @@ public final class TextLabel extends AbstractFrame<TextLabel> {
         int stringWidth = font.getStringWidth(text, fontSize, italicSlant, boldStrength);
         int stringHeight = font.getStringHeight(text, fontSize, italicSlant, boldStrength);
         int horizontalAlignmentPixel = switch (horizontalAlignment) {
-            case HorizontalAlignment.LEFT -> realPosition.getXPixel();
-            case HorizontalAlignment.RIGHT -> realPositionMax.getXPixel() - stringWidth;
-            case HorizontalAlignment.CENTER -> (realPosition.getXPixel() + realPositionMax.getXPixel() - stringWidth) / 2;
+            case HorizontalAlignment.LEFT -> realPosition.getXPixelInWindow();
+            case HorizontalAlignment.RIGHT -> realPositionMax.getXPixelInWindow() - stringWidth;
+            case HorizontalAlignment.CENTER -> (realPosition.getXPixelInWindow() + realPositionMax.getXPixelInWindow() - stringWidth) / 2;
         };
         int verticalAlignmentPixel = switch (verticalAlignment) {
-            case VerticalAlignment.TOP -> realPosition.getYPixel();
-            case VerticalAlignment.BOTTOM -> realPositionMax.getYPixel() - stringHeight;
-            case VerticalAlignment.CENTER -> (realPosition.getYPixel() + realPositionMax.getYPixel() - stringHeight) / 2;
+            case VerticalAlignment.TOP -> realPosition.getYPixelInWindow();
+            case VerticalAlignment.BOTTOM -> realPositionMax.getYPixelInWindow() - stringHeight;
+            case VerticalAlignment.CENTER -> (realPosition.getYPixelInWindow() + realPositionMax.getYPixelInWindow() - stringHeight) / 2;
         };
         textRenderPosition = ScaleOffset.fromOffset(horizontalAlignmentPixel, verticalAlignmentPixel);
     }

@@ -35,8 +35,9 @@ public final class SignalBus {
         GlobalSignalBus.getInstance().send(type, node);
     }
 
-    public void register(SignalType type, Runnable runnable){
+    public Runnable register(SignalType type, Runnable runnable){
         callbacks.computeIfAbsent(type, singleType -> new CopyOnWriteArrayList<>()).add(runnable);
+        return runnable;
     }
     public void unregister(SignalType type, Runnable runnable){
         if (callbacks.containsKey(type)){

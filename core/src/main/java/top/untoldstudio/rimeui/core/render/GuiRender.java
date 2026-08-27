@@ -56,8 +56,8 @@ public abstract class GuiRender {
     }
 
     public void drawSquare(ScaleOffset min, ScaleOffset max, RGBA color){
-        ScaleOffset pointA = min.withXOffset(max.getXPixel());
-        ScaleOffset pointB = min.withYOffset(max.getYPixel());
+        ScaleOffset pointA = min.withXOffset(max.getXPixelInWindow());
+        ScaleOffset pointB = min.withYOffset(max.getYPixelInWindow());
         drawTriangle(min, pointA, pointB, color, color, color);
         drawTriangle(max, pointA, pointB, color, color, color);
     }
@@ -99,7 +99,7 @@ public abstract class GuiRender {
     public abstract void saveContext();
     public abstract void restoreContext();
     public void drawTriangle(ScaleOffset positionA, ScaleOffset positionB, ScaleOffset positionC, RGBA colorA, RGBA colorB, RGBA colorC){
-        drawTriangle(positionA.getXPixel(), positionA.getYPixel(), positionB.getXPixel(), positionB.getYPixel(), positionC.getXPixel(), positionC.getYPixel(),
+        drawTriangle(positionA.getXPixelInWindow(), positionA.getYPixelInWindow(), positionB.getXPixelInWindow(), positionB.getYPixelInWindow(), positionC.getXPixelInWindow(), positionC.getYPixelInWindow(),
                 colorA.red(), colorA.green(), colorA.blue(), colorA.alpha(),
                 colorB.red(), colorB.green(), colorB.blue(), colorB.alpha(),
                 colorC.red(), colorC.green(), colorC.blue(), colorC.alpha()
@@ -110,7 +110,7 @@ public abstract class GuiRender {
         int green = color.green();
         int blue = color.blue();
         int alpha = color.alpha();
-        drawTexture(textureId, min.getXPixel(), min.getYPixel(), max.getXPixel(), max.getYPixel(),
+        drawTexture(textureId, min.getXPixelInWindow(), min.getYPixelInWindow(), max.getXPixelInWindow(), max.getYPixelInWindow(),
                 0, 1, 0, 1,
                 red, green, blue, alpha,
                 red, green, blue, alpha,
@@ -130,8 +130,8 @@ public abstract class GuiRender {
         long ascender = Objects.requireNonNull(face.size()).metrics().ascender();
         float ascenderPx = ascender / 64.0f;
 
-        float penX = startDrawPosition.getXPixel();
-        float penY = startDrawPosition.getYPixel() + ascenderPx;
+        float penX = startDrawPosition.getXPixelInWindow();
+        float penY = startDrawPosition.getYPixelInWindow() + ascenderPx;
 
         beginTextRendering();
 
@@ -211,10 +211,10 @@ public abstract class GuiRender {
     public void drawNiceGridTexture(int textureId, ScaleOffset position, ScaleOffset size,
                                     int textureWidth, int textureHeight,
                                     int left, int right, int top, int bottom, RGBA color) {
-        int positionX = position.getXPixel();
-        int positionY = position.getYPixel();
-        int targetWidth = size.getXPixel();
-        int targetHeight = size.getYPixel();
+        int positionX = position.getXPixelInWindow();
+        int positionY = position.getYPixelInWindow();
+        int targetWidth = size.getXPixelInWindow();
+        int targetHeight = size.getYPixelInWindow();
 
         if (targetWidth <= 0 || targetHeight <= 0 || textureWidth <= 0 || textureHeight <= 0) {
             return;

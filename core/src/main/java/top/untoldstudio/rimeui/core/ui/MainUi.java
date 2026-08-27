@@ -68,10 +68,10 @@ public final class MainUi {
     public boolean isMouseInRange(ScaleOffset min, ScaleOffset max){
         double mouseX = MainUi.getInstance().getMouse().getXPosition();
         double mouseY = MainUi.getInstance().getMouse().getYPosition();
-        int minX = min.getXPixel();
-        int minY = min.getYPixel();
-        int maxX = max.getXPixel();
-        int maxY = max.getYPixel();
+        int minX = min.getXPixelInWindow();
+        int minY = min.getYPixelInWindow();
+        int maxX = max.getXPixelInWindow();
+        int maxY = max.getYPixelInWindow();
         return mouseX >= minX && mouseX <= maxX && mouseY >= minY && mouseY <= maxY;
     }
     public void onKeyEvent(KeyEvent event){

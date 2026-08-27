@@ -474,8 +474,8 @@ public final class OpenGLGuiRender extends GuiRender {
         int windowWidth = MainUi.getInstance().getWindowWidth();
         int windowHeight = MainUi.getInstance().getWindowHeight();
         if (isUseRenderMapping) {
-            glViewport(renderRegionMin.getXPixel(), renderRegionMin.getYPixel(),
-                    renderRegionSize.getXPixel(), renderRegionSize.getYPixel());
+            glViewport(renderRegionMin.getXPixelInWindow(), renderRegionMin.getYPixelInWindow(),
+                    renderRegionSize.getXPixelInWindow(), renderRegionSize.getYPixelInWindow());
         } else {
             glViewport(0, 0, windowWidth, windowHeight);
         }
@@ -518,8 +518,8 @@ public final class OpenGLGuiRender extends GuiRender {
             int windowWidth = MainUi.getInstance().getWindowWidth();
             int windowHeight = MainUi.getInstance().getWindowHeight();
             if (isUseRenderMapping) {
-                glViewport(renderRegionMin.getXPixel(), renderRegionMin.getYPixel(),
-                        renderRegionSize.getXPixel(), renderRegionSize.getYPixel());
+                glViewport(renderRegionMin.getXPixelInWindow(), renderRegionMin.getYPixelInWindow(),
+                        renderRegionSize.getXPixelInWindow(), renderRegionSize.getYPixelInWindow());
             } else {
                 glViewport(0, 0, windowWidth, windowHeight);
             }
@@ -834,9 +834,9 @@ public final class OpenGLGuiRender extends GuiRender {
     @Override
     public void enableScissor(ScaleOffset position, ScaleOffset size) {
         glEnable(GL_SCISSOR_TEST);
-        glScissor(position.getXPixel(),
-                MainUi.getInstance().getWindowHeight() - position.getYPixel() - size.getYPixel(),
-                size.getXPixel(), size.getYPixel());
+        glScissor(position.getXPixelInWindow(),
+                MainUi.getInstance().getWindowHeight() - position.getYPixelInWindow() - size.getYPixelInWindow(),
+                size.getXPixelInWindow(), size.getYPixelInWindow());
     }
 
     @Override

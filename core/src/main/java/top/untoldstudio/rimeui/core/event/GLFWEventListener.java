@@ -44,7 +44,7 @@ public class GLFWEventListener {
     }
 
     /**
-     * WARN:它会把你所有已注册的回调顶掉,如果你不想这么做,请直接调用{@link InputEventListener}的方法
+     * WARN:它会把你所有已注册的回调顶掉,如果你不想这么做,请直接调用{@link InputEventListener}的方法,如果你使用了我们的NeoForge模组绑定你就不需要手动接入输入,我们的模组做了
      */
     public void registerCallback(){
         keyCallback = glfwSetKeyCallback(window, (currentWindow, key, scancode, action, modifiers) -> {
@@ -57,7 +57,7 @@ public class GLFWEventListener {
         });
         cursorPositionCallback = glfwSetCursorPosCallback(window, (currentWindow, x, y) -> {
             if (!enabled) return;
-            InputEventListener.onCursorMoveEvent(x, y);
+            InputEventListener.onMouseMoveEvent(x, y);
         });
         scrollCallback = glfwSetScrollCallback(window, (currentWindow, x, y) -> {
             if (!enabled) return;
