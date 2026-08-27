@@ -36,6 +36,13 @@ public class GLFWEventListener {
         this.window = window;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+    public void setEnabled(boolean enabled) {
+        GLFWEventListener.enabled = enabled;
+    }
+
     /**
      * WARN:它会把你所有已注册的回调顶掉,如果你不想这么做,请直接调用{@link InputEventListener}的方法
      */
@@ -56,6 +63,13 @@ public class GLFWEventListener {
             if (!enabled) return;
             InputEventListener.onMouseScrollEvent(x, y);
         });
+    }
+
+    public void clean(){
+        keyCallback.free();
+        mouseButtonCallback.free();
+        cursorPositionCallback.free();
+        scrollCallback.free();
     }
 
     public static GLFWEventListener getInstance() {

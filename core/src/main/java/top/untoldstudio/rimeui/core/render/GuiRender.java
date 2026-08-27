@@ -16,19 +16,28 @@
 package top.untoldstudio.rimeui.core.render;
 
 import static org.lwjgl.util.freetype.FreeType.*;
+import static org.lwjgl.glfw.GLFW.*;
 
 import org.lwjgl.util.freetype.*;
+import top.untoldstudio.rimeui.core.data.CursorMode;
+import top.untoldstudio.rimeui.core.data.CursorShape;
 import top.untoldstudio.rimeui.core.data.RGBA;
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.font.Font;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public abstract class GuiRender {
+    protected final long windowHandle;
     protected boolean isUseRenderMapping = false;
     protected ScaleOffset renderRegionMin;
     protected ScaleOffset renderRegionSize;
+    protected long cursorShapeInThisFrame;
+    protected int cursorModeInThisFrame;
+    protected final Map<Integer, Long> cursorShapeMap = new HashMap<>();
 
     public abstract void enableScissor(ScaleOffset position, ScaleOffset size);
     public abstract void disableScissor();
@@ -53,8 +62,35 @@ public abstract class GuiRender {
         drawTriangle(max, pointA, pointB, color, color, color);
     }
 
+    public final void beginFrame(){
+        cursorShapeInThisFrame = -1;
+        cursorModeInThisFrame = -1;
+        begin();
+    }
     public abstract void begin();
+    public final void endFrame(){
+        end();
+        if (cursorShapeInThisFrame != -1) {
+            glfwSetCursor(windowHandle, cursorShapeInThisFrame);
+        }
+        if (cursorModeInThisFrame != -1) {
+            glfwSetInputMode(windowHandle, GLFW_CURSOR, cursorModeInThisFrame);
+        }
+    }
     public abstract void end();
+    public void setCursorShapeInThisFrame(CursorShape cursorShapeInThisFrame) {
+        this.cursorShapeInThisFrame = cursorShapeMap.get(cursorShapeInThisFrame.getGLFWValue());
+    }
+    public void setCursorModeInThisFrame(int cursorModeInThisFrame) {
+        this.cursorModeInThisFrame = cursorModeInThisFrame;
+    }
+    public void setCursorModeInThisFrame(CursorMode cursorModeInThisFrame) {
+        this.cursorModeInThisFrame = cursorModeInThisFrame.getGLFWValue();
+    }
+    public void setCursorShapeInThisFrame(long cursorShapeInThisFrame) {
+        this.cursorShapeInThisFrame = cursorShapeInThisFrame;
+    }
+
     /**
      * 警告:非特殊情况请从{@link top.untoldstudio.rimeui.core.texture.TextureManager}加载纹理,该方法将被ImageManager的loadImage调用
      * 它不会释放stbData内存,如果你忘了就会内存泄漏！
@@ -311,4 +347,12 @@ public abstract class GuiRender {
                             int cRed, int cGreen, int cBlue, int cAlpha,
                             int dRed, int dGreen, int dBlue, int dAlpha
     );
+
+    public GuiRender(long windowHandle){
+        this.windowHandle = windowHandle;
+
+        for (CursorShape shape : CursorShape.values()){
+            cursorShapeMap.put(shape.getGLFWValue(), glfwCreateStandardCursor(shape.getGLFWValue()));
+        }
+    }
 }

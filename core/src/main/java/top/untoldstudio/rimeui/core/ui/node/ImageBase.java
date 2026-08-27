@@ -15,28 +15,18 @@
  */
 package top.untoldstudio.rimeui.core.ui.node;
 
+import top.untoldstudio.rimeui.core.data.RGBA;
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.render.GuiRender;
-import top.untoldstudio.rimeui.core.signal.SignalType;
 import top.untoldstudio.rimeui.core.texture.ImageData;
-import top.untoldstudio.rimeui.core.ui.AbstractFrame;
+import top.untoldstudio.rimeui.core.ui.GuiInterface;
 
-public final class ImageLabel extends AbstractFrame<ImageLabel> implements ImageBase {
-    private ImageData data;
-
-    @Override
-    protected void render(GuiRender render, double delta){
-        renderImage(render, data, realPosition, realPositionMax, realSize, backgroundColor);
-    }
-
-    public ImageLabel setTexture(ImageData data){
-        this.data = data;
-        sendSignal(SignalType.SET_TEXTURE_ID, data);
-        return self;
-    }
-
-    public ImageLabel(ImageData data, ScaleOffset position, ScaleOffset size) {
-        super(position, size);
-        this.data = data;
+public interface ImageBase extends GuiInterface {
+    default void renderImage(GuiRender render, ImageData data, ScaleOffset realPosition, ScaleOffset realPositionMax, ScaleOffset realSize, RGBA backgroundColor){
+        if (data.isNiceGridTexture()){
+            render.drawNiceGridTexture(data.textureId(), realPosition, realSize, data.width(), data.height(), data.left(), data.right(), data.top(), data.bottom(), backgroundColor);
+        } else {
+            render.drawTexture(data.textureId(), realPosition, realPositionMax, backgroundColor);
+        }
     }
 }

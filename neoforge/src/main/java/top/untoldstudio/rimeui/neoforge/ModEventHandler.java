@@ -19,6 +19,9 @@ import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import top.untoldstudio.rimeui.core.RimeUI;
+import top.untoldstudio.rimeui.core.data.ScaleOffset;
+import top.untoldstudio.rimeui.core.texture.TextureManager;
+import top.untoldstudio.rimeui.core.ui.node.ImageButton;
 
 public class ModEventHandler {
     @SubscribeEvent
@@ -26,6 +29,12 @@ public class ModEventHandler {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.execute(() -> {
             RimeUI.initOpenGL(minecraft.getWindow().handle());
+            ImageButton button = new ImageButton(TextureManager.loadImageWithoutNiceGrid("/test1.png"), ScaleOffset.fromScale(0.5, 0.5), ScaleOffset.fromScale(0.5, 0.5))
+                    .setHoveredImage(TextureManager.loadImageWithoutNiceGrid("/test2.png"))
+                    .setPressedImage(TextureManager.loadImageWithoutNiceGrid("/test3.png"))
+                    .setAnchor(0.5, 0.5)
+                    ;
+            RimeUI.getMainGui().addChild(button);
         });
     }
 }

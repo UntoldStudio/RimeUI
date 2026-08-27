@@ -16,7 +16,11 @@
 package top.untoldstudio.rimeui.application.bootstrap;
 
 import top.untoldstudio.rimeui.core.RimeUI;
+import top.untoldstudio.rimeui.core.data.ScaleOffset;
+import top.untoldstudio.rimeui.core.event.GLFWEventListener;
+import top.untoldstudio.rimeui.core.texture.TextureManager;
 import top.untoldstudio.rimeui.core.ui.Window;
+import top.untoldstudio.rimeui.core.ui.node.ImageButton;
 
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 
@@ -27,11 +31,22 @@ public final class Application {
     public void run(){
         long windowHandle = window.getWindowHandle();
         RimeUI.initOpenGL(windowHandle);
+
+        ImageButton button = new ImageButton(TextureManager.loadImageWithoutNiceGrid("/test1.png"), ScaleOffset.fromScale(0.5, 0.5), ScaleOffset.fromScale(0.5, 0.5))
+                .setHoveredImage(TextureManager.loadImageWithoutNiceGrid("/test2.png"))
+                .setPressedImage(TextureManager.loadImageWithoutNiceGrid("/test3.png"))
+                .setAnchor(0.5, 0.5)
+                ;
+        RimeUI.getMainGui().addChild(button);
+        GLFWEventListener listener = new GLFWEventListener(windowHandle);
+        listener.registerCallback();
+        listener.setEnabled(true);
         while (!window.isWindowShouldClose()){
             window.render();
             glfwSwapBuffers(windowHandle);
         }
         window.close();
+        listener.clean();
         stop();
     }
 

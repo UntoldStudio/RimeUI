@@ -16,6 +16,7 @@
 package top.untoldstudio.rimeui.core.ui;
 
 import top.untoldstudio.rimeui.core.MathTool;
+import top.untoldstudio.rimeui.core.data.CursorShape;
 import top.untoldstudio.rimeui.core.data.RGBA;
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.event.WindowSizeChangeEvent;
@@ -42,6 +43,10 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
         if (isClipChildren) {
             render.disableScissor();
         }
+    }
+
+    public boolean isMouseInRange(){
+        return MainUi.getInstance().isMouseInRange(realPosition, realPositionMax);
     }
 
     public void renderFrameDefaultBackground(GuiRender render, double delta){

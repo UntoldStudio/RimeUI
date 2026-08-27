@@ -15,7 +15,7 @@
  */
 package top.untoldstudio.rimeui.core.event;
 
-public final class CursorMoveEvent extends CancelableEvent {
+public final class MouseMoveEvent extends CancelableEvent {
     private static double lastX = 0;
     private static double lastY = 0;
     private final double xDelta;
@@ -23,7 +23,7 @@ public final class CursorMoveEvent extends CancelableEvent {
     private final double x;
     private final double y;
 
-    public CursorMoveEvent(double x, double y){
+    public MouseMoveEvent(double x, double y){
         this.x = x;
         this.y = y;
         xDelta = x - lastX;

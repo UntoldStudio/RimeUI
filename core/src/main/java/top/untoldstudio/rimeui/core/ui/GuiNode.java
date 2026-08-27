@@ -70,25 +70,41 @@ public abstract class GuiNode<T extends GuiNode<T>> {
     public void onKeyEventWithChildren(KeyEvent event){
         for (int i = children.size() -1; i >= 0; i--){
             children.get(i).onKeyEventWithChildren(event);
+            if (event.isCancelled()){
+                return;
+            }
         }
+        onKeyEvent(event);
     }
     protected void onKeyEvent(KeyEvent event){}
     public void onMouseButtonEventWithChildren(MouseButtonEvent event){
         for (int i = children.size() -1; i >= 0; i--){
             children.get(i).onMouseButtonEventWithChildren(event);
+            if (event.isCancelled()){
+                return;
+            }
         }
+        onMouseButtonEvent(event);
     }
     protected void onMouseButtonEvent(MouseButtonEvent event){}
-    public void onCursorPositionEventWithChildren(CursorMoveEvent event){
+    public void onMouseMoveEventWithChildren(MouseMoveEvent event){
         for (int i = children.size() -1; i >= 0; i--){
-            children.get(i).onCursorPositionEventWithChildren(event);
+            children.get(i).onMouseMoveEventWithChildren(event);
+            if (event.isCancelled()){
+                return;
+            }
         }
+        onMouseMoveEvent(event);
     }
-    protected void onCursorPositionEvent(CursorMoveEvent event){}
+    protected void onMouseMoveEvent(MouseMoveEvent event){}
     public void onMouseScrollEventWithChildren(MouseScrollEvent event){
         for (int i = children.size() -1; i >= 0; i--){
             children.get(i).onMouseScrollEventWithChildren(event);
+            if (event.isCancelled()){
+                return;
+            }
         }
+        onMouseScrollEvent(event);
     }
     protected void onMouseScrollEvent(MouseScrollEvent event){}
 

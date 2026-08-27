@@ -24,6 +24,7 @@ public final class InputEventListener {
         return event;
     }
     public static void onKeyEvent(KeyEvent event){
+        if (MainUi.getInstance() == null) return;
         MainUi.getInstance().onKeyEvent(event);
     }
     public static MouseButtonEvent onMouseButtonEvent(int button, int action, int modifiers){
@@ -32,14 +33,16 @@ public final class InputEventListener {
         return event;
     }
     public static void onMouseButtonEvent(MouseButtonEvent event){
+        if (MainUi.getInstance() == null) return;
         MainUi.getInstance().onMouseButtonEvent(event);
     }
-    public static CursorMoveEvent onCursorMoveEvent(double x, double y){
-        CursorMoveEvent event = new CursorMoveEvent(x, y);
+    public static MouseMoveEvent onCursorMoveEvent(double x, double y){
+        MouseMoveEvent event = new MouseMoveEvent(x, y);
         onCursorMoveEvent(event);
         return event;
     }
-    public static void onCursorMoveEvent(CursorMoveEvent event){
+    public static void onCursorMoveEvent(MouseMoveEvent event){
+        if (MainUi.getInstance() == null) return;
         MainUi.getInstance().onCursorMoveEvent(event);
     }
     public static MouseScrollEvent onMouseScrollEvent(double x, double y){
@@ -48,6 +51,11 @@ public final class InputEventListener {
         return event;
     }
     public static void onMouseScrollEvent(MouseScrollEvent event){
+        if (MainUi.getInstance() == null) return;
         MainUi.getInstance().onMouseScrollEvent(event);
+    }
+    public static void externalSettingCursor(long targetHandle){
+        if (MainUi.getInstance() == null) return;
+        MainUi.getInstance().setExternalSettingCursor(targetHandle);
     }
 }

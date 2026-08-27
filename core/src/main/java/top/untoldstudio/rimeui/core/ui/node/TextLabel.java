@@ -24,7 +24,7 @@ import top.untoldstudio.rimeui.core.render.GuiRender;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 import top.untoldstudio.rimeui.core.ui.AbstractFrame;
 
-public class TextLabel extends AbstractFrame<TextLabel> {
+public final class TextLabel extends AbstractFrame<TextLabel> {
     private boolean canFrameBackgroundDisplay = false;
     private Font font = Font.JETBRAINS_MONO;
     private String text;

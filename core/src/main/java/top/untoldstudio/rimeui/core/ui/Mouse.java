@@ -15,17 +15,31 @@
  */
 package top.untoldstudio.rimeui.core.ui;
 
-import org.lwjgl.glfw.GLFW;
+import top.untoldstudio.rimeui.core.data.MouseButton;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 public final class Mouse {
-    private long window;
+    private final long window;
     private double xPosition;
     private double yPosition;
+    private final Map<MouseButton, Boolean> pressMap = new EnumMap<>(MouseButton.class);
 
-    public void updateXAndYPosition(){
-        double[] newXPosition = new double[1];
-        double[] newYPosition = new double[1];
-        GLFW.glfwGetCursorPos(window, newXPosition, newYPosition);
+    public void updateXAndYPosition(double x, double y) {
+        this.xPosition = x;
+        this.yPosition = y;
+    }
+
+    public void setMouseButtonPressed(MouseButton button){
+        pressMap.put(button, true);
+    }
+    public void setMouseButtonReleased(MouseButton button){
+        pressMap.put(button, false);
+    }
+    public boolean isMouseButtonPressed(MouseButton button){
+        Boolean pressed = pressMap.get(button);
+        return pressed != null && pressed;
     }
 
     public double getXPosition() {
@@ -37,6 +51,9 @@ public final class Mouse {
 
     public Mouse(long window){
         this.window = window;
-        updateXAndYPosition();
+    }
+
+    public long getWindow() {
+        return window;
     }
 }

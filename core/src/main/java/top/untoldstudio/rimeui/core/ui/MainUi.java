@@ -16,6 +16,9 @@
 package top.untoldstudio.rimeui.core.ui;
 
 import org.jetbrains.annotations.NotNull;
+import top.untoldstudio.rimeui.core.data.CursorShape;
+import top.untoldstudio.rimeui.core.data.InputAction;
+import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.event.*;
 import top.untoldstudio.rimeui.core.render.GuiRender;
 import top.untoldstudio.rimeui.core.signal.SignalType;
@@ -33,6 +36,7 @@ public final class MainUi {
     private double lastRenderTime = System.nanoTime() / 1_000_000_000.0;
     private final Window window;
     private final Mouse mouse;
+    private long externalSettingCursor = -1;
 
     public void render(){
         int oldWidth = windowWidth;
@@ -44,7 +48,14 @@ public final class MainUi {
             onWindowSizeChangeEvent(new WindowSizeChangeEvent(oldWidth, oldHeight, windowWidth, windowHeight));
         }
         render.saveContext();
-        render.begin();
+        render.beginFrame();
+
+        if (externalSettingCursor != -1){
+            render.setCursorShapeInThisFrame(externalSettingCursor);
+        } else {
+            render.setCursorShapeInThisFrame(CursorShape.ARROW);
+        }
+
         double startRenderTime = System.nanoTime() / 1_000_000_000.0;
         for (GuiNode<?> node : children){
             node.renderWithChildren(render, startRenderTime - lastRenderTime);
@@ -52,7 +63,11 @@ public final class MainUi {
         render.submitBuffer();
         lastRenderTime = System.nanoTime();
         render.restoreContext();
-        render.end();
+        render.endFrame();
+    }
+
+    public void setExternalSettingCursor(long externalSettingCursor) {
+        this.externalSettingCursor = externalSettingCursor;
     }
 
     private void onWindowSizeChangeEvent(WindowSizeChangeEvent event){
@@ -60,19 +75,36 @@ public final class MainUi {
             child.onWindowSizeChangeEventWithChildren(event);
         }
     }
+    public boolean isMouseInRange(ScaleOffset min, ScaleOffset max){
+        double mouseX = MainUi.getInstance().getMouse().getXPosition();
+        double mouseY = MainUi.getInstance().getMouse().getYPosition();
+        int minX = min.getXPixel();
+        int minY = min.getYPixel();
+        int maxX = max.getXPixel();
+        int maxY = max.getYPixel();
+        return mouseX >= minX && mouseX <= maxX && mouseY >= minY && mouseY <= maxY;
+    }
     public void onKeyEvent(KeyEvent event){
         for (int i = children.size() -1; i >= 0; i--){
             children.get(i).onKeyEventWithChildren(event);
         }
     }
     public void onMouseButtonEvent(MouseButtonEvent event){
+        if (event.getAction() == InputAction.RELEASE){
+            mouse.setMouseButtonReleased(event.getButton());
+        } else if (event.getAction() == InputAction.PRESS){
+            mouse.setMouseButtonPressed(event.getButton());
+        }
+
         for (int i = children.size() -1; i >= 0; i--){
             children.get(i).onMouseButtonEventWithChildren(event);
         }
     }
-    public void onCursorMoveEvent(CursorMoveEvent event){
+    public void onCursorMoveEvent(MouseMoveEvent event){
+        mouse.updateXAndYPosition(event.getX(), event.getY());
+
         for (int i = children.size() -1; i >= 0; i--){
-            children.get(i).onCursorPositionEventWithChildren(event);
+            children.get(i).onMouseMoveEventWithChildren(event);
         }
     }
     public void onMouseScrollEvent(MouseScrollEvent event){
