@@ -248,90 +248,63 @@ public abstract class GuiRender {
                 positionX + targetLeft, positionY + targetTop,
                 0f, left / (float) textureWidth,
                 0f, top / (float) textureHeight,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a);
+                r, g, b, a, r, g, b, a, r, g, b, a, r, g, b, a);
 
         drawTexture(textureId,
                 centerPositionX, positionY,
                 centerPositionX + targetCenterWidth, positionY + targetTop,
                 left / (float) textureWidth, (left + textureCenterWidth) / (float) textureWidth,
                 0f, top / (float) textureHeight,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a);
+                r, g, b, a, r, g, b, a, r, g, b, a, r, g, b, a);
 
         drawTexture(textureId,
                 positionX + targetWidth - targetRight, positionY,
                 rightX, positionY + targetTop,
                 (textureWidth - right) / (float) textureWidth, 1f,
                 0f, top / (float) textureHeight,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a);
+                r, g, b, a, r, g, b, a, r, g, b, a, r, g, b, a);
 
         drawTexture(textureId,
                 positionX, centerPositionY,
                 positionX + targetLeft, centerPositionY + targetCenterHeight,
                 0f, left / (float) textureWidth,
                 top / (float) textureHeight, (top + textureCenterHeight) / (float) textureHeight,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a);
+                r, g, b, a, r, g, b, a, r, g, b, a, r, g, b, a);
 
         drawTexture(textureId,
                 centerPositionX, centerPositionY,
                 centerPositionX + targetCenterWidth, centerPositionY + targetCenterHeight,
                 left / (float) textureWidth, (left + textureCenterWidth) / (float) textureWidth,
                 top / (float) textureHeight, (top + textureCenterHeight) / (float) textureHeight,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a);
+                r, g, b, a, r, g, b, a, r, g, b, a, r, g, b, a);
 
         drawTexture(textureId,
                 positionX + targetWidth - targetRight, centerPositionY,
                 rightX, centerPositionY + targetCenterHeight,
                 (textureWidth - right) / (float) textureWidth, 1f,
                 top / (float) textureHeight, (top + textureCenterHeight) / (float) textureHeight,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a);
+                r, g, b, a, r, g, b, a, r, g, b, a, r, g, b, a);
 
         drawTexture(textureId,
                 positionX, positionY + targetHeight - targetBottom,
                 positionX + targetLeft, bottomY,
                 0f, left / (float) textureWidth,
                 (textureHeight - bottom) / (float) textureHeight, 1f,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a);
+                r, g, b, a, r, g, b, a, r, g, b, a, r, g, b, a);
 
         drawTexture(textureId,
                 centerPositionX, positionY + targetHeight - targetBottom,
                 centerPositionX + targetCenterWidth, bottomY,
                 left / (float) textureWidth, (left + textureCenterWidth) / (float) textureWidth,
                 (textureHeight - bottom) / (float) textureHeight, 1f,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a);
+                r, g, b, a, r, g, b, a, r, g, b, a, r, g, b, a);
 
         drawTexture(textureId,
                 positionX + targetWidth - targetRight, positionY + targetHeight - targetBottom,
                 rightX, bottomY,
                 (textureWidth - right) / (float) textureWidth, 1f,
                 (textureHeight - bottom) / (float) textureHeight, 1f,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a,
-                r, g, b, a);
+                r, g, b, a, r, g, b, a, r, g, b, a, r, g, b, a);
     }
     public abstract void drawTriangle(int ax, int ay, int bx, int by, int cx, int cy,
                                       int aRed, int aGreen, int aBlue, int aAlpha,

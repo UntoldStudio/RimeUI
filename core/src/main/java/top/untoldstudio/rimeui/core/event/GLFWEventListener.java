@@ -26,10 +26,22 @@ public class GLFWEventListener {
     private static GLFWEventListener instance;
     private final long window;
     private static boolean enabled = false;
-    private GLFWKeyCallback keyCallback;
-    private GLFWMouseButtonCallback mouseButtonCallback;
-    private GLFWCursorPosCallback cursorPositionCallback;
-    private GLFWScrollCallback scrollCallback;
+    private GLFWKeyCallback keyCallback = GLFWKeyCallback.create((currentWindow, key, scancode, action, modifiers) -> {
+        if (!enabled) return;
+        InputEventListener.onKeyEvent(key, action, modifiers);
+    });
+    private GLFWMouseButtonCallback mouseButtonCallback = GLFWMouseButtonCallback.create((currentWindow, button, action, modifiers) -> {
+        if (!enabled) return;
+        InputEventListener.onMouseButtonEvent(button, action, modifiers);
+    });
+    private GLFWCursorPosCallback cursorPositionCallback = GLFWCursorPosCallback.create((currentWindow, x, y) -> {
+        if (!enabled) return;
+        InputEventListener.onMouseMoveEvent(x, y);
+    });
+    private GLFWScrollCallback scrollCallback = GLFWScrollCallback.create((currentWindow, x, y) -> {
+        if (!enabled) return;
+        InputEventListener.onMouseScrollEvent(x, y);
+    });
 
     public GLFWEventListener(long window) {
         instance = this;
@@ -44,25 +56,13 @@ public class GLFWEventListener {
     }
 
     /**
-     * WARN:它会把你所有已注册的回调顶掉,如果你不想这么做,请直接调用{@link InputEventListener}的方法,如果你使用了我们的NeoForge模组绑定你就不需要手动接入输入,我们的模组做了
+     * WARN:它会把你所有已注册的回调顶掉,且不会把事件对象给你让你检查是否取消以取消宿主的后续处理,如果你不想这么做,请直接调用{@link InputEventListener}的方法以获取事件返回值,如果你使用了我们的NeoForge模组绑定你就不需要手动接入输入,我们的模组做了
      */
     public void registerCallback(){
-        keyCallback = glfwSetKeyCallback(window, (currentWindow, key, scancode, action, modifiers) -> {
-            if (!enabled) return;
-            InputEventListener.onKeyEvent(key, action, modifiers);
-        });
-        mouseButtonCallback = glfwSetMouseButtonCallback(window, (currentWindow, button, action, modifiers) -> {
-            if (!enabled) return;
-            InputEventListener.onMouseButtonEvent(button, action, modifiers);
-        });
-        cursorPositionCallback = glfwSetCursorPosCallback(window, (currentWindow, x, y) -> {
-            if (!enabled) return;
-            InputEventListener.onMouseMoveEvent(x, y);
-        });
-        scrollCallback = glfwSetScrollCallback(window, (currentWindow, x, y) -> {
-            if (!enabled) return;
-            InputEventListener.onMouseScrollEvent(x, y);
-        });
+        glfwSetKeyCallback(window, keyCallback);
+        glfwSetMouseButtonCallback(window, mouseButtonCallback);
+        glfwSetCursorPosCallback(window, cursorPositionCallback);
+        glfwSetScrollCallback(window, scrollCallback);
     }
 
     public void clean(){

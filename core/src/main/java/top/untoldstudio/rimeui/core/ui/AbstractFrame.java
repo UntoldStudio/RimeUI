@@ -18,7 +18,7 @@ package top.untoldstudio.rimeui.core.ui;
 import top.untoldstudio.rimeui.core.MathTool;
 import top.untoldstudio.rimeui.core.data.RGBA;
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
-import top.untoldstudio.rimeui.core.event.WindowSizeChangeEvent;
+import top.untoldstudio.rimeui.core.event.*;
 import top.untoldstudio.rimeui.core.render.GuiRender;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 
@@ -129,7 +129,7 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
     @Override
     protected abstract void render(GuiRender render, double delta);
 
-    protected void operationPosition(){
+    public void operationPosition(){
         if (getParent() != null && getParent() instanceof AbstractFrame<?> parentFrame){
             operationPosition(parentFrame, parentFrame.getRealPosition());
         } else {
@@ -140,7 +140,7 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
     protected void onWindowSizeChangeEvent(WindowSizeChangeEvent event){
         operationPosition();
     }
-    protected void operationPosition(AbstractFrame<?> parentFrame, ScaleOffset parentRealPosition) {
+    public void operationPosition(AbstractFrame<?> parentFrame, ScaleOffset parentRealPosition) {
         if (parentFrame != null) {
             realSize = ScaleOffset.fromOffset((int) Math.round(size.xScale() * parentFrame.getRealSize().getXPixelInWindow()) + size.xOffset(), (int) Math.round(size.yScale() * parentFrame.getRealSize().getYPixelInWindow()) + size.yOffset());
             realPosition = ScaleOffset.fromOffset(
@@ -164,6 +164,9 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
 
     @Override
     protected void init(){
+        if (parent != null && !parent.isInit){
+            parent.init();
+        }
         operationPosition();
     }
 

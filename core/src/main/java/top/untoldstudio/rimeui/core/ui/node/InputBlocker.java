@@ -13,20 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.untoldstudio.rimeui.neoforge;
+package top.untoldstudio.rimeui.core.ui.node;
 
-import net.minecraft.client.Minecraft;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import top.untoldstudio.rimeui.core.RimeUI;
+import top.untoldstudio.rimeui.core.ui.AbstractFrame;
+import top.untoldstudio.rimeui.core.ui.GuiInterface;
 
-public class ModEventHandler {
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void onClientSetup(FMLClientSetupEvent event) {
-        Minecraft minecraft = Minecraft.getInstance();
-        minecraft.execute(() -> {
-            RimeUI.initOpenGL(minecraft.getWindow().handle());
-        });
+public interface InputBlocker<T> extends GuiInterface {
+    @Override
+    default AbstractFrame<?> getGuiNode(){
+        return (AbstractFrame<?>) this;
     }
+
+    boolean isBlockInput();
+    T setBlockInput(boolean isAcceptInput);
 }

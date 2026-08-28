@@ -182,8 +182,6 @@ public final class OpenGLGuiRender extends GuiRender {
         @Override
         public void execute() {
             if (size == 0) return;
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
             glUseProgram(fontShaderProgram);
             glUniform4f(fontColorLocation,
                     color.red() / 255f, color.green() / 255f,
@@ -376,10 +374,6 @@ public final class OpenGLGuiRender extends GuiRender {
                             int bRed, int bGreen, int bBlue, int bAlpha,
                             int cRed, int cGreen, int cBlue, int cAlpha,
                             int dRed, int dGreen, int dBlue, int dAlpha) {
-        float tmp = v0;
-        v0 = v1;
-        v1 = tmp;
-
         if (commands.isEmpty() || !(commands.getLast() instanceof TextureBatch)
                 || ((TextureBatch) commands.getLast()).textureId != textureId) {
             commands.add(new TextureBatch(textureId));
@@ -491,6 +485,8 @@ public final class OpenGLGuiRender extends GuiRender {
         glUseProgram(baseShaderProgram);
 
         glColorMask(true, true, true, true);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
         glDisable(GL_SCISSOR_TEST);
@@ -540,6 +536,8 @@ public final class OpenGLGuiRender extends GuiRender {
             glBindTexture(GL_TEXTURE_2D, 0);
             glBindVertexArray(0);
             glUseProgram(0);
+
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }));
     }
 
@@ -745,7 +743,6 @@ public final class OpenGLGuiRender extends GuiRender {
     public void restoreContext() {
         SavedGLState s = stateStack.pop();
 
-        glViewport(s.viewport()[0], s.viewport()[1], s.viewport()[2], s.viewport()[3]);
         glScissor(s.scissorBox()[0], s.scissorBox()[1], s.scissorBox()[2], s.scissorBox()[3]);
         glClearColor(s.colorClearValue()[0], s.colorClearValue()[1], s.colorClearValue()[2], s.colorClearValue()[3]);
         glClearDepth(s.depthClearValue());
@@ -805,6 +802,7 @@ public final class OpenGLGuiRender extends GuiRender {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s.ebo());
         glBindVertexArray(s.vao());
         glUseProgram(s.program());
+        glViewport(s.viewport()[0], s.viewport()[1], s.viewport()[2], s.viewport()[3]);
     }
 
     @Override
@@ -833,19 +831,21 @@ public final class OpenGLGuiRender extends GuiRender {
 
     @Override
     public void enableScissor(ScaleOffset position, ScaleOffset size) {
-        glEnable(GL_SCISSOR_TEST);
-        glScissor(position.getXPixelInWindow(),
-                MainUi.getInstance().getWindowHeight() - position.getYPixelInWindow() - size.getYPixelInWindow(),
-                size.getXPixelInWindow(), size.getYPixelInWindow());
+        int windowHeight = MainUi.getInstance().getWindowHeight();
+        commands.add(new StateCommand(() -> {
+            glEnable(GL_SCISSOR_TEST);
+            glScissor(
+                    position.getXPixelInWindow(),
+                    windowHeight - position.getYPixelInWindow() - size.getYPixelInWindow(),
+                    size.getXPixelInWindow(),
+                    size.getYPixelInWindow()
+            );
+        }));
     }
 
     @Override
     public void disableScissor() {
-        glDisable(GL_SCISSOR_TEST);
-    }
-
-    public long getWindowHandle() {
-        return windowHandle;
+        commands.add(new StateCommand(() -> glDisable(GL_SCISSOR_TEST)));
     }
 
     private static int loadProgram(String vertSource, String fragSource, int[] attribLocations, String[] attribNames) {

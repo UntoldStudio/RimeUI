@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import top.untoldstudio.rimeui.core.event.MouseMoveEvent;
 import top.untoldstudio.rimeui.core.event.InputEventListener;
+import top.untoldstudio.rimeui.core.event.MouseScrollEvent;
 import top.untoldstudio.rimeui.core.ui.MainUi;
 
 @Mixin(MouseHandler.class)
@@ -49,6 +50,20 @@ public abstract class MouseHandlerMixin {
                 callbackInfo.cancel();
                 this.accumulatedDX = 0.0;
                 this.accumulatedDY = 0.0;
+            }
+        }
+    }
+
+    @Inject(
+            method = "onScroll",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private void onScroll(long window, double xOffset, double yOffset, CallbackInfo callbackInfo) {
+        if (MainUi.getInstance() != null) {
+            MouseScrollEvent event = InputEventListener.onMouseScrollEvent(xOffset, yOffset);
+            if (event.isCancelled()) {
+                callbackInfo.cancel();
             }
         }
     }

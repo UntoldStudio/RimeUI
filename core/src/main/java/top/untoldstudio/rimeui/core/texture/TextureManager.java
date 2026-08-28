@@ -34,10 +34,6 @@ public final class TextureManager {
     private static final IntBuffer channels = BufferUtils.createIntBuffer(1);
     private record ImageInitializationData(int textureId, int width, int height){}
 
-    static {
-        STBImage.stbi_set_flip_vertically_on_load(true);
-    }
-
     public static ImageData loadImageWithoutNiceGrid(String imagePath){
         if (imageMap.containsKey(imagePath)) {
             return imageMap.get(imagePath);
@@ -64,9 +60,6 @@ public final class TextureManager {
         height.clear();
         channels.clear();
 
-        int widthInt = width.get(0);
-        int heightInt = height.get(0);
-
         ByteBuffer pixels = STBImage.stbi_load(imagePath, width, height, channels, 4);
 
         if (pixels == null) {
@@ -89,6 +82,9 @@ public final class TextureManager {
         if (pixels == null) {
             throw new ResourceError("Failed to load image " + imagePath + ": " + STBImage.stbi_failure_reason());
         }
+
+        int widthInt = width.get(0);
+        int heightInt = height.get(0);
 
         int id = MainUi.getInstance().getRender().loadImage(width.get(0), height.get(0), pixels);
 

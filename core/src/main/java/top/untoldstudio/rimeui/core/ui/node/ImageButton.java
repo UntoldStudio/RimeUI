@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public final class ImageButton extends AbstractFrame<ImageButton> implements ImageBase {
+public class ImageButton extends AbstractFrame<ImageButton> implements ImageBase {
     private final List<MouseButton> canTriggerButtons = new ArrayList<>(List.of(MouseButton.LEFT));
     private ImageData defaultImage;
     private ImageData pressedImage;
@@ -48,7 +48,7 @@ public final class ImageButton extends AbstractFrame<ImageButton> implements Ima
                 isPressed = true;
             }
         }
-        if (isPressed){
+        if (isPressed && pressedImage != null){
             data = pressedImage;
         }
         if (super.isMouseInRange() && getTransparency() != 1 && visible){
@@ -60,6 +60,7 @@ public final class ImageButton extends AbstractFrame<ImageButton> implements Ima
             }
             render.setCursorShapeInThisFrame(CursorShape.HAND);
         }
+
         renderImage(render, data, realPosition, realPositionMax, realSize, backgroundColor);
 
         if (isPressed && !isPressedNow){

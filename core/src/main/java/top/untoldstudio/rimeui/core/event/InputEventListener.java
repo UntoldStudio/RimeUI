@@ -43,7 +43,7 @@ public final class InputEventListener {
     }
     public static void onMouseMoveEvent(MouseMoveEvent event){
         if (MainUi.getInstance() == null) return;
-        MainUi.getInstance().onCursorMoveEvent(event);
+        MainUi.getInstance().onMouseMoveEvent(event);
     }
     public static MouseScrollEvent onMouseScrollEvent(double x, double y){
         MouseScrollEvent event = new MouseScrollEvent(x, y);

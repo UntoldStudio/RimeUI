@@ -119,7 +119,7 @@ public final class TextLabel extends AbstractFrame<TextLabel> {
     }
 
     @Override
-    protected void operationPosition(AbstractFrame<?> parentFrame, ScaleOffset parentRealPosition){
+    public void operationPosition(AbstractFrame<?> parentFrame, ScaleOffset parentRealPosition){
         super.operationPosition(parentFrame, parentRealPosition);
         int stringWidth = font.getStringWidth(text, fontSize, italicSlant, boldStrength);
         int stringHeight = font.getStringHeight(text, fontSize, italicSlant, boldStrength);

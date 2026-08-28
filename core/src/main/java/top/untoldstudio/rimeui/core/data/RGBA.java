@@ -74,4 +74,5 @@ public record RGBA(int red, int green, int blue, int alpha) {
     public static final RGBA RED = new RGBA(255, 0, 0, 255);
     public static final RGBA GREEN = new RGBA(0, 255, 0, 255);
     public static final RGBA BLUE = new RGBA(0, 0, 255, 255);
+    public static final RGBA GRAY = new RGBA(128, 128, 128, 255);
 }

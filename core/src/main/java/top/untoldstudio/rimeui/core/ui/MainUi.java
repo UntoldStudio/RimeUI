@@ -35,12 +35,15 @@ public final class MainUi {
     private final Window window;
     private final Mouse mouse;
     private long externalSettingCursor = -1;
+    private boolean isLastMouseMoveEventCanceled = false;
 
     public void render(){
         render.saveContext();
         render.beginFrame();
 
-        if (externalSettingCursor != -1){
+        boolean isCanceled = false;
+
+        if (externalSettingCursor != -1 && !isLastMouseMoveEventCanceled){
             render.setCursorShapeInThisFrame(externalSettingCursor);
         } else {
             render.setCursorShapeInThisFrame(CursorShape.ARROW);
@@ -92,13 +95,18 @@ public final class MainUi {
             if (event.isCancelled()) return;
         }
     }
-    public void onCursorMoveEvent(MouseMoveEvent event){
+    public void onMouseMoveEvent(MouseMoveEvent event){
         mouse.updateXAndYPosition(event.getX(), event.getY());
 
         for (int i = children.size() -1; i >= 0; i--){
             children.get(i).onMouseMoveEventWithChildren(event);
-            if (event.isCancelled()) return;
+            if (event.isCancelled()){
+                isLastMouseMoveEventCanceled = true;
+                return;
+            }
         }
+
+        isLastMouseMoveEventCanceled = false;
     }
     public void onMouseScrollEvent(MouseScrollEvent event){
         for (int i = children.size() -1; i >= 0; i--){

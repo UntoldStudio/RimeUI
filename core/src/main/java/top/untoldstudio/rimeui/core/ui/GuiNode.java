@@ -52,10 +52,10 @@ public abstract class GuiNode<T extends GuiNode<T>> {
         sendSignal(SignalType.AFTER_RENDER);
     }
     protected abstract void render(GuiRender render, double delta);
-    protected boolean isVisible(){
+    public boolean isVisible(){
         return visible;
     }
-    protected void setVisible(boolean visible){
+    public void setVisible(boolean visible){
         this.visible = visible;
     }
     public T registerRenderCallback(DoubleConsumer callback){
@@ -219,8 +219,8 @@ public abstract class GuiNode<T extends GuiNode<T>> {
         return self;
     }
     public void initWithChildren(){
-        init();
         isInit = true;
+        init();
         for (GuiNode<?> child : children){
             child.initWithChildren();
         }

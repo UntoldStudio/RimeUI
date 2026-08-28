@@ -18,7 +18,6 @@ package top.untoldstudio.rimeui.core.ui;
 import static org.lwjgl.glfw.GLFW.*;
 
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
-import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.opengl.GL;
 import top.untoldstudio.rimeui.core.event.WindowSizeChangeEvent;
 
@@ -30,22 +29,27 @@ public final class Window {
     private boolean isClose = false;
     private int width;
     private int height;
-    private final GLFWFramebufferSizeCallback framebufferSizeCallback;
+    private GLFWFramebufferSizeCallback oldFramebufferSizeCallback = null;
+    private final GLFWFramebufferSizeCallback newFrameCallback;
 
     public Window(long windowHandle){
         this.windowHandle = windowHandle;
-        framebufferSizeCallback = glfwSetFramebufferSizeCallback(windowHandle, (window, newWidth, newHeight) -> {
-            int oldWidth = width;
-            int oldHeight = height;
-            width = newWidth;
-            height = newHeight;
-            MainUi.getInstance().onWindowSizeChangeEvent(new WindowSizeChangeEvent(oldWidth, oldHeight, newWidth, newHeight));
-        });
         int[] widthInt = new int[1];
         int[] heightInt = new int[1];
         glfwGetFramebufferSize(windowHandle, widthInt, heightInt);
         width = widthInt[0];
         height = heightInt[0];
+        newFrameCallback = GLFWFramebufferSizeCallback.create((window, newWidth, newHeight) -> {
+            int oldWidth = width;
+            int oldHeight = height;
+            width = newWidth;
+            height = newHeight;
+            MainUi.getInstance().onWindowSizeChangeEvent(new WindowSizeChangeEvent(oldWidth, oldHeight, newWidth, newHeight));
+            if (oldFramebufferSizeCallback != null){
+                oldFramebufferSizeCallback.invoke(window, newWidth, newHeight);
+            }
+        });
+        oldFramebufferSizeCallback = glfwSetFramebufferSizeCallback(windowHandle, newFrameCallback);
     }
 
     public static Window create(String title, int width, int height){
@@ -67,7 +71,7 @@ public final class Window {
 
     public void close(){
         this.isClose = true;
-        framebufferSizeCallback.free();
+        newFrameCallback.free();
         glfwDestroyWindow(windowHandle);
         glfwTerminate();
     }
