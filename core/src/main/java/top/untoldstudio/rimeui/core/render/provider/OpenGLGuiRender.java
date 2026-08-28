@@ -893,6 +893,7 @@ public final class OpenGLGuiRender extends GuiRender {
         return program;
     }
 
+    @Override
     public void cleanup(){
         glDeleteVertexArrays(baseVao);
         glDeleteBuffers(baseVbo);

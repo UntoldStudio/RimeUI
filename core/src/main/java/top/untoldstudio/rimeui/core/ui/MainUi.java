@@ -212,6 +212,7 @@ public final class MainUi {
 
     public void cleanup(){
         window.close();
+        render.cleanup();
         TextureManager.cleanup();
     }
 }

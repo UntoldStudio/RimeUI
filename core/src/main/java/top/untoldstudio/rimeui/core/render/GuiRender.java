@@ -207,6 +207,7 @@ public abstract class GuiRender {
     public abstract void drawGlyph(FT_Bitmap bitmap, int glyphX, int glyphY, RGBA color);
     protected abstract void beginTextRendering();
     protected abstract void endTextRendering();
+    public abstract void cleanup();
 
     public void drawNiceGridTexture(int textureId, ScaleOffset position, ScaleOffset size,
                                     int textureWidth, int textureHeight,

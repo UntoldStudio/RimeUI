@@ -45,9 +45,7 @@ public final class Application {
             RimeUI.getMainGui().render();
             glfwSwapBuffers(windowHandle);
         }
-        window.close();
-        listener.clean();
-        stop();
+        RimeUI.cleanup();
     }
 
     public void stop(){
