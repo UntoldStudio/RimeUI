@@ -17,6 +17,7 @@ package top.untoldstudio.rimeui.application.bootstrap;
 
 import top.untoldstudio.rimeui.core.RimeUI;
 import top.untoldstudio.rimeui.core.event.GLFWEventListener;
+import top.untoldstudio.rimeui.core.resource.ResourceReader;
 import top.untoldstudio.rimeui.core.ui.Window;
 
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
@@ -34,6 +35,9 @@ public final class Application {
         GLFWEventListener listener = new GLFWEventListener(windowHandle);
         listener.registerCallback();
         listener.setEnabled(true);
+
+        window.setWindowIcon("/texture/icon.png");
+
         while (!window.isWindowShouldClose()){
             glfwPollEvents();
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

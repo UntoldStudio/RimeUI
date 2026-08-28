@@ -13,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.untoldstudio.rimeui.application.bootstrap;
+package top.untoldstudio.rimeui.neoforge.mixin;
 
-public class Main {
-    static {
+import net.minecraft.client.main.Main;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Mixin(Main.class)
+public class MainMixin {
+    @Inject(method = "<init>", at = @At(value = "HEAD"))
+    private static void init(CallbackInfo ci) {
         System.setProperty("org.lwjgl.system.stackSize", "1024");
-    }
-
-    public static void main(String[] args) {
-        new Application().run();
     }
 }

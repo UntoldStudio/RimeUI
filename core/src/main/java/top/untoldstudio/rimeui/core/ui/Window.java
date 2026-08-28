@@ -17,9 +17,16 @@ package top.untoldstudio.rimeui.core.ui;
 
 import static org.lwjgl.glfw.GLFW.*;
 
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
+import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.stb.STBImage;
+import org.lwjgl.system.MemoryStack;
 import top.untoldstudio.rimeui.core.event.WindowSizeChangeEvent;
+import top.untoldstudio.rimeui.core.texture.TextureManager;
+
+import java.nio.ByteBuffer;
 
 /**
  * 如果你已经有一个窗口了你不想再创造一个新的窗口/不能自己控制窗口的生命周期请不要调用create方法!
@@ -67,6 +74,27 @@ public final class Window {
         GL.createCapabilities();
 
         return new Window(window);
+    }
+
+    public void setWindowIcon(TextureManager.ImageInitializationData initializationData) {
+        ByteBuffer buffer = initializationData.dataBytes();
+
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            GLFWImage image = GLFWImage.malloc(stack);
+            image.width(initializationData.width());
+            image.height(initializationData.height());
+            image.pixels(buffer);
+
+            GLFWImage.Buffer imageBuffer = GLFWImage.malloc(1, stack);
+            imageBuffer.put(0, image);
+
+            GLFW.glfwSetWindowIcon(windowHandle, imageBuffer);
+        }
+
+        STBImage.stbi_image_free(buffer);
+    }
+    public void setWindowIcon(String path){
+        setWindowIcon(TextureManager.loadImageInitializationData(path));
     }
 
     public void close(){

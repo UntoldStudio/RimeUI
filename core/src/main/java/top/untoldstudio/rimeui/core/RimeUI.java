@@ -22,6 +22,10 @@ import top.untoldstudio.rimeui.core.render.provider.OpenGLGuiRender;
 import top.untoldstudio.rimeui.core.ui.Window;
 
 public final class RimeUI {
+    static {
+        System.setProperty("org.lwjgl.system.stackSize", "1024");
+    }
+
     public static void initOpenGL(long windowHandle){
         initCustomGuiRender(windowHandle, new OpenGLGuiRender(windowHandle));
     }
@@ -37,5 +41,8 @@ public final class RimeUI {
     }
     public static MainUi getMainGui(){
         return MainUi.getInstance();
+    }
+    public static void cleanup(){
+        MainUi.getInstance().cleanup();
     }
 }

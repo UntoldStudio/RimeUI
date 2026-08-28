@@ -22,6 +22,7 @@ import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.event.*;
 import top.untoldstudio.rimeui.core.render.GuiRender;
 import top.untoldstudio.rimeui.core.signal.SignalType;
+import top.untoldstudio.rimeui.core.texture.TextureManager;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -207,5 +208,10 @@ public final class MainUi {
     }
     public Mouse getMouse() {
         return mouse;
+    }
+
+    public void cleanup(){
+        window.close();
+        TextureManager.cleanup();
     }
 }

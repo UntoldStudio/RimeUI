@@ -19,7 +19,8 @@ import static org.lwjgl.opengl.GL32C.*;
 import static org.lwjgl.opengl.ARBImaging.GL_BLEND_COLOR;
 
 import org.joml.Matrix4f;
-import org.lwjgl.BufferUtils;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.freetype.FT_Bitmap;
 import top.untoldstudio.rimeui.core.data.RGBA;
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
@@ -111,13 +112,15 @@ public final class OpenGLGuiRender extends GuiRender {
                 glBufferData(GL_ARRAY_BUFFER, bytes, GL_STREAM_DRAW);
                 baseVboCapacity = bytes;
             }
-            FloatBuffer buf = BufferUtils.createFloatBuffer(size);
-            buf.put(vertices, 0, size);
-            buf.flip();
-            glBufferSubData(GL_ARRAY_BUFFER, 0, buf);
-            glDrawArrays(GL_TRIANGLES, 0, size / 6);
-            glBindVertexArray(0);
-            size = 0;
+            try (MemoryStack stack = MemoryStack.stackPush()) {
+                FloatBuffer buffer = stack.mallocFloat(size);
+                buffer.put(vertices, 0, size);
+                buffer.flip();
+                glBufferSubData(GL_ARRAY_BUFFER, 0, buffer);
+                glDrawArrays(GL_TRIANGLES, 0, size / 6);
+                glBindVertexArray(0);
+                size = 0;
+            }
         }
     }
 
@@ -145,17 +148,19 @@ public final class OpenGLGuiRender extends GuiRender {
                 glBufferData(GL_ARRAY_BUFFER, bytes, GL_STREAM_DRAW);
                 textureVboCapacity = bytes;
             }
-            FloatBuffer buf = BufferUtils.createFloatBuffer(size);
-            buf.put(vertices, 0, size);
-            buf.flip();
-            glBufferSubData(GL_ARRAY_BUFFER, 0, buf);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, textureId);
-            glUniform1i(textureSamplerLocation, 0);
-            glDrawArrays(GL_TRIANGLES, 0, size / 8);
-            glBindVertexArray(0);
-            glBindTexture(GL_TEXTURE_2D, 0);
-            size = 0;
+            try (MemoryStack stack = MemoryStack.stackPush()) {
+                FloatBuffer buffer = stack.mallocFloat(size);
+                buffer.put(vertices, 0, size);
+                buffer.flip();
+                glBufferSubData(GL_ARRAY_BUFFER, 0, buffer);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, textureId);
+                glUniform1i(textureSamplerLocation, 0);
+                glDrawArrays(GL_TRIANGLES, 0, size / 8);
+                glBindVertexArray(0);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                size = 0;
+            }
         }
     }
 
@@ -193,17 +198,19 @@ public final class OpenGLGuiRender extends GuiRender {
                 glBufferData(GL_ARRAY_BUFFER, bytes, GL_STREAM_DRAW);
                 fontVboCapacity = bytes;
             }
-            FloatBuffer buf = BufferUtils.createFloatBuffer(size);
-            buf.put(vertices, 0, size);
-            buf.flip();
-            glBufferSubData(GL_ARRAY_BUFFER, 0, buf);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, fontAtlasTextureId);
-            glUniform1i(fontSamplerLocation, 0);
-            glDrawArrays(GL_TRIANGLES, 0, size / 4);
-            glBindVertexArray(0);
-            glBindTexture(GL_TEXTURE_2D, 0);
-            size = 0;
+            try (MemoryStack stack = MemoryStack.stackPush()) {
+                FloatBuffer buffer = stack.mallocFloat(size);
+                buffer.put(vertices, 0, size);
+                buffer.flip();
+                glBufferSubData(GL_ARRAY_BUFFER, 0, buffer);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, fontAtlasTextureId);
+                glUniform1i(fontSamplerLocation, 0);
+                glDrawArrays(GL_TRIANGLES, 0, size / 4);
+                glBindVertexArray(0);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                size = 0;
+            }
         }
     }
 
@@ -227,11 +234,11 @@ public final class OpenGLGuiRender extends GuiRender {
     private final int fontColorLocation;
     private final Matrix4f projectionMatrix = new Matrix4f();
     private final float[] projectionMatrixArray = new float[16];
-    private final IntBuffer intBuffer = BufferUtils.createIntBuffer(1);
-    private final IntBuffer int4Buffer = BufferUtils.createIntBuffer(4);
-    private final FloatBuffer floatBuffer = BufferUtils.createFloatBuffer(4);
-    private final ByteBuffer byteBuffer = BufferUtils.createByteBuffer(1);
-    private final DoubleBuffer doubleBuffer = BufferUtils.createDoubleBuffer(2);
+    private final IntBuffer intBuffer = MemoryUtil.memAllocInt(1);
+    private final IntBuffer int4Buffer = MemoryUtil.memAllocInt(4);
+    private final FloatBuffer floatBuffer = MemoryUtil.memAllocFloat(4);
+    private final ByteBuffer byteBuffer = MemoryUtil.memAlloc(1);
+    private final DoubleBuffer doubleBuffer = MemoryUtil.memAllocDouble(2);
 
     private int fontAtlasTextureId;
     private int atlasWidth = 1024;
@@ -545,40 +552,47 @@ public final class OpenGLGuiRender extends GuiRender {
         int oldWidth = atlasWidth;
         int oldHeight = atlasHeight;
 
-        ByteBuffer oldData = BufferUtils.createByteBuffer(oldWidth * oldHeight);
-        glBindTexture(GL_TEXTURE_2D, fontAtlasTextureId);
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, oldData);
+        int size = oldWidth * oldHeight;
 
-        int newTexId = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, newTexId);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        ByteBuffer oldData = MemoryUtil.memAlloc(size);
 
-        int newWidth = oldWidth * 2;
-        int newHeight = oldHeight * 2;
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, newWidth, newHeight, 0,
-                GL_RED, GL_UNSIGNED_BYTE, (ByteBuffer) null);
+        try {
+            glBindTexture(GL_TEXTURE_2D, fontAtlasTextureId);
+            glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, oldData);
 
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, oldWidth, oldHeight,
-                GL_RED, GL_UNSIGNED_BYTE, oldData);
+            int newTexId = glGenTextures();
+            glBindTexture(GL_TEXTURE_2D, newTexId);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        glDeleteTextures(fontAtlasTextureId);
-        fontAtlasTextureId = newTexId;
+            int newWidth = oldWidth * 2;
+            int newHeight = oldHeight * 2;
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, newWidth, newHeight, 0,
+                    GL_RED, GL_UNSIGNED_BYTE, (ByteBuffer) null);
 
-        atlasWidth = newWidth;
-        atlasHeight = newHeight;
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, oldWidth, oldHeight,
+                    GL_RED, GL_UNSIGNED_BYTE, oldData);
 
-        for (RenderCommand command : commands) {
-            if (command instanceof FontBatch) {
-                ((FontBatch) command).scaleUV(oldWidth, newWidth, oldHeight, newHeight);
+            glDeleteTextures(fontAtlasTextureId);
+            fontAtlasTextureId = newTexId;
+
+            atlasWidth = newWidth;
+            atlasHeight = newHeight;
+
+            for (RenderCommand command : commands) {
+                if (command instanceof FontBatch) {
+                    ((FontBatch) command).scaleUV(oldWidth, newWidth, oldHeight, newHeight);
+                }
             }
-        }
 
-        atlasCursorX = 0;
-        atlasCursorY = oldHeight;
-        atlasRowHeight = 0;
+            atlasCursorX = 0;
+            atlasCursorY = oldHeight;
+            atlasRowHeight = 0;
+        } finally {
+            MemoryUtil.memFree(oldData);
+        }
     }
 
     @Override
@@ -877,5 +891,23 @@ public final class OpenGLGuiRender extends GuiRender {
         glDeleteShader(vertShader);
         glDeleteShader(fragShader);
         return program;
+    }
+
+    public void cleanup(){
+        glDeleteVertexArrays(baseVao);
+        glDeleteBuffers(baseVbo);
+        glDeleteVertexArrays(textureVao);
+        glDeleteBuffers(textureVbo);
+        glDeleteVertexArrays(fontVao);
+        glDeleteBuffers(fontVbo);
+        glDeleteTextures(fontAtlasTextureId);
+        glDeleteProgram(baseShaderProgram);
+        glDeleteProgram(textureShaderProgram);
+        glDeleteProgram(fontShaderProgram);
+        MemoryUtil.memFree(intBuffer);
+        MemoryUtil.memFree(int4Buffer);
+        MemoryUtil.memFree(floatBuffer);
+        MemoryUtil.memFree(byteBuffer);
+        MemoryUtil.memFree(doubleBuffer);
     }
 }
