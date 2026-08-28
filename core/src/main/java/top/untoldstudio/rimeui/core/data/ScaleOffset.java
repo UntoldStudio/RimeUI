@@ -16,6 +16,7 @@
 package top.untoldstudio.rimeui.core.data;
 
 import top.untoldstudio.rimeui.core.MathTool;
+import top.untoldstudio.rimeui.core.ui.AbstractFrame;
 import top.untoldstudio.rimeui.core.ui.MainUi;
 
 public record ScaleOffset(double xScale, int xOffset, double yScale, int yOffset) {
@@ -113,5 +114,24 @@ public record ScaleOffset(double xScale, int xOffset, double yScale, int yOffset
     }
     public int getYPixelInWindow(){
         return getScaleYPixelInWindow() + yOffset;
+    }
+
+    public int getScaleXPixelInWindow(AbstractFrame<?> frame) {
+        return MathTool.round(frame.getRealSize().getXPixelInWindow() * xScale);
+    }
+    public int getScaleYPixelInWindow(AbstractFrame<?> frame) {
+        return MathTool.round(frame.getRealSize().getYPixelInWindow() * yScale);
+    }
+    public int getXPixelInWindow(AbstractFrame<?> frame) {
+        return getScaleXPixelInWindow(frame) + xOffset;
+    }
+    public int getYPixelInWindow(AbstractFrame<?> frame) {
+        return getScaleYPixelInWindow(frame) + yOffset;
+    }
+    public double getScaledXInWindow(AbstractFrame<?> frame) {
+        return (double) getXPixelInWindow(frame) / frame.getRealSize().getXPixelInWindow();
+    }
+    public double getScaledYInWindow(AbstractFrame<?> frame) {
+        return (double) getYPixelInWindow(frame) / frame.getRealSize().getYPixelInWindow();
     }
 }

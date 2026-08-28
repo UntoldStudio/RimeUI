@@ -32,6 +32,7 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
     protected double xAnchor = 0;
     protected double yAnchor = 0;
     protected boolean isClipChildren = false;
+    private int layoutOrder = 1;
 
     @Override
     public void renderWithChildren(GuiRender render, double delta){
@@ -160,6 +161,15 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
                 frame.operationPosition();
             }
         }
+    }
+
+    public T setLayoutOrder(int layoutOrder) {
+        this.layoutOrder = layoutOrder;
+        sendSignal(SignalType.SET_LAYOUT_ORDER, layoutOrder);
+        return self;
+    }
+    public int getLayoutOrder() {
+        return layoutOrder;
     }
 
     @Override
