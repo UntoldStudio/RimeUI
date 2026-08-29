@@ -51,19 +51,19 @@ public final class RimeUI {
         MainGui.getInstance().cleanup();
     }
 
-    public List<GuiNode<?>> deserializeNodeTreeToGuiNodes(String jsonString){
+    public static List<GuiNode<?>> deserializeNodeTreeToGuiNodes(String jsonString){
         return JsonSerialization.getInstance().deserializeNodeTreeToGuiNodes(jsonString);
     }
-    public List<JsonGuiNode> deserializeNodeTreeToJsonGuiNodes(String jsonString) {
+    public static List<JsonGuiNode> deserializeNodeTreeToJsonGuiNodes(String jsonString) {
         return JsonSerialization.getInstance().deserializeNodeTreeToJsonGuiNodes(jsonString);
     }
-    public String serializeNodeTreeFromJsonNodes(List<JsonGuiNode> rootNodeTree) {
+    public static String serializeNodeTreeFromJsonNodes(List<JsonGuiNode> rootNodeTree) {
         return JsonSerialization.getInstance().serializeNodeTreeFromJsonNodes(rootNodeTree);
     }
-    public String serializeNodeTreeFromNodes(List<GuiNode<?>> rootNodes){
+    public static String serializeNodeTreeFromNodes(List<GuiNode<?>> rootNodes){
         return JsonSerialization.getInstance().serializeNodeTreeFromNodes(rootNodes);
     }
-    public String serializeNodeTreeFromNode(GuiNode<?> node) {
+    public static String serializeNodeTreeFromNode(GuiNode<?> node) {
         return JsonSerialization.getInstance().serializeNodeTreeFromNode(node);
     }
 }
