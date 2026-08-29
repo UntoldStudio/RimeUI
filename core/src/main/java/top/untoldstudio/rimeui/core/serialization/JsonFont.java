@@ -15,21 +15,11 @@
  */
 package top.untoldstudio.rimeui.core.serialization;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
+import top.untoldstudio.rimeui.core.font.Font;
+import top.untoldstudio.rimeui.core.font.FontManager;
 
-import java.lang.reflect.Type;
-
-public final class GuiNodeJsonSerializer implements JsonSerializer<JsonGuiNode> {
-    @Override
-    public JsonElement serialize(JsonGuiNode src, Type targetType, JsonSerializationContext context) {
-        JsonObject object = context.serialize(src, src.getClass()).getAsJsonObject();
-
-        String typeName = object.get("type_name").getAsString();
-        object.addProperty("type_name", typeName.toLowerCase());
-
-        return object;
+public record JsonFont(String fontPath) {
+    public Font toFont(){
+        return FontManager.loadFont(fontPath);
     }
 }

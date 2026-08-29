@@ -20,6 +20,7 @@ import top.untoldstudio.rimeui.core.data.RGBA;
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.event.*;
 import top.untoldstudio.rimeui.core.render.GuiRender;
+import top.untoldstudio.rimeui.core.serialization.JsonAbstractFrame;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 
 public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<T> {
@@ -178,6 +179,19 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
             parent.init();
         }
         operationPosition();
+    }
+
+    public final JsonAbstractFrame fillParentClassJsonNode(JsonAbstractFrame frame){
+        frame.setBackgroundColor(backgroundColor);
+        frame.setPosition(position);
+        frame.setSize(size);
+        frame.setBackgroundColor(backgroundColor);
+        frame.setXAnchor(xAnchor);
+        frame.setYAnchor(yAnchor);
+        frame.setClipChildren(isClipChildren);
+        frame.setLayoutOrder(layoutOrder);
+        super.fillParentClassJsonNode(frame);
+        return frame;
     }
 
     public AbstractFrame(ScaleOffset position, ScaleOffset size) {

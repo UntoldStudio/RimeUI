@@ -27,6 +27,8 @@ dependencies {
 
     implementation(rootProject.libs.jansi)
 
+    implementation(rootProject.libs.gson)
+
     runtimeOnly("org.lwjgl:lwjgl:${lwjglVersion}:${lwjglNatives}")
     runtimeOnly("org.lwjgl:lwjgl-opengl:${lwjglVersion}:${lwjglNatives}")
     runtimeOnly("org.lwjgl:lwjgl-glfw:${lwjglVersion}:${lwjglNatives}")

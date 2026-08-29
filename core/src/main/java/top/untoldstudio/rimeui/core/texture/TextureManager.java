@@ -42,7 +42,7 @@ public final class TextureManager {
         ImageInitializationData data = loadImageInitializationData(imagePath);
         int textureId = MainGui.getInstance().getRender().loadImage(data.width, data.height, data.dataBytes);
         STBImage.stbi_image_free(data.dataBytes);
-        ImageData imageData = new ImageData(textureId, data.width(), data.height());
+        ImageData imageData = new ImageData(textureId, data.width(), data.height(), imagePath);
         imageMap.put(imagePath, imageData);
         return imageData;
     }
@@ -54,7 +54,7 @@ public final class TextureManager {
         ImageInitializationData data = loadImageInitializationData(imagePath);
         int textureId = MainGui.getInstance().getRender().loadImage(data.width, data.height, data.dataBytes);
         STBImage.stbi_image_free(data.dataBytes);
-        ImageData imageData = new ImageData(textureId, data.width(), data.height(), left, right, top, bottom);
+        ImageData imageData = new ImageData(textureId, data.width(), data.height(), left, right, top, bottom, imagePath);
         imageMap.put(imagePath, imageData);
         return imageData;
     }

@@ -17,12 +17,20 @@ package top.untoldstudio.rimeui.core.ui.node;
 
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.render.GuiRender;
+import top.untoldstudio.rimeui.core.serialization.node.JsonHBox;
 import top.untoldstudio.rimeui.core.ui.AbstractFrame;
 
 public final class HBox extends LayoutBox<HBox> {
     @Override
     protected void render(GuiRender render, double delta){
         super.renderFrameDefaultBackground(render, delta);
+    }
+
+    @Override
+    public JsonHBox toJsonNodeTree(){
+        JsonHBox box = new JsonHBox();
+        super.fillParentClassJsonNode(box);
+        return box;
     }
 
     @Override

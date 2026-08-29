@@ -21,6 +21,7 @@ import top.untoldstudio.rimeui.core.event.MouseButtonEvent;
 import top.untoldstudio.rimeui.core.event.MouseMoveEvent;
 import top.untoldstudio.rimeui.core.event.MouseScrollEvent;
 import top.untoldstudio.rimeui.core.render.GuiRender;
+import top.untoldstudio.rimeui.core.serialization.node.JsonImageLabel;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 import top.untoldstudio.rimeui.core.texture.ImageData;
 import top.untoldstudio.rimeui.core.ui.AbstractFrame;
@@ -34,13 +35,22 @@ public final class ImageLabel extends AbstractFrame<ImageLabel> implements Image
         renderImage(render, data, realPosition, realPositionMax, realSize, backgroundColor);
     }
 
+    @Override
+    public JsonImageLabel toJsonNodeTree(){
+        JsonImageLabel label = new JsonImageLabel();
+        label.setImageData(data.toJsonImageData());
+        label.setIsBlockInput(isBlockInput);
+        super.fillParentClassJsonNode(label);
+        return label;
+    }
+
     public ImageLabel setTexture(ImageData data){
         this.data = data;
         sendSignal(SignalType.SET_TEXTURE_ID, data);
         return self;
     }
 
-    public ImageLabel setBlockInput(boolean isAcceptInput) {
+    public ImageLabel setIsBlockInput(boolean isAcceptInput) {
         this.isBlockInput = isAcceptInput;
         sendSignal(SignalType.SET_BLOCK_INPUT, isAcceptInput);
         return this;

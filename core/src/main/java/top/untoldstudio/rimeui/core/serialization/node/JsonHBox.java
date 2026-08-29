@@ -13,17 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.untoldstudio.rimeui.core.ui.node;
+package top.untoldstudio.rimeui.core.serialization.node;
 
-import top.untoldstudio.rimeui.core.ui.AbstractFrame;
-import top.untoldstudio.rimeui.core.ui.GuiInterface;
+import top.untoldstudio.rimeui.core.ui.node.HBox;
 
-public interface InputBlocker<T> extends GuiInterface {
-    @Override
-    default AbstractFrame<?> getGuiNode(){
-        return (AbstractFrame<?>) this;
+public final class JsonHBox extends JsonLayoutBox {
+    public HBox toGuiNode(){
+        HBox box = new HBox(position, size);
+        super.fillParentGuiNodeField(box);
+        return box;
     }
-
-    boolean isBlockInput();
-    T setIsBlockInput(boolean isAcceptInput);
 }

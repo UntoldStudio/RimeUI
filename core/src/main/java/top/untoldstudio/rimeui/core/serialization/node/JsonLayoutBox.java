@@ -17,35 +17,40 @@ package top.untoldstudio.rimeui.core.serialization.node;
 
 import com.google.gson.annotations.SerializedName;
 import top.untoldstudio.rimeui.core.serialization.JsonAbstractFrame;
-import top.untoldstudio.rimeui.core.serialization.JsonImageData;
-import top.untoldstudio.rimeui.core.ui.node.ImageLabel;
+import top.untoldstudio.rimeui.core.ui.node.LayoutBox;
 
-public final class JsonImageLabel extends JsonAbstractFrame {
-    @SerializedName("image_data")
-    private JsonImageData imageData;
+public abstract class JsonLayoutBox extends JsonAbstractFrame {
+    @SerializedName("frame_start_spacing")
+    private int frameStartSpacing;
+    @SerializedName("frame_spacing")
+    private int frameSpacing;
     @SerializedName("is_block_input")
     private boolean isBlockInput;
 
-    @Override
-    public ImageLabel toGuiNode(){
-        ImageLabel label = new ImageLabel(imageData.toImageData(), position, size);
-        label.setTexture(imageData.toImageData());
-        label.setIsBlockInput(isBlockInput);
-        super.fillParentGuiNodeField(label);
-        return label;
+    public final LayoutBox<?> fillParentGuiNodeField(LayoutBox<?> box){
+        box.setFrameStartSpacing(frameStartSpacing);
+        box.setFrameSpacing(frameSpacing);
+        box.setIsBlockInput(isBlockInput);
+        return box;
     }
 
-    public JsonImageData getImageData() {
-        return imageData;
+    public int getFrameStartSpacing(){
+        return frameStartSpacing;
     }
-    public boolean isBlockInput() {
+    public int getFrameSpacing(){
+        return frameSpacing;
+    }
+    public boolean isBlockInput(){
         return isBlockInput;
     }
 
-    public void setImageData(JsonImageData imageData) {
-        this.imageData = imageData;
+    public void setFrameStartSpacing(int frameStartSpacing){
+        this.frameStartSpacing = frameStartSpacing;
     }
-    public void setIsBlockInput(boolean isBlockInput) {
+    public void setFrameSpacing(int frameSpacing){
+        this.frameSpacing = frameSpacing;
+    }
+    public void setIsBlockInput(boolean isBlockInput){
         this.isBlockInput = isBlockInput;
     }
 }

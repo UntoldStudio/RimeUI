@@ -17,8 +17,25 @@ package top.untoldstudio.rimeui.core.serialization.node;
 
 import com.google.gson.annotations.SerializedName;
 import top.untoldstudio.rimeui.core.serialization.JsonAbstractFrame;
+import top.untoldstudio.rimeui.core.ui.node.Frame;
 
 public final class JsonFrame extends JsonAbstractFrame {
     @SerializedName("is_block_input")
     private boolean isBlockInput;
+
+    @Override
+    public Frame toGuiNode(){
+        Frame frame = new Frame(position, size);
+        frame.setIsBlockInput(isBlockInput);
+        super.fillParentGuiNodeField(frame);
+        return frame;
+    }
+
+    public boolean isBlockInput(){
+        return isBlockInput;
+    }
+
+    public void setIsBlockInput(boolean isBlockInput){
+        this.isBlockInput = isBlockInput;
+    }
 }

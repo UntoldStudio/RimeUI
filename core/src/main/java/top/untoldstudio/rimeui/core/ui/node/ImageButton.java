@@ -21,6 +21,7 @@ import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.event.MouseMoveEvent;
 import top.untoldstudio.rimeui.core.event.MouseButtonEvent;
 import top.untoldstudio.rimeui.core.render.GuiRender;
+import top.untoldstudio.rimeui.core.serialization.node.JsonImageButton;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 import top.untoldstudio.rimeui.core.texture.ImageData;
 import top.untoldstudio.rimeui.core.ui.AbstractFrame;
@@ -37,6 +38,17 @@ public class ImageButton extends AbstractFrame<ImageButton> implements ImageBase
     private ImageData pressedImage;
     private ImageData hoveredImage;
     private boolean isPressedNow = true;
+
+    @Override
+    public JsonImageButton toJsonNodeTree(){
+        JsonImageButton button = new JsonImageButton();
+        button.setCanTriggerButtons(canTriggerButtons);
+        button.setDefaultImageData(defaultImage.toJsonImageData());
+        button.setHoveredImageData(hoveredImage.toJsonImageData());
+        button.setPressedImageData(pressedImage.toJsonImageData());
+        super.fillParentClassJsonNode(button);
+        return button;
+    }
 
     @Override
     public void render(GuiRender render, double delta){

@@ -16,6 +16,22 @@
 package top.untoldstudio.rimeui.core.serialization;
 
 import com.google.gson.annotations.SerializedName;
+import top.untoldstudio.rimeui.core.texture.ImageData;
+import top.untoldstudio.rimeui.core.texture.TextureManager;
 
-public record JsonImageData(@SerializedName("is_nice_grid_texture") boolean isNiceGridTexture, String path) {
+public record JsonImageData(@SerializedName("is_nice_grid_texture") boolean isNiceGridTexture, int left, int right, int top, int bottom, String path) {
+    public JsonImageData(String path){
+        this(false, 0, 0, 0, 0, path);
+    }
+    public JsonImageData(String path, int left, int right, int top, int bottom){
+        this(true, left, right, top, bottom, path);
+    }
+
+    public ImageData toImageData() {
+        if (isNiceGridTexture){
+            return TextureManager.loadImageWithNiceGrid(path, left, right, top, bottom);
+        } else {
+            return TextureManager.loadImageWithoutNiceGrid(path);
+        }
+    }
 }

@@ -16,10 +16,13 @@
 package top.untoldstudio.rimeui.application.bootstrap;
 
 import top.untoldstudio.rimeui.core.RimeUI;
+import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.event.GLFWEventListener;
+import top.untoldstudio.rimeui.core.serialization.JsonSerialization;
 import top.untoldstudio.rimeui.core.ui.DoubleConsumer;
 import top.untoldstudio.rimeui.core.ui.MainGui;
 import top.untoldstudio.rimeui.core.ui.Window;
+import top.untoldstudio.rimeui.core.ui.node.Frame;
 
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
@@ -38,6 +41,9 @@ public final class Application {
         GLFWEventListener listener = new GLFWEventListener(windowHandle);
         listener.registerCallback();
         listener.setEnabled(true);
+
+        Frame frame = new Frame(ScaleOffset.fromScale(0.5, 0.5), ScaleOffset.fromScale(0.5, 0.5));
+        RimeUI.getMainGui().addChild(frame);
 
         window.setWindowIcon("/texture/icon.png");
 

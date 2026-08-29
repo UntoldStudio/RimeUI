@@ -25,6 +25,7 @@ import top.untoldstudio.rimeui.core.event.MouseMoveEvent;
 import top.untoldstudio.rimeui.core.event.MouseScrollEvent;
 import top.untoldstudio.rimeui.core.font.Font;
 import top.untoldstudio.rimeui.core.render.GuiRender;
+import top.untoldstudio.rimeui.core.serialization.node.JsonTextLabel;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 import top.untoldstudio.rimeui.core.ui.AbstractFrame;
 
@@ -40,6 +41,23 @@ public final class TextLabel extends AbstractFrame<TextLabel> implements InputBl
     private VerticalAlignment verticalAlignment = VerticalAlignment.TOP;
     private ScaleOffset textRenderPosition;
     private boolean isBlockInput = false;
+
+    @Override
+    public JsonTextLabel toJsonNodeTree(){
+        JsonTextLabel label = new JsonTextLabel();
+        label.setCanFrameBackgroundDisplay(canFrameBackgroundDisplay);
+        label.setText(text);
+        label.setFont(font.toJsonFont());
+        label.setFontSize(fontSize);
+        label.setTextColor(textColor);
+        label.setItalicSlant(italicSlant);
+        label.setBoldStrength(boldStrength);
+        label.setHorizontalAlignment(horizontalAlignment);
+        label.setVerticalAlignment(verticalAlignment);
+        label.setIsBlockInput(isBlockInput);
+        super.fillParentClassJsonNode(label);
+        return label;
+    }
 
     @Override
     public void render(GuiRender render, double delta){
@@ -141,7 +159,7 @@ public final class TextLabel extends AbstractFrame<TextLabel> implements InputBl
         textRenderPosition = ScaleOffset.fromOffset(horizontalAlignmentPixel, verticalAlignmentPixel);
     }
 
-    public TextLabel setBlockInput(boolean isAcceptInput) {
+    public TextLabel setIsBlockInput(boolean isAcceptInput) {
         this.isBlockInput = isAcceptInput;
         sendSignal(SignalType.SET_BLOCK_INPUT, isAcceptInput);
         return this;

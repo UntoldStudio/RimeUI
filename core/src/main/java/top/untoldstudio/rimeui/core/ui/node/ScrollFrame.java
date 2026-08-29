@@ -19,6 +19,7 @@ import top.untoldstudio.rimeui.core.data.RGBA;
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.event.*;
 import top.untoldstudio.rimeui.core.render.GuiRender;
+import top.untoldstudio.rimeui.core.serialization.node.JsonScrollFrame;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 import top.untoldstudio.rimeui.core.texture.ImageData;
 import top.untoldstudio.rimeui.core.texture.TextureManager;
@@ -36,6 +37,18 @@ public final class ScrollFrame extends AbstractFrame<ScrollFrame> implements Inp
     @Override
     protected void render(GuiRender render, double delta) {
         super.renderFrameDefaultBackground(render, delta);
+    }
+
+    @Override
+    public JsonScrollFrame toJsonNodeTree(){
+        JsonScrollFrame frame = new JsonScrollFrame();
+        frame.setScrollBar(scrollBar.toJsonNodeTree());
+        frame.setScrollScale(scrollScale);
+        frame.setScrollProgress(scrollProgress);
+        frame.setScrollSpeed(scrollSpeed);
+        frame.setIsBlockInput(isBlockInput);
+        super.fillParentClassJsonNode(frame);
+        return frame;
     }
 
     private void setScrollBarProcessState() {
@@ -151,7 +164,7 @@ public final class ScrollFrame extends AbstractFrame<ScrollFrame> implements Inp
         return scrollSpeed;
     }
 
-    public ScrollFrame setBlockInput(boolean isAcceptInput) {
+    public ScrollFrame setIsBlockInput(boolean isAcceptInput) {
         this.isBlockInput = isAcceptInput;
         sendSignal(SignalType.SET_BLOCK_INPUT, isAcceptInput);
         return this;

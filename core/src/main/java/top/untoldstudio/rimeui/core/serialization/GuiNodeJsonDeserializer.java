@@ -20,8 +20,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import top.untoldstudio.rimeui.core.error.JsonDeserializeError;
-import top.untoldstudio.rimeui.core.serialization.node.JsonFrame;
-import top.untoldstudio.rimeui.core.serialization.node.JsonImageLabel;
+import top.untoldstudio.rimeui.core.serialization.node.*;
 
 import java.lang.reflect.Type;
 
@@ -31,6 +30,7 @@ public final class GuiNodeJsonDeserializer implements JsonDeserializer<JsonGuiNo
         JsonObject object = element.getAsJsonObject();
         String type = object.get("type_name").getAsString().toUpperCase();
         JsonNodeType nodeType;
+
         try {
             nodeType = JsonNodeType.valueOf(type);
         } catch (IllegalArgumentException e) {
@@ -39,6 +39,11 @@ public final class GuiNodeJsonDeserializer implements JsonDeserializer<JsonGuiNo
         return switch (nodeType){
             case FRAME -> context.deserialize(object, JsonFrame.class);
             case IMAGE_LABEL -> context.deserialize(object, JsonImageLabel.class);
+            case H_BOX -> context.deserialize(object, JsonHBox.class);
+            case V_BOX -> context.deserialize(object, JsonVBox.class);
+            case IMAGE_BUTTON -> context.deserialize(object, JsonImageButton.class);
+            case SCROLL_FRAME -> context.deserialize(object, JsonScrollFrame.class);
+            case TEXT_LABEL -> context.deserialize(object, JsonTextLabel.class);
         };
     }
 }

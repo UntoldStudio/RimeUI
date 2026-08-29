@@ -18,4 +18,9 @@ package top.untoldstudio.rimeui.core.serialization;
 public enum JsonNodeType {
     FRAME,
     IMAGE_LABEL,
+    H_BOX,
+    V_BOX,
+    IMAGE_BUTTON,
+    SCROLL_FRAME,
+    TEXT_LABEL,
 }

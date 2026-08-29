@@ -22,6 +22,7 @@ import top.untoldstudio.rimeui.core.event.MouseButtonEvent;
 import top.untoldstudio.rimeui.core.event.MouseMoveEvent;
 import top.untoldstudio.rimeui.core.event.MouseScrollEvent;
 import top.untoldstudio.rimeui.core.render.GuiRender;
+import top.untoldstudio.rimeui.core.serialization.node.JsonLayoutBox;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 import top.untoldstudio.rimeui.core.ui.AbstractFrame;
 import top.untoldstudio.rimeui.core.ui.GuiNode;
@@ -38,6 +39,14 @@ public abstract class LayoutBox<T extends LayoutBox<T>> extends AbstractFrame<T>
 
     protected abstract void render(GuiRender render, double delta);
     protected abstract void sortFrame();
+
+    public final JsonLayoutBox fillParentClassJsonNode(JsonLayoutBox box){
+        box.setFrameStartSpacing(frameStartSpacing);
+        box.setFrameSpacing(frameSpacing);
+        box.setIsBlockInput(isBlockInput);
+        super.fillParentClassJsonNode(box);
+        return box;
+    }
 
     public int getFrameStartSpacing() {
         return frameStartSpacing;
@@ -97,7 +106,7 @@ public abstract class LayoutBox<T extends LayoutBox<T>> extends AbstractFrame<T>
         sortFrame();
     }
 
-    public T setBlockInput(boolean isAcceptInput) {
+    public T setIsBlockInput(boolean isAcceptInput) {
         this.isBlockInput = isAcceptInput;
         sendSignal(SignalType.SET_BLOCK_INPUT, isAcceptInput);
         return self;

@@ -15,11 +15,17 @@
  */
 package top.untoldstudio.rimeui.core.texture;
 
-public record ImageData(boolean isNiceGridTexture, int textureId, int width, int height, int left, int right, int top, int bottom) {
-    public ImageData(int textureId, int width, int height){
-        this(false, textureId, width, height, 0, 0, 0, 0);
+import top.untoldstudio.rimeui.core.serialization.JsonImageData;
+
+public record ImageData(boolean isNiceGridTexture, int textureId, int width, int height, int left, int right, int top, int bottom, String path) {
+    public ImageData(int textureId, int width, int height, String path){
+        this(false, textureId, width, height, 0, 0, 0, 0, path);
     }
-    public ImageData(int textureId, int width, int height, int left, int right, int top, int bottom) {
-        this(true, textureId, width, height, left, right, top, bottom);
+    public ImageData(int textureId, int width, int height, int left, int right, int top, int bottom, String path) {
+        this(true, textureId, width, height, left, right, top, bottom, path);
+    }
+
+    public JsonImageData toJsonImageData(){
+        return new JsonImageData(isNiceGridTexture, left, right, top, bottom, path);
     }
 }

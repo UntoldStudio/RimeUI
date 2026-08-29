@@ -18,6 +18,7 @@ package top.untoldstudio.rimeui.core.ui;
 import org.jetbrains.annotations.NotNull;
 import top.untoldstudio.rimeui.core.event.*;
 import top.untoldstudio.rimeui.core.render.GuiRender;
+import top.untoldstudio.rimeui.core.serialization.JsonGuiNode;
 import top.untoldstudio.rimeui.core.signal.SignalBus;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 
@@ -55,8 +56,10 @@ public abstract class GuiNode<T extends GuiNode<T>> {
     public boolean isVisible(){
         return visible;
     }
-    public void setVisible(boolean visible){
+    public T setVisible(boolean visible){
         this.visible = visible;
+        sendSignal(SignalType.SET_VISIBLE, visible);
+        return self;
     }
     public T registerRenderCallback(DoubleConsumer callback){
         renderCallbacks.add(callback);
@@ -243,6 +246,19 @@ public abstract class GuiNode<T extends GuiNode<T>> {
     }
     public int getRenderLevel() {
         return renderLevel;
+    }
+
+    public abstract JsonGuiNode toJsonNodeTree();
+    public JsonGuiNode fillParentClassJsonNode(JsonGuiNode node){
+        List<JsonGuiNode> childrenJsonGuiNodes = new ArrayList<>();
+        for (GuiNode<?> child : children){
+            childrenJsonGuiNodes.add(child.toJsonNodeTree());
+        }
+        node.setChildren(childrenJsonGuiNodes);
+        node.setName(name);
+        node.setRenderLevel(renderLevel);
+        node.setVisible(visible);
+        return node;
     }
 
     protected void sortChildren(){

@@ -20,6 +20,7 @@ import top.untoldstudio.rimeui.core.event.KeyEvent;
 import top.untoldstudio.rimeui.core.event.MouseButtonEvent;
 import top.untoldstudio.rimeui.core.event.MouseMoveEvent;
 import top.untoldstudio.rimeui.core.event.MouseScrollEvent;
+import top.untoldstudio.rimeui.core.serialization.node.JsonFrame;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 import top.untoldstudio.rimeui.core.ui.AbstractFrame;
 import top.untoldstudio.rimeui.core.render.GuiRender;
@@ -32,7 +33,7 @@ public final class Frame extends AbstractFrame<Frame> implements InputBlocker<Fr
         super.renderFrameDefaultBackground(render, delta);
     }
 
-    public Frame setBlockInput(boolean isAcceptInput) {
+    public Frame setIsBlockInput(boolean isAcceptInput) {
         this.isBlockInput = isAcceptInput;
         sendSignal(SignalType.SET_BLOCK_INPUT, isAcceptInput);
         return this;
@@ -60,5 +61,13 @@ public final class Frame extends AbstractFrame<Frame> implements InputBlocker<Fr
     @Override
     protected void onMouseScrollEvent(MouseScrollEvent event){
         if (isBlockInput && isMouseInRange()) event.cancel();
+    }
+
+    @Override
+    public JsonFrame toJsonNodeTree(){
+        JsonFrame frame = new JsonFrame();
+        frame.setIsBlockInput(isBlockInput);
+        super.fillParentClassJsonNode(frame);
+        return frame;
     }
 }

@@ -17,14 +17,27 @@ package top.untoldstudio.rimeui.core.serialization;
 
 import com.google.gson.*;
 import top.untoldstudio.rimeui.core.error.JsonSerializeError;
+import top.untoldstudio.rimeui.core.ui.GuiNode;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public final class JsonSerialization {
     private static final JsonSerialization instance = new JsonSerialization();
-    public final Gson gson = new GsonBuilder().setPrettyPrinting().registerTypeAdapter(JsonGuiNode.class, new GuiNodeJsonDeserializer()).registerTypeAdapter(JsonGuiNode.class, new GuiNodeJsonSerializer()).create();
+    public final Gson gson = new GsonBuilder()
+            .setPrettyPrinting()
+            .registerTypeAdapter(JsonGuiNode.class, new GuiNodeJsonDeserializer())
+            .registerTypeAdapterFactory(new LowerCaseEnumTypeAdapterFactory())
+            .create();
 
+    public List<GuiNode<?>> deserializeNodeTreeToGuiNode(String jsonString){
+        List<JsonGuiNode> jsonGuiNodes = deserializeNodeTree(jsonString);
+        List<GuiNode<?>> guiNodes = new ArrayList<>();
+        for (JsonGuiNode jsonGuiNode : jsonGuiNodes){
+            guiNodes.add(jsonGuiNode.toGuiNode());
+        }
+        return guiNodes;
+    }
     public List<JsonGuiNode> deserializeNodeTree(String jsonString) {
         JsonObject root = JsonParser.parseString(jsonString).getAsJsonObject();
 
@@ -41,7 +54,7 @@ public final class JsonSerialization {
 
         return rootNodes;
     }
-    public String serializeNodeTree(List<JsonGuiNode> rootNodeTree) {
+    public String serializeNodeTreeFromJsonNodes(List<JsonGuiNode> rootNodeTree) {
         int currentNodeIdentifier = 1;
         JsonObject root = new JsonObject();
         for (JsonGuiNode node : rootNodeTree) {
@@ -49,6 +62,16 @@ public final class JsonSerialization {
             currentNodeIdentifier++;
         }
         return gson.toJson(root);
+    }
+    public String serializeNodeTreeFromNodes(List<GuiNode<?>> rootNodes){
+        List<JsonGuiNode> jsonNodes = new ArrayList<>();
+        for (GuiNode<?> node : rootNodes) {
+            jsonNodes.add(node.toJsonNodeTree());
+        }
+        return serializeNodeTreeFromJsonNodes(jsonNodes);
+    }
+    public String serializeNodeTreeFromNode(GuiNode<?> node) {
+        return serializeNodeTreeFromJsonNodes(List.of(node.toJsonNodeTree()));
     }
 
     public static JsonSerialization getInstance() {

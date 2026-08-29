@@ -17,12 +17,20 @@ package top.untoldstudio.rimeui.core.ui.node;
 
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.render.GuiRender;
+import top.untoldstudio.rimeui.core.serialization.node.JsonVBox;
 import top.untoldstudio.rimeui.core.ui.AbstractFrame;
 
 public final class VBox extends LayoutBox<VBox> {
     @Override
     protected void render(GuiRender render, double delta){
         super.renderFrameDefaultBackground(render, delta);
+    }
+
+    @Override
+    public JsonVBox toJsonNodeTree(){
+        JsonVBox box = new JsonVBox();
+        super.fillParentClassJsonNode(box);
+        return box;
     }
 
     @Override

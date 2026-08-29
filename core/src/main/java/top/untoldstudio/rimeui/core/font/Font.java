@@ -18,11 +18,16 @@ package top.untoldstudio.rimeui.core.font;
 import static org.lwjgl.util.freetype.FreeType.*;
 
 import org.lwjgl.util.freetype.*;
+import top.untoldstudio.rimeui.core.serialization.JsonFont;
 
 import java.nio.ByteBuffer;
 
 public record Font(FT_Face face, String fontPath, ByteBuffer memoryBuffer) {
     public static final Font JETBRAINS_MONO = FontManager.loadFont("/font/jetbrains_mono.ttf");
+
+    public JsonFont toJsonFont() {
+        return new JsonFont(fontPath);
+    }
 
     public int getStringWidth(String text, int fontSize, double italicDegrees, int boldStrength) {
         float[] bounds = computeTextBounds(text, fontSize, italicDegrees, boldStrength);

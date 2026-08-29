@@ -16,27 +16,30 @@
 package top.untoldstudio.rimeui.core.serialization;
 
 import com.google.gson.annotations.SerializedName;
+import top.untoldstudio.rimeui.core.ui.GuiNode;
 
 import java.util.List;
 
 public abstract class JsonGuiNode {
     @SerializedName("type_name")
-    private String typeName;
+    private JsonNodeType nodeType;
     private String name;
     @SerializedName("render_level")
     private int renderLevel;
     private boolean visible;
     private List<JsonGuiNode> children;
 
-    public String getTypeName() {
-        return typeName;
-    }
-    public JsonNodeType getNodeType() {
-        try {
-            return JsonNodeType.valueOf(typeName.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid JsonNodeType: " + typeName);
+    public abstract GuiNode<?> toGuiNode();
+    public final GuiNode<?> fillParentGuiNodeField(GuiNode<?> node){
+        node.setName(name).setRenderLevel(renderLevel).setVisible(visible);
+        for (JsonGuiNode child : children){
+            node.addChild(child.toGuiNode());
         }
+        return node;
+    }
+
+    public JsonNodeType getTypeName() {
+        return nodeType;
     }
     public String getName() {
         return name;
@@ -49,5 +52,21 @@ public abstract class JsonGuiNode {
     }
     public boolean isVisible() {
         return visible;
+    }
+
+    public void setNodeType(JsonNodeType nodeType) {
+        this.nodeType = nodeType;
+    }
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+    public void setChildren(List<JsonGuiNode> children) {
+        this.children = children;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public void setRenderLevel(int renderLevel) {
+        this.renderLevel = renderLevel;
     }
 }
