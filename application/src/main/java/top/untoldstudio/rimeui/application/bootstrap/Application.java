@@ -17,7 +17,8 @@ package top.untoldstudio.rimeui.application.bootstrap;
 
 import top.untoldstudio.rimeui.core.RimeUI;
 import top.untoldstudio.rimeui.core.event.GLFWEventListener;
-import top.untoldstudio.rimeui.core.resource.ResourceReader;
+import top.untoldstudio.rimeui.core.ui.DoubleConsumer;
+import top.untoldstudio.rimeui.core.ui.MainUi;
 import top.untoldstudio.rimeui.core.ui.Window;
 
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
@@ -27,8 +28,10 @@ import static org.lwjgl.opengl.GL32C.*;
 public final class Application {
     private static Application instance;
     private final Window window;
+    private boolean isRunning;
 
     public void run(){
+        isRunning = true;
         long windowHandle = window.getWindowHandle();
         RimeUI.initOpenGL(windowHandle);
 
@@ -38,23 +41,33 @@ public final class Application {
 
         window.setWindowIcon("/texture/icon.png");
 
-        while (!window.isWindowShouldClose()){
+        while (isRunning && !window.isWindowShouldClose()){
             glfwPollEvents();
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
             RimeUI.getMainGui().render();
             glfwSwapBuffers(windowHandle);
         }
-        RimeUI.cleanup();
+        stop();
+    }
+
+    public void runTask(Runnable task){
+        MainUi.getInstance().runTask(task);
+    }
+    public void runTaskLater(DoubleConsumer task, double delay){
+        MainUi.getInstance().runTaskLater(task, delay);
     }
 
     public void stop(){
+        isRunning = false;
+        RimeUI.cleanup();
     }
 
     public Application() {
         instance = this;
         window = Window.create("RimeUI Layout Builder", 800, 600);
     }
+
     public static Application getInstance() {
         return instance;
     }

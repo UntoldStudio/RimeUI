@@ -27,6 +27,9 @@ import top.untoldstudio.rimeui.core.texture.TextureManager;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public final class MainUi {
     private static MainUi instance;
@@ -37,21 +40,25 @@ public final class MainUi {
     private final Mouse mouse;
     private long externalSettingCursor = -1;
     private boolean isLastMouseMoveEventCanceled = false;
+    private final BlockingQueue<Runnable> tasks = new LinkedBlockingQueue<>();
+    private final PriorityBlockingQueue<DelayTask> delayTasks = new PriorityBlockingQueue<>();
 
-    public void render(){
+    public void render() {
         render.saveContext();
         render.beginFrame();
 
-        boolean isCanceled = false;
-
-        if (externalSettingCursor != -1 && !isLastMouseMoveEventCanceled){
+        if (externalSettingCursor != -1 && !isLastMouseMoveEventCanceled) {
             render.setCursorShapeInThisFrame(externalSettingCursor);
         } else {
             render.setCursorShapeInThisFrame(CursorShape.ARROW);
         }
 
+        long currentTime = System.nanoTime();
         double startRenderTime = System.nanoTime() / 1_000_000_000.0;
-        for (GuiNode<?> node : children){
+
+        runTasks(currentTime);
+
+        for (GuiNode<?> node : children) {
             node.renderWithChildren(render, startRenderTime - lastRenderTime);
         }
         render.submitBuffer();
@@ -60,16 +67,43 @@ public final class MainUi {
         render.endFrame();
     }
 
+    private void runTasks(long currentTime) {
+        Runnable task;
+        while ((task = tasks.poll()) != null) {
+            try {
+                task.run();
+            } catch (Exception e) {
+                throw new RuntimeException("A fatal error occurred in the task!", e);
+            }
+        }
+        DelayTask delayTask;
+        while ((delayTask = delayTasks.peek()) != null) {
+            if (delayTask.tryRun(currentTime)) {
+                delayTasks.poll();
+            } else {
+                break;
+            }
+        }
+    }
+    public void runTask(Runnable task) {
+        tasks.add(task);
+    }
+    public void runTaskLater(DoubleConsumer task, double waitTime){
+        long currentTime = System.nanoTime();
+        delayTasks.offer(new DelayTask(currentTime, currentTime + (long)(waitTime * 1_000_000_000.0), task));
+    }
+
     public void setExternalSettingCursor(long externalSettingCursor) {
         this.externalSettingCursor = externalSettingCursor;
     }
 
-    public void onWindowSizeChangeEvent(WindowSizeChangeEvent event){
-        for (GuiNode<?> child : children){
+    public void onWindowSizeChangeEvent(WindowSizeChangeEvent event) {
+        for (GuiNode<?> child : children) {
             child.onWindowSizeChangeEventWithChildren(event);
         }
     }
-    public boolean isMouseInRange(ScaleOffset min, ScaleOffset max){
+
+    public boolean isMouseInRange(ScaleOffset min, ScaleOffset max) {
         double mouseX = MainUi.getInstance().getMouse().getXPosition();
         double mouseY = MainUi.getInstance().getMouse().getYPosition();
         int minX = min.getXPixelInWindow();
@@ -78,30 +112,33 @@ public final class MainUi {
         int maxY = max.getYPixelInWindow();
         return mouseX >= minX && mouseX <= maxX && mouseY >= minY && mouseY <= maxY;
     }
-    public void onKeyEvent(KeyEvent event){
-        for (int i = children.size() -1; i >= 0; i--){
+
+    public void onKeyEvent(KeyEvent event) {
+        for (int i = children.size() - 1; i >= 0; i--) {
             children.get(i).onKeyEventWithChildren(event);
             if (event.isCancelled()) return;
         }
     }
-    public void onMouseButtonEvent(MouseButtonEvent event){
-        if (event.getAction() == InputAction.RELEASE){
+
+    public void onMouseButtonEvent(MouseButtonEvent event) {
+        if (event.getAction() == InputAction.RELEASE) {
             mouse.setMouseButtonReleased(event.getButton());
-        } else if (event.getAction() == InputAction.PRESS){
+        } else if (event.getAction() == InputAction.PRESS) {
             mouse.setMouseButtonPressed(event.getButton());
         }
 
-        for (int i = children.size() -1; i >= 0; i--){
+        for (int i = children.size() - 1; i >= 0; i--) {
             children.get(i).onMouseButtonEventWithChildren(event);
             if (event.isCancelled()) return;
         }
     }
-    public void onMouseMoveEvent(MouseMoveEvent event){
+
+    public void onMouseMoveEvent(MouseMoveEvent event) {
         mouse.updateXAndYPosition(event.getX(), event.getY());
 
-        for (int i = children.size() -1; i >= 0; i--){
+        for (int i = children.size() - 1; i >= 0; i--) {
             children.get(i).onMouseMoveEventWithChildren(event);
-            if (event.isCancelled()){
+            if (event.isCancelled()) {
                 isLastMouseMoveEventCanceled = true;
                 return;
             }
@@ -109,53 +146,60 @@ public final class MainUi {
 
         isLastMouseMoveEventCanceled = false;
     }
-    public void onMouseScrollEvent(MouseScrollEvent event){
-        for (int i = children.size() -1; i >= 0; i--){
+
+    public void onMouseScrollEvent(MouseScrollEvent event) {
+        for (int i = children.size() - 1; i >= 0; i--) {
             children.get(i).onMouseScrollEventWithChildren(event);
             if (event.isCancelled()) return;
         }
     }
 
-    public boolean hasChild(GuiNode<?> node){
+    public boolean hasChild(GuiNode<?> node) {
         return children.contains(node);
     }
-    public boolean hasChild(String childName){
-        for (GuiNode<?> node : children){
-            if (node.getName().equals(childName)){
+
+    public boolean hasChild(String childName) {
+        for (GuiNode<?> node : children) {
+            if (node.getName().equals(childName)) {
                 return true;
             }
         }
         return false;
     }
-    public MainUi addChild(@NotNull GuiNode<?> node){
+
+    public MainUi addChild(@NotNull GuiNode<?> node) {
         node.parent = null;
         node.parentIsGuiMain = true;
         children.add(node);
         sortChildren();
-        if (!node.isInit){
+        if (!node.isInit) {
             node.initWithChildren();
         }
         node.sendSignal(SignalType.SET_PARENT);
         return this;
     }
-    public MainUi addChildren(@NotNull GuiNode<?>... children){
-        for (GuiNode<?> node : children){
+
+    public MainUi addChildren(@NotNull GuiNode<?>... children) {
+        for (GuiNode<?> node : children) {
             addChild(node);
         }
         return this;
     }
-    public MainUi removeChild(@NotNull GuiNode<?> node){
+
+    public MainUi removeChild(@NotNull GuiNode<?> node) {
         node.parentIsGuiMain = false;
         node.sendSignal(SignalType.SET_PARENT);
         children.remove(node);
         return this;
     }
-    public MainUi removeChildren(@NotNull GuiNode<?>... nodes){
-        for (GuiNode<?> node : nodes){
+
+    public MainUi removeChildren(@NotNull GuiNode<?>... nodes) {
+        for (GuiNode<?> node : nodes) {
             removeChild(node);
         }
         return this;
     }
+
     public MainUi removeChild(String name) {
         GuiNode<?> target = null;
         for (GuiNode<?> child : children) {
@@ -169,18 +213,19 @@ public final class MainUi {
         }
         return this;
     }
-    public MainUi removeChildren(String... names){
-        for (String name : names){
+
+    public MainUi removeChildren(String... names) {
+        for (String name : names) {
             removeChild(name);
         }
         return this;
     }
 
-    void sortChildren(){
+    void sortChildren() {
         children.sort(Comparator.comparingInt(GuiNode::getRenderLevel));
     }
 
-    public MainUi(GuiRender render, Window window){
+    public MainUi(GuiRender render, Window window) {
         instance = this;
         this.render = render;
         this.window = window;
@@ -199,20 +244,51 @@ public final class MainUi {
         return window.getHeight();
     }
 
-    public GuiRender getRender(){
+    public GuiRender getRender() {
         return render;
     }
 
     public Window getWindow() {
         return window;
     }
+
     public Mouse getMouse() {
         return mouse;
     }
 
-    public void cleanup(){
+    public void cleanup() {
         window.close();
         render.cleanup();
         TextureManager.cleanup();
+    }
+
+    public static class DelayTask implements Comparable<DelayTask>{
+        private final long targetTime;
+        private final long startTime;
+        private final DoubleConsumer callback;
+
+        public DelayTask(long startTime, long targetTime, DoubleConsumer callback) {
+            this.startTime = startTime;
+            this.targetTime = targetTime;
+            this.callback = callback;
+        }
+
+        public boolean tryRun(long currentTime){
+            boolean isRun = false;
+            if (currentTime >= targetTime){
+                isRun = true;
+                try {
+                    callback.accept((currentTime - startTime) / 1_000_000_000.0);
+                } catch (Exception e) {
+                    throw new RuntimeException("A fatal error occurred in the task!", e);
+                }
+            }
+            return isRun;
+        }
+
+        @Override
+        public int compareTo(@NotNull DelayTask other) {
+            return Long.compare(this.targetTime, other.targetTime);
+        }
     }
 }
