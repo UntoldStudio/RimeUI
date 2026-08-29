@@ -47,15 +47,15 @@ public final class TextureManager {
         return imageData;
     }
     public static ImageData loadImageWithNiceGrid(String imagePath, int left, int right, int top, int bottom){
-        if (imageMap.containsKey(imagePath)) {
-            return imageMap.get(imagePath);
+        if (imageMap.containsKey("NiceGrid:" + imagePath)) {
+            return imageMap.get("NiceGrid:" + imagePath);
         }
 
         ImageInitializationData data = loadImageInitializationData(imagePath);
         int textureId = MainGui.getInstance().getRender().loadImage(data.width, data.height, data.dataBytes);
         STBImage.stbi_image_free(data.dataBytes);
         ImageData imageData = new ImageData(textureId, data.width(), data.height(), left, right, top, bottom, imagePath);
-        imageMap.put(imagePath, imageData);
+        imageMap.put("NiceGrid:" + imagePath, imageData);
         return imageData;
     }
 

@@ -16,16 +16,10 @@
 package top.untoldstudio.rimeui.core.ui.node;
 
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
-import top.untoldstudio.rimeui.core.render.GuiRender;
 import top.untoldstudio.rimeui.core.serialization.node.JsonVBox;
 import top.untoldstudio.rimeui.core.ui.AbstractFrame;
 
 public final class VBox extends LayoutBox<VBox> {
-    @Override
-    protected void render(GuiRender render, double delta){
-        super.renderFrameDefaultBackground(render, delta);
-    }
-
     public VBox clone(){
         VBox box = new VBox(position, size);
         super.fillFieldForClone(box);

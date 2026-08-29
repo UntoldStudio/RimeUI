@@ -37,7 +37,10 @@ public abstract class LayoutBox<T extends LayoutBox<T>> extends AbstractFrame<T>
     protected List<AbstractFrame<?>> sortedFrameList = new ArrayList<>();
     protected boolean isBlockInput = false;
 
-    protected abstract void render(GuiRender render, double delta);
+    @Override
+    protected void render(GuiRender render, double delta){
+        super.renderFrameDefaultBackground(render, delta);
+    }
     protected abstract void sortFrame();
 
     @Override
@@ -92,7 +95,7 @@ public abstract class LayoutBox<T extends LayoutBox<T>> extends AbstractFrame<T>
     public T removeChild(@NotNull GuiNode<?> child) {
         super.removeChild(child);
         if (child instanceof AbstractFrame<?>) {
-            sortList();
+            sortFrame();
         }
         return self;
     }

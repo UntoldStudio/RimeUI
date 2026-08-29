@@ -28,6 +28,9 @@ import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.opengl.GL32C.*;
 
+/**
+ * 注意:application模块是我们的GUI编辑器而非给你的示例...
+ */
 public final class Application {
     private static Application instance;
     private final Window window;
@@ -46,6 +49,8 @@ public final class Application {
         RimeUI.getMainGui().addChild(frame);
 
         window.setWindowIcon("/texture/icon.png");
+
+        Bootstrap.buildDefaultGuiNodes();
 
         while (isRunning && !window.isWindowShouldClose()){
             glfwPollEvents();
