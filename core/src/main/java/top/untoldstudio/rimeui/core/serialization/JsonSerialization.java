@@ -30,15 +30,15 @@ public final class JsonSerialization {
             .registerTypeAdapterFactory(new LowerCaseEnumTypeAdapterFactory())
             .create();
 
-    public List<GuiNode<?>> deserializeNodeTreeToGuiNode(String jsonString){
-        List<JsonGuiNode> jsonGuiNodes = deserializeNodeTree(jsonString);
+    public List<GuiNode<?>> deserializeNodeTreeToGuiNodes(String jsonString){
+        List<JsonGuiNode> jsonGuiNodes = deserializeNodeTreeToJsonGuiNodes(jsonString);
         List<GuiNode<?>> guiNodes = new ArrayList<>();
         for (JsonGuiNode jsonGuiNode : jsonGuiNodes){
             guiNodes.add(jsonGuiNode.toGuiNode());
         }
         return guiNodes;
     }
-    public List<JsonGuiNode> deserializeNodeTree(String jsonString) {
+    public List<JsonGuiNode> deserializeNodeTreeToJsonGuiNodes(String jsonString) {
         JsonObject root = JsonParser.parseString(jsonString).getAsJsonObject();
 
         List<JsonElement> children = new ArrayList<>(root.asMap().values());

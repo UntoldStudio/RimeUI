@@ -17,9 +17,14 @@ package top.untoldstudio.rimeui.core;
 
 import top.untoldstudio.rimeui.core.font.FontManager;
 import top.untoldstudio.rimeui.core.render.GuiRender;
+import top.untoldstudio.rimeui.core.serialization.JsonGuiNode;
+import top.untoldstudio.rimeui.core.serialization.JsonSerialization;
+import top.untoldstudio.rimeui.core.ui.GuiNode;
 import top.untoldstudio.rimeui.core.ui.MainGui;
 import top.untoldstudio.rimeui.core.render.provider.OpenGLGuiRender;
 import top.untoldstudio.rimeui.core.ui.Window;
+
+import java.util.List;
 
 public final class RimeUI {
     static {
@@ -44,5 +49,21 @@ public final class RimeUI {
     }
     public static void cleanup(){
         MainGui.getInstance().cleanup();
+    }
+
+    public List<GuiNode<?>> deserializeNodeTreeToGuiNodes(String jsonString){
+        return JsonSerialization.getInstance().deserializeNodeTreeToGuiNodes(jsonString);
+    }
+    public List<JsonGuiNode> deserializeNodeTreeToJsonGuiNodes(String jsonString) {
+        return JsonSerialization.getInstance().deserializeNodeTreeToJsonGuiNodes(jsonString);
+    }
+    public String serializeNodeTreeFromJsonNodes(List<JsonGuiNode> rootNodeTree) {
+        return JsonSerialization.getInstance().serializeNodeTreeFromJsonNodes(rootNodeTree);
+    }
+    public String serializeNodeTreeFromNodes(List<GuiNode<?>> rootNodes){
+        return JsonSerialization.getInstance().serializeNodeTreeFromNodes(rootNodes);
+    }
+    public String serializeNodeTreeFromNode(GuiNode<?> node) {
+        return JsonSerialization.getInstance().serializeNodeTreeFromNode(node);
     }
 }
