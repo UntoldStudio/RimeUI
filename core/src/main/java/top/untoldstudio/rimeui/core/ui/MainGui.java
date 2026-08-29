@@ -31,8 +31,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
-public final class MainUi {
-    private static MainUi instance;
+public final class MainGui {
+    private static MainGui instance;
     private final List<GuiNode<?>> children = new ArrayList<>();
     private final GuiRender render;
     private double lastRenderTime = System.nanoTime() / 1_000_000_000.0;
@@ -104,8 +104,8 @@ public final class MainUi {
     }
 
     public boolean isMouseInRange(ScaleOffset min, ScaleOffset max) {
-        double mouseX = MainUi.getInstance().getMouse().getXPosition();
-        double mouseY = MainUi.getInstance().getMouse().getYPosition();
+        double mouseX = MainGui.getInstance().getMouse().getXPosition();
+        double mouseY = MainGui.getInstance().getMouse().getYPosition();
         int minX = min.getXPixelInWindow();
         int minY = min.getYPixelInWindow();
         int maxX = max.getXPixelInWindow();
@@ -167,7 +167,7 @@ public final class MainUi {
         return false;
     }
 
-    public MainUi addChild(@NotNull GuiNode<?> node) {
+    public MainGui addChild(@NotNull GuiNode<?> node) {
         node.parent = null;
         node.parentIsGuiMain = true;
         children.add(node);
@@ -179,28 +179,28 @@ public final class MainUi {
         return this;
     }
 
-    public MainUi addChildren(@NotNull GuiNode<?>... children) {
+    public MainGui addChildren(@NotNull GuiNode<?>... children) {
         for (GuiNode<?> node : children) {
             addChild(node);
         }
         return this;
     }
 
-    public MainUi removeChild(@NotNull GuiNode<?> node) {
+    public MainGui removeChild(@NotNull GuiNode<?> node) {
         node.parentIsGuiMain = false;
         node.sendSignal(SignalType.SET_PARENT);
         children.remove(node);
         return this;
     }
 
-    public MainUi removeChildren(@NotNull GuiNode<?>... nodes) {
+    public MainGui removeChildren(@NotNull GuiNode<?>... nodes) {
         for (GuiNode<?> node : nodes) {
             removeChild(node);
         }
         return this;
     }
 
-    public MainUi removeChild(String name) {
+    public MainGui removeChild(String name) {
         GuiNode<?> target = null;
         for (GuiNode<?> child : children) {
             if (child.getName().equals(name)) {
@@ -214,7 +214,7 @@ public final class MainUi {
         return this;
     }
 
-    public MainUi removeChildren(String... names) {
+    public MainGui removeChildren(String... names) {
         for (String name : names) {
             removeChild(name);
         }
@@ -225,14 +225,14 @@ public final class MainUi {
         children.sort(Comparator.comparingInt(GuiNode::getRenderLevel));
     }
 
-    public MainUi(GuiRender render, Window window) {
+    public MainGui(GuiRender render, Window window) {
         instance = this;
         this.render = render;
         this.window = window;
         this.mouse = new Mouse(window.getWindowHandle());
     }
 
-    public static MainUi getInstance() {
+    public static MainGui getInstance() {
         return instance;
     }
 

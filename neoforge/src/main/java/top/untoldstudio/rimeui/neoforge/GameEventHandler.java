@@ -20,13 +20,12 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import top.untoldstudio.rimeui.core.event.InputEventListener;
 import top.untoldstudio.rimeui.core.event.MouseButtonEvent;
-import top.untoldstudio.rimeui.core.event.MouseScrollEvent;
-import top.untoldstudio.rimeui.core.ui.MainUi;
+import top.untoldstudio.rimeui.core.ui.MainGui;
 
 public final class GameEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onMouseButtonEvent(InputEvent.MouseButton.Pre event){
-        if (MainUi.getInstance() == null) return;
+        if (MainGui.getInstance() == null) return;
         MouseButtonEvent customEvent = InputEventListener.onMouseButtonEvent(event.getButton(), event.getAction(), event.getModifiers());
         if (customEvent.isCancelled()){
             event.setCanceled(true);

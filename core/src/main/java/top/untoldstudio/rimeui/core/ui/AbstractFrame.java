@@ -46,7 +46,7 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
     }
 
     public boolean isMouseInRange(){
-        return MainUi.getInstance().isMouseInRange(realPosition, realPositionMax);
+        return MainGui.getInstance().isMouseInRange(realPosition, realPositionMax);
     }
 
     public void renderFrameDefaultBackground(GuiRender render, double delta){

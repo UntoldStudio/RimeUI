@@ -15,8 +15,11 @@
  */
 package top.untoldstudio.rimeui.core.error;
 
-public class ResourceError extends UIError {
+public class ResourceError extends GUIError {
     public ResourceError(String message) {
         super(message);
+    }
+    public ResourceError(String message, Throwable cause) {
+        super(message, cause);
     }
 }

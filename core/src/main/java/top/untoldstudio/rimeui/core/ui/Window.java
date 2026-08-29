@@ -51,7 +51,7 @@ public final class Window {
             int oldHeight = height;
             width = newWidth;
             height = newHeight;
-            MainUi.getInstance().onWindowSizeChangeEvent(new WindowSizeChangeEvent(oldWidth, oldHeight, newWidth, newHeight));
+            MainGui.getInstance().onWindowSizeChangeEvent(new WindowSizeChangeEvent(oldWidth, oldHeight, newWidth, newHeight));
             if (oldFramebufferSizeCallback != null){
                 oldFramebufferSizeCallback.invoke(window, newWidth, newHeight);
             }

@@ -18,7 +18,7 @@ package top.untoldstudio.rimeui.application.bootstrap;
 import top.untoldstudio.rimeui.core.RimeUI;
 import top.untoldstudio.rimeui.core.event.GLFWEventListener;
 import top.untoldstudio.rimeui.core.ui.DoubleConsumer;
-import top.untoldstudio.rimeui.core.ui.MainUi;
+import top.untoldstudio.rimeui.core.ui.MainGui;
 import top.untoldstudio.rimeui.core.ui.Window;
 
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
@@ -52,10 +52,10 @@ public final class Application {
     }
 
     public void runTask(Runnable task){
-        MainUi.getInstance().runTask(task);
+        MainGui.getInstance().runTask(task);
     }
     public void runTaskLater(DoubleConsumer task, double delay){
-        MainUi.getInstance().runTaskLater(task, delay);
+        MainGui.getInstance().runTaskLater(task, delay);
     }
 
     public void stop(){

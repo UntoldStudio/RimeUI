@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import top.untoldstudio.rimeui.core.event.MouseMoveEvent;
 import top.untoldstudio.rimeui.core.event.InputEventListener;
 import top.untoldstudio.rimeui.core.event.MouseScrollEvent;
-import top.untoldstudio.rimeui.core.ui.MainUi;
+import top.untoldstudio.rimeui.core.ui.MainGui;
 
 @Mixin(MouseHandler.class)
 public abstract class MouseHandlerMixin {
@@ -43,7 +43,7 @@ public abstract class MouseHandlerMixin {
             cancellable = true
     )
     private void onHandleAccumulatedMovement(CallbackInfo callbackInfo) {
-        if (MainUi.getInstance() != null){
+        if (MainGui.getInstance() != null){
             MouseMoveEvent event = new MouseMoveEvent(xpos, ypos);
             InputEventListener.onMouseMoveEvent(event);
             if (event.isCancelled()) {
@@ -60,7 +60,7 @@ public abstract class MouseHandlerMixin {
             cancellable = true
     )
     private void onScroll(long window, double xOffset, double yOffset, CallbackInfo callbackInfo) {
-        if (MainUi.getInstance() != null) {
+        if (MainGui.getInstance() != null) {
             MouseScrollEvent event = InputEventListener.onMouseScrollEvent(xOffset, yOffset);
             if (event.isCancelled()) {
                 callbackInfo.cancel();

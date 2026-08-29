@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.untoldstudio.rimeui.core.error;
+package top.untoldstudio.rimeui.core.serialization.node;
 
-public class RenderError extends GUIError {
-    public RenderError(String message) {
-        super(message);
-    }
-    public RenderError(String message, Throwable cause) {
-        super(message, cause);
-    }
+import com.google.gson.annotations.SerializedName;
+import top.untoldstudio.rimeui.core.serialization.JsonAbstractFrame;
+import top.untoldstudio.rimeui.core.serialization.JsonImageData;
+
+public final class JsonImageLabel extends JsonAbstractFrame {
+    @SerializedName("image_data")
+    private JsonImageData imageData;
+    @SerializedName("is_block_input")
+    private boolean isBlockInput;
 }

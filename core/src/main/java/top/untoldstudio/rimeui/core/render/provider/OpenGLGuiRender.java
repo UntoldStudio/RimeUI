@@ -28,7 +28,7 @@ import top.untoldstudio.rimeui.core.error.RenderError;
 import top.untoldstudio.rimeui.core.error.ResourceError;
 import top.untoldstudio.rimeui.core.render.GuiRender;
 import top.untoldstudio.rimeui.core.resource.ResourceReader;
-import top.untoldstudio.rimeui.core.ui.MainUi;
+import top.untoldstudio.rimeui.core.ui.MainGui;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -472,8 +472,8 @@ public final class OpenGLGuiRender extends GuiRender {
         commands.clear();
 
         glUseProgram(baseShaderProgram);
-        int windowWidth = MainUi.getInstance().getWindowWidth();
-        int windowHeight = MainUi.getInstance().getWindowHeight();
+        int windowWidth = MainGui.getInstance().getWindowWidth();
+        int windowHeight = MainGui.getInstance().getWindowHeight();
         if (isUseRenderMapping) {
             glViewport(renderRegionMin.getXPixelInWindow(), renderRegionMin.getYPixelInWindow(),
                     renderRegionSize.getXPixelInWindow(), renderRegionSize.getYPixelInWindow());
@@ -518,8 +518,8 @@ public final class OpenGLGuiRender extends GuiRender {
             glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-            int windowWidth = MainUi.getInstance().getWindowWidth();
-            int windowHeight = MainUi.getInstance().getWindowHeight();
+            int windowWidth = MainGui.getInstance().getWindowWidth();
+            int windowHeight = MainGui.getInstance().getWindowHeight();
             if (isUseRenderMapping) {
                 glViewport(renderRegionMin.getXPixelInWindow(), renderRegionMin.getYPixelInWindow(),
                         renderRegionSize.getXPixelInWindow(), renderRegionSize.getYPixelInWindow());
@@ -821,7 +821,7 @@ public final class OpenGLGuiRender extends GuiRender {
 
     @Override
     public int loadImage(int width, int height, ByteBuffer stbData) {
-        GuiRender render = MainUi.getInstance().getRender();
+        GuiRender render = MainGui.getInstance().getRender();
         render.saveContext();
 
         int textureId = glGenTextures();
@@ -845,7 +845,7 @@ public final class OpenGLGuiRender extends GuiRender {
 
     @Override
     public void enableScissor(ScaleOffset position, ScaleOffset size) {
-        int windowHeight = MainUi.getInstance().getWindowHeight();
+        int windowHeight = MainGui.getInstance().getWindowHeight();
         commands.add(new StateCommand(() -> {
             glEnable(GL_SCISSOR_TEST);
             glScissor(

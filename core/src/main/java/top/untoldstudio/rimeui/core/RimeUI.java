@@ -17,7 +17,7 @@ package top.untoldstudio.rimeui.core;
 
 import top.untoldstudio.rimeui.core.font.FontManager;
 import top.untoldstudio.rimeui.core.render.GuiRender;
-import top.untoldstudio.rimeui.core.ui.MainUi;
+import top.untoldstudio.rimeui.core.ui.MainGui;
 import top.untoldstudio.rimeui.core.render.provider.OpenGLGuiRender;
 import top.untoldstudio.rimeui.core.ui.Window;
 
@@ -31,18 +31,18 @@ public final class RimeUI {
     }
     public static void initCustomGuiRender(long windowHandle, GuiRender render){
         init();
-        new MainUi(render, new Window(windowHandle));
+        new MainGui(render, new Window(windowHandle));
     }
     public static void init(){
         FontManager.init();
     }
     public static void render(){
-        MainUi.getInstance().render();
+        MainGui.getInstance().render();
     }
-    public static MainUi getMainGui(){
-        return MainUi.getInstance();
+    public static MainGui getMainGui(){
+        return MainGui.getInstance();
     }
     public static void cleanup(){
-        MainUi.getInstance().cleanup();
+        MainGui.getInstance().cleanup();
     }
 }

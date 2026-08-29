@@ -13,13 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.untoldstudio.rimeui.core.error;
+package top.untoldstudio.rimeui.core.serialization;
 
-public class RenderError extends GUIError {
-    public RenderError(String message) {
-        super(message);
-    }
-    public RenderError(String message, Throwable cause) {
-        super(message, cause);
-    }
+import com.google.gson.annotations.SerializedName;
+
+public record JsonImageData(@SerializedName("is_nice_grid_texture") boolean isNiceGridTexture, String path) {
 }

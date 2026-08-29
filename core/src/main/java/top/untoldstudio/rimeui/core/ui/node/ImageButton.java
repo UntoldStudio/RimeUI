@@ -24,7 +24,7 @@ import top.untoldstudio.rimeui.core.render.GuiRender;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 import top.untoldstudio.rimeui.core.texture.ImageData;
 import top.untoldstudio.rimeui.core.ui.AbstractFrame;
-import top.untoldstudio.rimeui.core.ui.MainUi;
+import top.untoldstudio.rimeui.core.ui.MainGui;
 import top.untoldstudio.rimeui.core.ui.Mouse;
 
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class ImageButton extends AbstractFrame<ImageButton> implements ImageBase
 
     @Override
     public void render(GuiRender render, double delta){
-        Mouse mouse = MainUi.getInstance().getMouse();
+        Mouse mouse = MainGui.getInstance().getMouse();
         ImageData data = defaultImage;
         boolean isPressed = false;
         for (MouseButton button : canTriggerButtons){

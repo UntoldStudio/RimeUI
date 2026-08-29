@@ -19,12 +19,16 @@ import top.untoldstudio.rimeui.core.data.HorizontalAlignment;
 import top.untoldstudio.rimeui.core.data.RGBA;
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.data.VerticalAlignment;
+import top.untoldstudio.rimeui.core.event.KeyEvent;
+import top.untoldstudio.rimeui.core.event.MouseButtonEvent;
+import top.untoldstudio.rimeui.core.event.MouseMoveEvent;
+import top.untoldstudio.rimeui.core.event.MouseScrollEvent;
 import top.untoldstudio.rimeui.core.font.Font;
 import top.untoldstudio.rimeui.core.render.GuiRender;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 import top.untoldstudio.rimeui.core.ui.AbstractFrame;
 
-public final class TextLabel extends AbstractFrame<TextLabel> {
+public final class TextLabel extends AbstractFrame<TextLabel> implements InputBlocker<TextLabel> {
     private boolean canFrameBackgroundDisplay = false;
     private Font font = Font.JETBRAINS_MONO;
     private String text;
@@ -35,6 +39,7 @@ public final class TextLabel extends AbstractFrame<TextLabel> {
     private HorizontalAlignment horizontalAlignment = HorizontalAlignment.LEFT;
     private VerticalAlignment verticalAlignment = VerticalAlignment.TOP;
     private ScaleOffset textRenderPosition;
+    private boolean isBlockInput = false;
 
     @Override
     public void render(GuiRender render, double delta){
@@ -134,6 +139,32 @@ public final class TextLabel extends AbstractFrame<TextLabel> {
             case VerticalAlignment.CENTER -> (realPosition.getYPixelInWindow() + realPositionMax.getYPixelInWindow() - stringHeight) / 2;
         };
         textRenderPosition = ScaleOffset.fromOffset(horizontalAlignmentPixel, verticalAlignmentPixel);
+    }
+
+    public TextLabel setBlockInput(boolean isAcceptInput) {
+        this.isBlockInput = isAcceptInput;
+        sendSignal(SignalType.SET_BLOCK_INPUT, isAcceptInput);
+        return this;
+    }
+    public boolean isBlockInput() {
+        return isBlockInput;
+    }
+
+    @Override
+    protected void onKeyEvent(KeyEvent event){
+        if (isBlockInput && isMouseInRange()) event.cancel();
+    }
+    @Override
+    protected void onMouseButtonEvent(MouseButtonEvent event){
+        if (isBlockInput && isMouseInRange()) event.cancel();
+    }
+    @Override
+    protected void onMouseMoveEvent(MouseMoveEvent event){
+        if (isBlockInput && isMouseInRange()) event.cancel();
+    }
+    @Override
+    protected void onMouseScrollEvent(MouseScrollEvent event){
+        if (isBlockInput && isMouseInRange()) event.cancel();
     }
 
     public TextLabel(String text, ScaleOffset position, ScaleOffset size) {

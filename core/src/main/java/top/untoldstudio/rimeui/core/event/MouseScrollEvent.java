@@ -15,7 +15,7 @@
  */
 package top.untoldstudio.rimeui.core.event;
 
-import top.untoldstudio.rimeui.core.ui.MainUi;
+import top.untoldstudio.rimeui.core.ui.MainGui;
 
 public final class MouseScrollEvent extends CancelableEvent {
     private final double xDelta;
@@ -26,8 +26,8 @@ public final class MouseScrollEvent extends CancelableEvent {
     public MouseScrollEvent(double xDelta, double yDelta){
         this.xDelta = xDelta;
         this.yDelta = yDelta;
-        this.xPosition = MainUi.getInstance().getMouse().getXPosition();
-        this.yPosition = MainUi.getInstance().getMouse().getYPosition();
+        this.xPosition = MainGui.getInstance().getMouse().getXPosition();
+        this.yPosition = MainGui.getInstance().getMouse().getYPosition();
     }
 
     public double getXDelta(){

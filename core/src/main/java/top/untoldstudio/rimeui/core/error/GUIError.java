@@ -15,8 +15,11 @@
  */
 package top.untoldstudio.rimeui.core.error;
 
-public class UIError extends RuntimeException {
-    public UIError(String message) {
+public class GUIError extends RuntimeException {
+    public GUIError(String message) {
         super(message);
+    }
+    public GUIError(String message, Throwable cause) {
+        super(message, cause);
     }
 }

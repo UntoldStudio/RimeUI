@@ -22,13 +22,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import top.untoldstudio.rimeui.core.event.InputEventListener;
-import top.untoldstudio.rimeui.core.ui.MainUi;
+import top.untoldstudio.rimeui.core.ui.MainGui;
 
 @Mixin(KeyboardHandler.class)
 public abstract class KeyboardHandlerMixin {
     @Inject(method = "keyPress", at = @At("HEAD"), cancellable = true)
     private void cancelKeyPress(long window, int action, KeyEvent event, CallbackInfo callbackInfo){
-        if (MainUi.getInstance() != null){
+        if (MainGui.getInstance() != null){
             top.untoldstudio.rimeui.core.event.KeyEvent customEvent = InputEventListener.onKeyEvent(event.key(), action, event.modifiers());
             if (customEvent.isCancelled()){
                 callbackInfo.cancel();

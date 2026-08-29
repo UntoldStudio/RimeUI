@@ -19,7 +19,7 @@ import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryUtil;
 import top.untoldstudio.rimeui.core.error.ResourceError;
 import top.untoldstudio.rimeui.core.resource.ResourceReader;
-import top.untoldstudio.rimeui.core.ui.MainUi;
+import top.untoldstudio.rimeui.core.ui.MainGui;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -40,7 +40,7 @@ public final class TextureManager {
         }
 
         ImageInitializationData data = loadImageInitializationData(imagePath);
-        int textureId = MainUi.getInstance().getRender().loadImage(data.width, data.height, data.dataBytes);
+        int textureId = MainGui.getInstance().getRender().loadImage(data.width, data.height, data.dataBytes);
         STBImage.stbi_image_free(data.dataBytes);
         ImageData imageData = new ImageData(textureId, data.width(), data.height());
         imageMap.put(imagePath, imageData);
@@ -52,7 +52,7 @@ public final class TextureManager {
         }
 
         ImageInitializationData data = loadImageInitializationData(imagePath);
-        int textureId = MainUi.getInstance().getRender().loadImage(data.width, data.height, data.dataBytes);
+        int textureId = MainGui.getInstance().getRender().loadImage(data.width, data.height, data.dataBytes);
         STBImage.stbi_image_free(data.dataBytes);
         ImageData imageData = new ImageData(textureId, data.width(), data.height(), left, right, top, bottom);
         imageMap.put(imagePath, imageData);

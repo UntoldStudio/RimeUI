@@ -143,7 +143,7 @@ public abstract class GuiNode<T extends GuiNode<T>> {
             if (node.parent != null){
                 node.parent.children.remove(node);
             } else if (node.parentIsGuiMain){
-                MainUi.getInstance().removeChild(node);
+                MainGui.getInstance().removeChild(node);
             }
             node.parent = this;
             if (!node.isInit){
@@ -213,7 +213,7 @@ public abstract class GuiNode<T extends GuiNode<T>> {
         if (parent != null){
             parent.sortChildren();
         } else if (parentIsGuiMain){
-            MainUi.getInstance().sortChildren();
+            MainGui.getInstance().sortChildren();
         }
         sendSignal(SignalType.SET_RENDER_LEVEL, renderLevel);
         return self;

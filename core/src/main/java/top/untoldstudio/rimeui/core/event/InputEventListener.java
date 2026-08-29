@@ -15,7 +15,7 @@
  */
 package top.untoldstudio.rimeui.core.event;
 
-import top.untoldstudio.rimeui.core.ui.MainUi;
+import top.untoldstudio.rimeui.core.ui.MainGui;
 
 public final class InputEventListener {
     public static KeyEvent onKeyEvent(int key, int action, int modifiers){
@@ -24,8 +24,8 @@ public final class InputEventListener {
         return event;
     }
     public static void onKeyEvent(KeyEvent event){
-        if (MainUi.getInstance() == null) return;
-        MainUi.getInstance().onKeyEvent(event);
+        if (MainGui.getInstance() == null) return;
+        MainGui.getInstance().onKeyEvent(event);
     }
     public static MouseButtonEvent onMouseButtonEvent(int button, int action, int modifiers){
         MouseButtonEvent event = new MouseButtonEvent(button, action, modifiers);
@@ -33,8 +33,8 @@ public final class InputEventListener {
         return event;
     }
     public static void onMouseButtonEvent(MouseButtonEvent event){
-        if (MainUi.getInstance() == null) return;
-        MainUi.getInstance().onMouseButtonEvent(event);
+        if (MainGui.getInstance() == null) return;
+        MainGui.getInstance().onMouseButtonEvent(event);
     }
     public static MouseMoveEvent onMouseMoveEvent(double x, double y){
         MouseMoveEvent event = new MouseMoveEvent(x, y);
@@ -42,8 +42,8 @@ public final class InputEventListener {
         return event;
     }
     public static void onMouseMoveEvent(MouseMoveEvent event){
-        if (MainUi.getInstance() == null) return;
-        MainUi.getInstance().onMouseMoveEvent(event);
+        if (MainGui.getInstance() == null) return;
+        MainGui.getInstance().onMouseMoveEvent(event);
     }
     public static MouseScrollEvent onMouseScrollEvent(double x, double y){
         MouseScrollEvent event = new MouseScrollEvent(x, y);
@@ -51,11 +51,11 @@ public final class InputEventListener {
         return event;
     }
     public static void onMouseScrollEvent(MouseScrollEvent event){
-        if (MainUi.getInstance() == null) return;
-        MainUi.getInstance().onMouseScrollEvent(event);
+        if (MainGui.getInstance() == null) return;
+        MainGui.getInstance().onMouseScrollEvent(event);
     }
     public static void externalSettingCursor(long targetHandle){
-        if (MainUi.getInstance() == null) return;
-        MainUi.getInstance().setExternalSettingCursor(targetHandle);
+        if (MainGui.getInstance() == null) return;
+        MainGui.getInstance().setExternalSettingCursor(targetHandle);
     }
 }

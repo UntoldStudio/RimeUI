@@ -15,11 +15,11 @@
  */
 package top.untoldstudio.rimeui.core.error;
 
-public class RenderError extends GUIError {
-    public RenderError(String message) {
+public class JsonSerializeError extends GUIError {
+    public JsonSerializeError(String message) {
         super(message);
     }
-    public RenderError(String message, Throwable cause) {
+    public JsonSerializeError(String message, Throwable cause) {
         super(message, cause);
     }
 }

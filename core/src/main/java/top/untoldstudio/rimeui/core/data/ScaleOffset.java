@@ -15,11 +15,21 @@
  */
 package top.untoldstudio.rimeui.core.data;
 
+import com.google.gson.annotations.SerializedName;
 import top.untoldstudio.rimeui.core.MathTool;
 import top.untoldstudio.rimeui.core.ui.AbstractFrame;
-import top.untoldstudio.rimeui.core.ui.MainUi;
+import top.untoldstudio.rimeui.core.ui.MainGui;
 
-public record ScaleOffset(double xScale, int xOffset, double yScale, int yOffset) {
+public record ScaleOffset(
+        @SerializedName("x_scale")
+        double xScale,
+        @SerializedName("x_offset")
+        int xOffset,
+        @SerializedName("y_scale")
+        double yScale,
+        @SerializedName("y_offset")
+        int yOffset
+) {
     public static final ScaleOffset ZERO = new ScaleOffset(0, 0, 0, 0);
 
     public ScaleOffset withScale(double xScale, double yScale){
@@ -98,19 +108,19 @@ public record ScaleOffset(double xScale, int xOffset, double yScale, int yOffset
     }
 
     public int getScaleXPixelInWindow(){
-        return MathTool.round(MainUi.getInstance().getWindowWidth() * xScale);
+        return MathTool.round(MainGui.getInstance().getWindowWidth() * xScale);
     }
     public double getScaledXInWindow(){
-        return (double) getXPixelInWindow() / (double)MainUi.getInstance().getWindowWidth();
+        return (double) getXPixelInWindow() / (double) MainGui.getInstance().getWindowWidth();
     }
     public double getScaledYInWindow(){
-        return (double) getYPixelInWindow() / (double)MainUi.getInstance().getWindowHeight();
+        return (double) getYPixelInWindow() / (double) MainGui.getInstance().getWindowHeight();
     }
     public int getXPixelInWindow(){
         return getScaleXPixelInWindow() + xOffset;
     }
     public int getScaleYPixelInWindow(){
-        return MathTool.round(MainUi.getInstance().getWindowHeight() * yScale);
+        return MathTool.round(MainGui.getInstance().getWindowHeight() * yScale);
     }
     public int getYPixelInWindow(){
         return getScaleYPixelInWindow() + yOffset;
