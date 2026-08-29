@@ -40,6 +40,15 @@ public abstract class LayoutBox<T extends LayoutBox<T>> extends AbstractFrame<T>
     protected abstract void render(GuiRender render, double delta);
     protected abstract void sortFrame();
 
+    @Override
+    public T fillFieldForClone(T other){
+        super.fillFieldForClone(other);
+        other.setFrameStartSpacing(frameStartSpacing);
+        other.setFrameSpacing(frameSpacing);
+        other.setIsBlockInput(isBlockInput);
+        return other;
+    }
+
     public final JsonLayoutBox fillParentClassJsonNode(JsonLayoutBox box){
         box.setFrameStartSpacing(frameStartSpacing);
         box.setFrameSpacing(frameSpacing);

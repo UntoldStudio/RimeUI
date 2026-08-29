@@ -36,6 +36,15 @@ public final class ImageLabel extends AbstractFrame<ImageLabel> implements Image
     }
 
     @Override
+    public ImageLabel clone(){
+        ImageLabel label = new ImageLabel(data, position, size);
+        super.fillFieldForClone(label);
+        label.setTexture(data);
+        label.setIsBlockInput(isBlockInput);
+        return label;
+    }
+
+    @Override
     public JsonImageLabel toJsonNodeTree(){
         JsonImageLabel label = new JsonImageLabel();
         label.setImageData(data.toJsonImageData());

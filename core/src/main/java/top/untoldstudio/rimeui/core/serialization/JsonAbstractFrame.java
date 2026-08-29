@@ -40,7 +40,7 @@ public abstract class JsonAbstractFrame extends JsonGuiNode {
         frame.setBackgroundColor(backgroundColor);
         frame.setXAnchor(xAnchor);
         frame.setYAnchor(yAnchor);
-        frame.setClipChildren(isClipChildren);
+        frame.setIsClipChildren(isClipChildren);
         frame.setLayoutOrder(layoutOrder);
         super.fillParentGuiNodeField(frame);
         return frame;

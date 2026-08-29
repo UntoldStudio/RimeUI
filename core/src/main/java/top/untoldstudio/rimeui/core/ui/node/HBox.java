@@ -27,6 +27,12 @@ public final class HBox extends LayoutBox<HBox> {
     }
 
     @Override
+    public HBox clone(){
+        HBox box = new HBox(position, size);
+        return super.fillFieldForClone(box);
+    }
+
+    @Override
     public JsonHBox toJsonNodeTree(){
         JsonHBox box = new JsonHBox();
         super.fillParentClassJsonNode(box);

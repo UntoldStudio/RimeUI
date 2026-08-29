@@ -33,6 +33,14 @@ public final class Frame extends AbstractFrame<Frame> implements InputBlocker<Fr
         super.renderFrameDefaultBackground(render, delta);
     }
 
+    @Override
+    public Frame clone(){
+        Frame frame = new Frame(position, size);
+        super.fillFieldForClone(frame);
+        frame.setIsBlockInput(isBlockInput);
+        return frame;
+    }
+
     public Frame setIsBlockInput(boolean isAcceptInput) {
         this.isBlockInput = isAcceptInput;
         sendSignal(SignalType.SET_BLOCK_INPUT, isAcceptInput);

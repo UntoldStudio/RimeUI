@@ -60,6 +60,23 @@ public final class TextLabel extends AbstractFrame<TextLabel> implements InputBl
     }
 
     @Override
+    public TextLabel clone(){
+        TextLabel label = new TextLabel(text, position, size);
+        super.fillFieldForClone(label);
+        label.setCanFrameBackgroundDisplay(canFrameBackgroundDisplay);
+        label.setText(text);
+        label.setFont(font);
+        label.setFontSize(fontSize);
+        label.setTextColor(textColor);
+        label.setItalicSlant(italicSlant);
+        label.setBoldStrength(boldStrength);
+        label.setHorizontalAlignment(horizontalAlignment);
+        label.setVerticalAlignment(verticalAlignment);
+        label.setIsBlockInput(isBlockInput);
+        return label;
+    }
+
+    @Override
     public void render(GuiRender render, double delta){
         if (canFrameBackgroundDisplay){
             super.renderFrameDefaultBackground(render, delta);

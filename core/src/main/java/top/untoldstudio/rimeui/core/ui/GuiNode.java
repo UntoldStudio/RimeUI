@@ -39,6 +39,16 @@ public abstract class GuiNode<T extends GuiNode<T>> {
     private final Map<SignalType, Object> lastSignalObjectValues = new EnumMap<>(SignalType.class);
     private final List<DoubleConsumer> renderCallbacks = new ArrayList<>();
 
+    public T fillFieldForClone(T other){
+        other.setName(name);
+        other.setRenderLevel(renderLevel);
+        other.setVisible(visible);
+        for (GuiNode<?> node : children){
+            other.addChild(node.clone());
+        }
+        return other;
+    }
+
     protected void renderWithChildren(GuiRender render, double delta){
         sendSignal(SignalType.BEFORE_RENDER);
         if (visible){
@@ -249,6 +259,7 @@ public abstract class GuiNode<T extends GuiNode<T>> {
     }
 
     public abstract JsonGuiNode toJsonNodeTree();
+    public abstract GuiNode<?> clone();
     public JsonGuiNode fillParentClassJsonNode(JsonGuiNode node){
         List<JsonGuiNode> childrenJsonGuiNodes = new ArrayList<>();
         for (GuiNode<?> child : children){

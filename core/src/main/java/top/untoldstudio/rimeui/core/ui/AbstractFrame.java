@@ -36,6 +36,19 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
     private int layoutOrder = 1;
 
     @Override
+    public T fillFieldForClone(T other){
+        super.fillFieldForClone(other);
+        other.setPosition(position);
+        other.setSize(size);
+        other.setBackgroundColor(backgroundColor);
+        other.setYAnchor(yAnchor);
+        other.setXAnchor(xAnchor);
+        other.setIsClipChildren(isClipChildren);
+        other.setLayoutOrder(layoutOrder);
+        return other;
+    }
+
+    @Override
     public void renderWithChildren(GuiRender render, double delta){
         if (isClipChildren) {
             render.enableScissor(realPosition, realSize);
@@ -93,7 +106,7 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
         setYAnchor(yAnchor);
         return self;
     }
-    public T setClipChildren(boolean clipChildren) {
+    public T setIsClipChildren(boolean clipChildren) {
         isClipChildren = clipChildren;
         return self;
     }

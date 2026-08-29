@@ -26,6 +26,12 @@ public final class VBox extends LayoutBox<VBox> {
         super.renderFrameDefaultBackground(render, delta);
     }
 
+    public VBox clone(){
+        VBox box = new VBox(position, size);
+        super.fillFieldForClone(box);
+        return box;
+    }
+
     @Override
     public JsonVBox toJsonNodeTree(){
         JsonVBox box = new JsonVBox();

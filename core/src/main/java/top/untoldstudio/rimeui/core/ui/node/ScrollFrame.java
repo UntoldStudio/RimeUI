@@ -51,6 +51,21 @@ public final class ScrollFrame extends AbstractFrame<ScrollFrame> implements Inp
         return frame;
     }
 
+    @Override
+    public ScrollFrame clone(){
+        ScrollFrame frame = new ScrollFrame(position, size);
+        super.fillFieldForClone(frame);
+        frame.setCanScroll(canScroll);
+        frame.setScrollScale(scrollScale);
+        frame.setScrollProgress(scrollProgress);
+        frame.setScrollSpeed(scrollSpeed);
+        frame.setIsBlockInput(isBlockInput);
+        frame.setScrollBarVisible(scrollBar.isVisible());
+        frame.setScrollBarTexture(getScrollBarTexture());
+        frame.setScrollBarWidth(scrollBar.getSize().getXPixelInWindow());
+        return frame;
+    }
+
     private void setScrollBarProcessState() {
         double yScale = 1 / scrollScale;
         scrollBar.setSize(scrollBar.getSize().withYScale(yScale));
@@ -196,7 +211,7 @@ public final class ScrollFrame extends AbstractFrame<ScrollFrame> implements Inp
     }
 
     @Override
-    public ScrollFrame setClipChildren(boolean clipChildren) {
+    public ScrollFrame setIsClipChildren(boolean clipChildren) {
         throw new UnsupportedOperationException("You cannot set clipped a ScrollFrame");
     }
 }

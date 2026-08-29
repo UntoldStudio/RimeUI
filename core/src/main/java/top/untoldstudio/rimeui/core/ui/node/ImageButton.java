@@ -40,6 +40,19 @@ public class ImageButton extends AbstractFrame<ImageButton> implements ImageBase
     private boolean isPressedNow = true;
 
     @Override
+    public ImageButton clone(){
+        ImageButton button = new ImageButton(defaultImage, position, size);
+        super.fillFieldForClone(button);
+        for (MouseButton mouseButton : canTriggerButtons) {
+            button.addCanTriggerButton(mouseButton);
+        }
+        button.setDefaultImage(defaultImage);
+        button.setPressedImage(pressedImage);
+        button.setHoveredImage(hoveredImage);
+        return button;
+    }
+
+    @Override
     public JsonImageButton toJsonNodeTree(){
         JsonImageButton button = new JsonImageButton();
         button.setCanTriggerButtons(canTriggerButtons);
