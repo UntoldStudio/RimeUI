@@ -86,17 +86,19 @@ public final class TextBox extends AbstractFrame<TextBox> implements TextDisplay
             super.renderFrameDefaultBackground(render, delta);
         }
         boolean hasInput = !currentInputText.isEmpty();
-        render.drawString(hasInput ? currentInputText : noInputText, font, textRenderPosition, fontSize,
-                hasInput ? inputTextColor : noInputTextColor, italicSlant, boldStrength);
+        render.drawString(hasInput ? currentInputText : noInputText, font, textRenderPosition, fontSize, hasInput ? inputTextColor : noInputTextColor, italicSlant, boldStrength);
 
         if (isInFocus && cursorVisible) {
-            int cursorX = textRenderPosition.getXPixelInWindow()
-                    + font.getCursorX(currentInputText, cursorPosition, fontSize, italicSlant, boldStrength);
+            int cursorX = textRenderPosition.getXPixelInWindow() + font.getCursorX(currentInputText, cursorPosition, fontSize, italicSlant, boldStrength);
             int cursorHeight = fontSize + 2;
             int cursorY = textRenderPosition.getYPixelInWindow() - 1;
             ScaleOffset cursorMin = ScaleOffset.fromOffset(cursorX, cursorY);
             ScaleOffset cursorMax = ScaleOffset.fromOffset(cursorX + 1, cursorY + cursorHeight);
             render.drawSquare(cursorMin, cursorMax, inputTextColor);
+        }
+
+        if (isMouseInRange()){
+            render.setCursorShapeInThisFrame(CursorShape.IBEAM);
         }
     }
 
