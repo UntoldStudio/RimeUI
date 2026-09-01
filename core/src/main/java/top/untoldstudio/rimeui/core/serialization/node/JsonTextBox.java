@@ -21,17 +21,16 @@ import top.untoldstudio.rimeui.core.data.RGBA;
 import top.untoldstudio.rimeui.core.data.VerticalAlignment;
 import top.untoldstudio.rimeui.core.serialization.JsonAbstractFrame;
 import top.untoldstudio.rimeui.core.serialization.JsonFont;
-import top.untoldstudio.rimeui.core.ui.node.TextLabel;
+import top.untoldstudio.rimeui.core.ui.node.TextBox;
 
-public final class JsonTextLabel extends JsonAbstractFrame {
+public final class JsonTextBox extends JsonAbstractFrame {
+    @SerializedName("no_input_text")
+    private String noInputText;
     @SerializedName("can_frame_background_display")
     private boolean canFrameBackgroundDisplay;
     private JsonFont font;
-    private String text;
     @SerializedName("font_size")
     private int fontSize;
-    @SerializedName("text_color")
-    private RGBA textColor;
     @SerializedName("italic_slant")
     private double italicSlant;
     @SerializedName("bold_strength")
@@ -40,71 +39,39 @@ public final class JsonTextLabel extends JsonAbstractFrame {
     private HorizontalAlignment horizontalAlignment;
     @SerializedName("vertical_alignment")
     private VerticalAlignment verticalAlignment;
-    @SerializedName("is_block_input")
-    private boolean isBlockInput;
+    @SerializedName("no_input_text_color")
+    private RGBA noInputTextColor;
+    @SerializedName("input_text_color")
+    private RGBA inputTextColor;
 
     @Override
-    public TextLabel toGuiNode(){
-        TextLabel label = new TextLabel(text, position, size);
-        label.setCanFrameBackgroundDisplay(canFrameBackgroundDisplay);
-        label.setFont(font.toFont());
-        label.setText(text);
-        label.setFontSize(fontSize);
-        label.setTextColor(textColor);
-        label.setItalicSlant(italicSlant);
-        label.setBoldStrength(boldStrength);
-        label.setHorizontalAlignment(horizontalAlignment);
-        label.setVerticalAlignment(verticalAlignment);
-        label.setIsBlockInput(isBlockInput);
-        super.fillParentGuiNodeField(label);
-        return label;
+    public TextBox toGuiNode(){
+        TextBox box = new TextBox(position, size);
+        box.setNoInputText(noInputText);
+        box.setCanFrameBackgroundDisplay(canFrameBackgroundDisplay);
+        box.setFont(font.toFont());
+        box.setFontSize(fontSize);
+        box.setItalicSlant(italicSlant);
+        box.setBoldStrength(boldStrength);
+        box.setHorizontalAlignment(horizontalAlignment);
+        box.setVerticalAlignment(verticalAlignment);
+        box.setNoInputTextColor(noInputTextColor);
+        box.setInputTextColor(inputTextColor);
+        super.fillParentGuiNodeField(box);
+        return box;
     }
 
-    public boolean canFrameBackgroundDisplay() {
-        return canFrameBackgroundDisplay;
+    public void setNoInputText(String noInputText) {
+        this.noInputText = noInputText;
     }
-    public JsonFont getFont() {
-        return font;
-    }
-    public String getText() {
-        return text;
-    }
-    public int getFontSize() {
-        return fontSize;
-    }
-    public RGBA getTextColor() {
-        return textColor;
-    }
-    public double getItalicSlant(){
-        return italicSlant;
-    }
-    public int getBoldStrength(){
-        return boldStrength;
-    }
-    public HorizontalAlignment getHorizontalAlignment() {
-        return horizontalAlignment;
-    }
-    public VerticalAlignment getVerticalAlignment() {
-        return verticalAlignment;
-    }
-    public boolean isBlockInput() {
-        return isBlockInput;
-    }
-
     public void setCanFrameBackgroundDisplay(boolean canFrameBackgroundDisplay) {
         this.canFrameBackgroundDisplay = canFrameBackgroundDisplay;
     }
     public void setFont(JsonFont font) {
         this.font = font;
     }
-    public void setText(String text) {
-        this.text = text;
-    }
     public void setFontSize(int fontSize) {
         this.fontSize = fontSize;
-    }
-    public void setTextColor(RGBA textColor) {
-        this.textColor = textColor;
     }
     public void setItalicSlant(double italicSlant){
         this.italicSlant = italicSlant;
@@ -118,7 +85,41 @@ public final class JsonTextLabel extends JsonAbstractFrame {
     public void setVerticalAlignment(VerticalAlignment verticalAlignment) {
         this.verticalAlignment = verticalAlignment;
     }
-    public void setIsBlockInput(boolean isBlockInput) {
-        this.isBlockInput = isBlockInput;
+    public void setNoInputTextColor(RGBA noInputTextColor) {
+        this.noInputTextColor = noInputTextColor;
+    }
+    public void setInputTextColor(RGBA inputTextColor) {
+        this.inputTextColor = inputTextColor;
+    }
+
+    public String getNoInputText() {
+        return noInputText;
+    }
+    public boolean canFrameBackgroundDisplay() {
+        return canFrameBackgroundDisplay;
+    }
+    public JsonFont getFont() {
+        return font;
+    }
+    public int getFontSize() {
+        return fontSize;
+    }
+    public double getItalicSlant(){
+        return italicSlant;
+    }
+    public int getBoldStrength(){
+        return boldStrength;
+    }
+    public HorizontalAlignment getHorizontalAlignment(){
+        return horizontalAlignment;
+    }
+    public VerticalAlignment getVerticalAlignment(){
+        return verticalAlignment;
+    }
+    public RGBA getNoInputTextColor() {
+        return noInputTextColor;
+    }
+    public RGBA getInputTextColor() {
+        return inputTextColor;
     }
 }

@@ -15,12 +15,24 @@
  */
 package top.untoldstudio.rimeui.core.serialization;
 
+import top.untoldstudio.rimeui.core.serialization.node.*;
+
 public enum JsonNodeType {
-    FRAME,
-    IMAGE_LABEL,
-    H_BOX,
-    V_BOX,
-    IMAGE_BUTTON,
-    SCROLL_FRAME,
-    TEXT_LABEL,
+    FRAME(JsonFrame.class),
+    IMAGE_LABEL(JsonImageLabel.class),
+    H_BOX(JsonHBox.class),
+    V_BOX(JsonVBox.class),
+    IMAGE_BUTTON(JsonImageButton.class),
+    SCROLL_FRAME(JsonScrollFrame.class),
+    TEXT_LABEL(JsonTextLabel.class);
+
+    private Class<? extends JsonGuiNode> clazz;
+
+    JsonNodeType(Class<? extends JsonGuiNode> clazz){
+        this.clazz = clazz;
+    }
+
+    public Class<? extends JsonGuiNode> getJsonNodeClass() {
+        return clazz;
+    }
 }

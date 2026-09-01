@@ -26,19 +26,19 @@ public class GLFWEventListener {
     private static GLFWEventListener instance;
     private final long window;
     private static boolean enabled = false;
-    private GLFWKeyCallback keyCallback = GLFWKeyCallback.create((currentWindow, key, scancode, action, modifiers) -> {
+    private final GLFWKeyCallback keyCallback = GLFWKeyCallback.create((currentWindow, key, scancode, action, modifiers) -> {
         if (!enabled) return;
         InputEventListener.onKeyEvent(key, action, modifiers);
     });
-    private GLFWMouseButtonCallback mouseButtonCallback = GLFWMouseButtonCallback.create((currentWindow, button, action, modifiers) -> {
+    private final GLFWMouseButtonCallback mouseButtonCallback = GLFWMouseButtonCallback.create((currentWindow, button, action, modifiers) -> {
         if (!enabled) return;
         InputEventListener.onMouseButtonEvent(button, action, modifiers);
     });
-    private GLFWCursorPosCallback cursorPositionCallback = GLFWCursorPosCallback.create((currentWindow, x, y) -> {
+    private final GLFWCursorPosCallback cursorPositionCallback = GLFWCursorPosCallback.create((currentWindow, x, y) -> {
         if (!enabled) return;
         InputEventListener.onMouseMoveEvent(x, y);
     });
-    private GLFWScrollCallback scrollCallback = GLFWScrollCallback.create((currentWindow, x, y) -> {
+    private final GLFWScrollCallback scrollCallback = GLFWScrollCallback.create((currentWindow, x, y) -> {
         if (!enabled) return;
         InputEventListener.onMouseScrollEvent(x, y);
     });

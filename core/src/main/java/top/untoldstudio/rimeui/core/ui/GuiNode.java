@@ -259,7 +259,7 @@ public abstract class GuiNode<T extends GuiNode<T>> {
     }
 
     public abstract JsonGuiNode toJsonNodeTree();
-    public abstract GuiNode<?> clone();
+    public abstract T clone();
     public JsonGuiNode fillParentClassJsonNode(JsonGuiNode node){
         List<JsonGuiNode> childrenJsonGuiNodes = new ArrayList<>();
         for (GuiNode<?> child : children){

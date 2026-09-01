@@ -29,16 +29,16 @@ import top.untoldstudio.rimeui.core.serialization.node.JsonTextLabel;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 import top.untoldstudio.rimeui.core.ui.AbstractFrame;
 
-public final class TextLabel extends AbstractFrame<TextLabel> implements InputBlocker<TextLabel> {
+public final class TextLabel extends AbstractFrame<TextLabel> implements InputBlocker<TextLabel>, TextDisplayable {
     private boolean canFrameBackgroundDisplay = false;
     private Font font = Font.JETBRAINS_MONO;
     private String text;
     private int fontSize = 14;
     private RGBA textColor = RGBA.WHITE;
-    private float italicSlant = 0;
+    private double italicSlant = 0;
     private int boldStrength = 0;
-    private HorizontalAlignment horizontalAlignment = HorizontalAlignment.LEFT;
-    private VerticalAlignment verticalAlignment = VerticalAlignment.TOP;
+    private HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
+    private VerticalAlignment verticalAlignment = VerticalAlignment.CENTER;
     private ScaleOffset textRenderPosition;
     private boolean isBlockInput = false;
 
@@ -109,9 +109,9 @@ public final class TextLabel extends AbstractFrame<TextLabel> implements InputBl
         sendSignal(SignalType.SET_TEXT_COLOR, textColor);
         return this;
     }
-    public TextLabel setItalicSlant(float italicSlant){
+    public TextLabel setItalicSlant(double italicSlant){
         this.italicSlant = italicSlant;
-        sendSignal(SignalType.SET_ITALIC_ALANT);
+        sendSignal(SignalType.SET_ITALIC_SLANT);
         return this;
     }
     public TextLabel setBoldStrength(int boldStrength){
@@ -121,12 +121,12 @@ public final class TextLabel extends AbstractFrame<TextLabel> implements InputBl
     }
     public TextLabel setHorizontalAlignment(HorizontalAlignment horizontalAlignment){
         this.horizontalAlignment = horizontalAlignment;
-        sendSignal(SignalType.SET_HORIZONTAL_ALANT, horizontalAlignment);
+        sendSignal(SignalType.SET_HORIZONTAL_ALIGNMENT, horizontalAlignment);
         return this;
     }
     public TextLabel setVerticalAlignment(VerticalAlignment verticalAlignment){
         this.verticalAlignment = verticalAlignment;
-        sendSignal(SignalType.SET_VERTICAL_ALANT, verticalAlignment);
+        sendSignal(SignalType.SET_VERTICAL_ALIGNMENT, verticalAlignment);
         return this;
     }
 
@@ -145,7 +145,7 @@ public final class TextLabel extends AbstractFrame<TextLabel> implements InputBl
     public RGBA getTextColor(){
         return textColor;
     }
-    public float getItalicSlant(){
+    public double getItalicSlant(){
         return italicSlant;
     }
     public int getBoldStrength(){
@@ -161,19 +161,7 @@ public final class TextLabel extends AbstractFrame<TextLabel> implements InputBl
     @Override
     public void operationPosition(AbstractFrame<?> parentFrame, ScaleOffset parentRealPosition){
         super.operationPosition(parentFrame, parentRealPosition);
-        int stringWidth = font.getStringWidth(text, fontSize, italicSlant, boldStrength);
-        int stringHeight = font.getStringHeight(text, fontSize, italicSlant, boldStrength);
-        int horizontalAlignmentPixel = switch (horizontalAlignment) {
-            case HorizontalAlignment.LEFT -> realPosition.getXPixelInWindow();
-            case HorizontalAlignment.RIGHT -> realPositionMax.getXPixelInWindow() - stringWidth;
-            case HorizontalAlignment.CENTER -> (realPosition.getXPixelInWindow() + realPositionMax.getXPixelInWindow() - stringWidth) / 2;
-        };
-        int verticalAlignmentPixel = switch (verticalAlignment) {
-            case VerticalAlignment.TOP -> realPosition.getYPixelInWindow();
-            case VerticalAlignment.BOTTOM -> realPositionMax.getYPixelInWindow() - stringHeight;
-            case VerticalAlignment.CENTER -> (realPosition.getYPixelInWindow() + realPositionMax.getYPixelInWindow() - stringHeight) / 2;
-        };
-        textRenderPosition = ScaleOffset.fromOffset(horizontalAlignmentPixel, verticalAlignmentPixel);
+        textRenderPosition = operationTextPosition(font, text, fontSize, italicSlant, boldStrength, realPosition, realPositionMax, horizontalAlignment, verticalAlignment);
     }
 
     public TextLabel setIsBlockInput(boolean isAcceptInput) {

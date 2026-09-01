@@ -36,14 +36,7 @@ public final class GuiNodeJsonDeserializer implements JsonDeserializer<JsonGuiNo
         } catch (IllegalArgumentException e) {
             throw new JsonDeserializeError("Invalid type", e);
         }
-        return switch (nodeType){
-            case FRAME -> context.deserialize(object, JsonFrame.class);
-            case IMAGE_LABEL -> context.deserialize(object, JsonImageLabel.class);
-            case H_BOX -> context.deserialize(object, JsonHBox.class);
-            case V_BOX -> context.deserialize(object, JsonVBox.class);
-            case IMAGE_BUTTON -> context.deserialize(object, JsonImageButton.class);
-            case SCROLL_FRAME -> context.deserialize(object, JsonScrollFrame.class);
-            case TEXT_LABEL -> context.deserialize(object, JsonTextLabel.class);
-        };
+
+        return context.deserialize(object, nodeType.getJsonNodeClass());
     }
 }

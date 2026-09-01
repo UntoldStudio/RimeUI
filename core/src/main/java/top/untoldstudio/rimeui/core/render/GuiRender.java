@@ -123,8 +123,7 @@ public abstract class GuiRender {
         drawString(text, font, startDrawPosition, fontSize, color, 0.0, 0);
     }
 
-    public void drawString(String text, Font font, ScaleOffset startDrawPosition, int fontSize, RGBA color,
-                           double italicDegrees, int boldStrength) {
+    public void drawString(String text, Font font, ScaleOffset startDrawPosition, int fontSize, RGBA color, double italicDegrees, int boldStrength) {
         FT_Set_Pixel_Sizes(font.face(), 0, fontSize);
         FT_Face face = font.face();
         long ascender = Objects.requireNonNull(face.size()).metrics().ascender();
