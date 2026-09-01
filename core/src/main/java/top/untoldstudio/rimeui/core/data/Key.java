@@ -134,7 +134,7 @@ public enum Key {
     RIGHT_ALT(GLFW_KEY_RIGHT_ALT, '\u0000'),
     LEFT_SUPER(GLFW_KEY_LEFT_SUPER, '\u0000'),
     RIGHT_SUPER(GLFW_KEY_RIGHT_SUPER, '\u0000'),
-    SPACE(GLFW_KEY_SPACE, '\u0000'),
+    SPACE(GLFW_KEY_SPACE, ' '),
     MENU(GLFW_KEY_MENU, '\u0000'),
     WORLD_1(GLFW_KEY_WORLD_1, '\u0000'),
     WORLD_2(GLFW_KEY_WORLD_2, '\u0000'),
@@ -147,7 +147,7 @@ public enum Key {
         this.name = name;
     }
 
-    public boolean isNull(){
+    public boolean isNameNull(){
         return name == '\u0000';
     }
     public char getName(){

@@ -61,13 +61,6 @@ public final class Application {
         stop();
     }
 
-    public void runTask(Runnable task){
-        MainGui.getInstance().runTask(task);
-    }
-    public void runTaskLater(Runnable task, long delay){
-        MainGui.getInstance().runTaskLater(task, delay);
-    }
-
     public void stop(){
         isRunning = false;
         RimeUI.cleanup();

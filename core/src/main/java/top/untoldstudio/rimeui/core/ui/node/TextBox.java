@@ -43,7 +43,6 @@ public final class TextBox extends AbstractFrame<TextBox> implements TextDisplay
     private int cursorPosition = 0;
     private boolean cursorVisible = false;
     private LoopTask cursorBlinkTask;
-    private final Frame pointer = new Frame(ScaleOffset.ZERO, ScaleOffset.ZERO).setAnchor(0, 0.5);
 
     @Override
     public JsonTextBox toJsonNodeTree() {
@@ -103,8 +102,7 @@ public final class TextBox extends AbstractFrame<TextBox> implements TextDisplay
     }
 
     private void operationTextRenderPosition() {
-        textRenderPosition = operationTextPosition(font, currentInputText.isEmpty() ? noInputText : currentInputText,
-                fontSize, italicSlant, boldStrength, realPosition, realPositionMax, horizontalAlignment, verticalAlignment);
+        textRenderPosition = operationTextPosition(font, currentInputText.isEmpty() ? noInputText : currentInputText, fontSize, italicSlant, boldStrength, realPosition, realPositionMax, horizontalAlignment, verticalAlignment);
     }
 
     @Override
@@ -140,7 +138,7 @@ public final class TextBox extends AbstractFrame<TextBox> implements TextDisplay
         }
         cursorVisible = true;
         Key key = event.getKey();
-        if (!key.isNull()) {
+        if (!key.isNameNull()) {
             char inputChar = key.getName();
             if (event.getModifiers().isCapsLockEnabled()){
                 inputChar = reverseCase(inputChar);
