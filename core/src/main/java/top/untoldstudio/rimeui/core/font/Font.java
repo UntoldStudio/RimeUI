@@ -116,4 +116,31 @@ public record Font(FT_Face face, String fontPath, ByteBuffer memoryBuffer) {
         }
         return new float[]{minX, maxX, minY, maxY};
     }
+
+    public int getCursorX(String text, int upToIndex, int fontSize, double italicDegrees, int boldStrength) {
+        if (upToIndex <= 0) return 0;
+        if (upToIndex > text.length()) upToIndex = text.length();
+        String sub = text.substring(0, upToIndex);
+        FT_Set_Pixel_Sizes(face, 0, fontSize);
+        float penX = 0;
+        int previousGlyphIndex = 0;
+        boolean hasPrevious = false;
+        for (int offset = 0; offset < sub.length(); ) {
+            int codepoint = sub.codePointAt(offset);
+            offset += Character.charCount(codepoint);
+            int glyphIndex = FT_Get_Char_Index(face, codepoint);
+            if (glyphIndex == 0) continue;
+            if (hasPrevious) {
+                FT_Vector kerning = FT_Vector.malloc();
+                FT_Get_Kerning(face, previousGlyphIndex, glyphIndex, FT_KERNING_DEFAULT, kerning);
+                penX += kerning.x() / 64.0f;
+                kerning.free();
+            }
+            FT_Load_Glyph(face, glyphIndex, FT_LOAD_NO_BITMAP);
+            penX += face.glyph().advance().x() / 64.0f;
+            previousGlyphIndex = glyphIndex;
+            hasPrevious = true;
+        }
+        return Math.round(penX);
+    }
 }

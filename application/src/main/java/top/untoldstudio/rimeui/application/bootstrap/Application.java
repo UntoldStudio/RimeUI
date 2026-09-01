@@ -46,7 +46,7 @@ public final class Application {
 
         window.setWindowIcon("/texture/icon.png");
 
-        TextBox box = new TextBox(ScaleOffset.fromScale(0.5, 0.5), ScaleOffset.fromScale(0.5, 0.5)).setAnchor(0.5, 0.5).setCanFrameBackgroundDisplay(false);
+        TextBox box = new TextBox(ScaleOffset.fromScale(0.5, 0.5), ScaleOffset.fromScale(0.5, 0.5)).setAnchor(0.5, 0.5);
         RimeUI.getMainGui().addChild(box);
 
         Bootstrap.buildDefaultGuiNodes();
@@ -64,7 +64,7 @@ public final class Application {
     public void runTask(Runnable task){
         MainGui.getInstance().runTask(task);
     }
-    public void runTaskLater(DoubleConsumer task, double delay){
+    public void runTaskLater(Runnable task, long delay){
         MainGui.getInstance().runTaskLater(task, delay);
     }
 

@@ -23,12 +23,14 @@ import top.untoldstudio.rimeui.core.event.*;
 import top.untoldstudio.rimeui.core.render.GuiRender;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 import top.untoldstudio.rimeui.core.texture.TextureManager;
+import top.untoldstudio.rimeui.core.ui.task.DelayTask;
+import top.untoldstudio.rimeui.core.ui.task.LoopTask;
+import top.untoldstudio.rimeui.core.ui.task.NormalTask;
+import top.untoldstudio.rimeui.core.ui.task.Task;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
 public final class MainGui {
@@ -40,8 +42,7 @@ public final class MainGui {
     private final Mouse mouse;
     private long externalSettingCursor = -1;
     private boolean isLastMouseMoveEventCanceled = false;
-    private final BlockingQueue<Runnable> tasks = new LinkedBlockingQueue<>();
-    private final PriorityBlockingQueue<DelayTask> delayTasks = new PriorityBlockingQueue<>();
+    private final PriorityBlockingQueue<Task> tasks = new PriorityBlockingQueue<>();
 
     public void render() {
         render.saveContext();
@@ -53,10 +54,10 @@ public final class MainGui {
             render.setCursorShapeInThisFrame(CursorShape.ARROW);
         }
 
-        long currentTime = System.nanoTime();
+        long currentTimeMillis = System.nanoTime() / 1_000_000;
         double startRenderTime = System.nanoTime() / 1_000_000_000.0;
 
-        runTasks(currentTime);
+        runTasks(currentTimeMillis);
 
         for (GuiNode<?> node : children) {
             node.renderWithChildren(render, startRenderTime - lastRenderTime);
@@ -67,30 +68,43 @@ public final class MainGui {
         render.endFrame();
     }
 
-    private void runTasks(long currentTime) {
-        Runnable task;
-        while ((task = tasks.poll()) != null) {
-            try {
-                task.run();
-            } catch (Exception e) {
-                throw new RuntimeException("A fatal error occurred in the task!", e);
-            }
-        }
-        DelayTask delayTask;
-        while ((delayTask = delayTasks.peek()) != null) {
-            if (delayTask.tryRun(currentTime)) {
-                delayTasks.poll();
+    private void runTasks(long currentTimeMillis) {
+        Task task;
+        while ((task = tasks.peek()) != null) {
+            if (task.isCanceled() || task.tryRun(currentTimeMillis)) {
+                tasks.poll();
             } else {
+                if (task.isNeedResort()) {
+                    tasks.poll();
+                    tasks.offer(task);
+                    task.setNeedResort(false);
+                }
                 break;
             }
         }
     }
-    public void runTask(Runnable task) {
-        tasks.add(task);
+
+    public NormalTask runTask(Runnable task) {
+        NormalTask normalTask = new NormalTask(task);
+        tasks.add(normalTask);
+        return normalTask;
     }
-    public void runTaskLater(DoubleConsumer task, double waitTime){
-        long currentTime = System.nanoTime();
-        delayTasks.offer(new DelayTask(currentTime, currentTime + (long)(waitTime * 1_000_000_000.0), task));
+
+    public DelayTask runTaskLater(Runnable task, long waitMilliseconds) {
+        long currentTimeMillis = System.nanoTime() / 1_000_000;
+        DelayTask delayTask = new DelayTask(currentTimeMillis + waitMilliseconds, task);
+        tasks.offer(delayTask);
+        return delayTask;
+    }
+
+    public LoopTask runLoopTask(Runnable task, long startWaitMilliseconds, long loopWaitMilliseconds, int loopCount) {
+        LoopTask loopTask = new LoopTask(startWaitMilliseconds, loopWaitMilliseconds, loopCount, task);
+        tasks.offer(loopTask);
+        return loopTask;
+    }
+
+    public LoopTask runInfiniteLoopTask(Runnable task, long startWaitMilliseconds, long loopWaitMilliseconds) {
+        return runLoopTask(task, startWaitMilliseconds, loopWaitMilliseconds, Integer.MAX_VALUE);
     }
 
     public void setExternalSettingCursor(long externalSettingCursor) {
@@ -260,35 +274,5 @@ public final class MainGui {
         window.close();
         render.cleanup();
         TextureManager.cleanup();
-    }
-
-    public static class DelayTask implements Comparable<DelayTask>{
-        private final long targetTime;
-        private final long startTime;
-        private final DoubleConsumer callback;
-
-        public DelayTask(long startTime, long targetTime, DoubleConsumer callback) {
-            this.startTime = startTime;
-            this.targetTime = targetTime;
-            this.callback = callback;
-        }
-
-        public boolean tryRun(long currentTime){
-            boolean isRun = false;
-            if (currentTime >= targetTime){
-                isRun = true;
-                try {
-                    callback.accept((currentTime - startTime) / 1_000_000_000.0);
-                } catch (Exception e) {
-                    throw new RuntimeException("A fatal error occurred in the task!", e);
-                }
-            }
-            return isRun;
-        }
-
-        @Override
-        public int compareTo(@NotNull DelayTask other) {
-            return Long.compare(this.targetTime, other.targetTime);
-        }
     }
 }

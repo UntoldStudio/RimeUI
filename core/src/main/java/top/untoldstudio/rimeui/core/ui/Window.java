@@ -57,6 +57,8 @@ public final class Window {
             }
         });
         oldFramebufferSizeCallback = glfwSetFramebufferSizeCallback(windowHandle, newFrameCallback);
+
+        glfwSetInputMode(windowHandle, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
     }
 
     public static Window create(String title, int width, int height){

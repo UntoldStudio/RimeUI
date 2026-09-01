@@ -23,6 +23,8 @@ import top.untoldstudio.rimeui.core.render.GuiRender;
 import top.untoldstudio.rimeui.core.serialization.node.JsonTextBox;
 import top.untoldstudio.rimeui.core.signal.SignalType;
 import top.untoldstudio.rimeui.core.ui.AbstractFrame;
+import top.untoldstudio.rimeui.core.ui.MainGui;
+import top.untoldstudio.rimeui.core.ui.task.LoopTask;
 
 public final class TextBox extends AbstractFrame<TextBox> implements TextDisplayable {
     private String noInputText = "Please Enter Text";
@@ -38,9 +40,13 @@ public final class TextBox extends AbstractFrame<TextBox> implements TextDisplay
     private RGBA noInputTextColor = RGBA.GRAY;
     private RGBA inputTextColor = RGBA.BLACK;
     private boolean isInFocus = false;
+    private int cursorPosition = 0;
+    private boolean cursorVisible = false;
+    private LoopTask cursorBlinkTask;
+    private final Frame pointer = new Frame(ScaleOffset.ZERO, ScaleOffset.ZERO).setAnchor(0, 0.5);
 
     @Override
-    public JsonTextBox toJsonNodeTree(){
+    public JsonTextBox toJsonNodeTree() {
         JsonTextBox box = new JsonTextBox();
         super.fillParentClassJsonNode(box);
         box.setNoInputText(noInputText);
@@ -57,7 +63,7 @@ public final class TextBox extends AbstractFrame<TextBox> implements TextDisplay
     }
 
     @Override
-    public TextBox clone(){
+    public TextBox clone() {
         TextBox box = new TextBox(position, size);
         super.fillFieldForClone(box);
         box.setNoInputText(noInputText);
@@ -75,47 +81,118 @@ public final class TextBox extends AbstractFrame<TextBox> implements TextDisplay
     }
 
     @Override
-    public void render(GuiRender render, double delta){
-        if (canFrameBackgroundDisplay){
+    public void render(GuiRender render, double delta) {
+        if (canFrameBackgroundDisplay) {
             super.renderFrameDefaultBackground(render, delta);
         }
-        boolean hasInput = currentInputText.isEmpty();
-        render.drawString(hasInput ? noInputText : currentInputText, font, textRenderPosition, fontSize, hasInput ? noInputTextColor : inputTextColor, italicSlant, boldStrength);
+        boolean hasInput = !currentInputText.isEmpty();
+        render.drawString(hasInput ? currentInputText : noInputText, font, textRenderPosition, fontSize,
+                hasInput ? inputTextColor : noInputTextColor, italicSlant, boldStrength);
+
+        if (isInFocus && cursorVisible) {
+            int cursorX = textRenderPosition.getXPixelInWindow()
+                    + font.getCursorX(currentInputText, cursorPosition, fontSize, italicSlant, boldStrength);
+            int cursorHeight = fontSize + 2;
+            int cursorY = textRenderPosition.getYPixelInWindow() - 1;
+            ScaleOffset cursorMin = ScaleOffset.fromOffset(cursorX, cursorY);
+            ScaleOffset cursorMax = ScaleOffset.fromOffset(cursorX + 1, cursorY + cursorHeight);
+            render.drawSquare(cursorMin, cursorMax, inputTextColor);
+        }
     }
 
-    private void operationTextRenderPosition(){
-        textRenderPosition = operationTextPosition(font, currentInputText.isEmpty() ? noInputText : currentInputText, fontSize, italicSlant, boldStrength, realPosition, realPositionMax, horizontalAlignment, verticalAlignment);
+    private void operationTextRenderPosition() {
+        textRenderPosition = operationTextPosition(font, currentInputText.isEmpty() ? noInputText : currentInputText,
+                fontSize, italicSlant, boldStrength, realPosition, realPositionMax, horizontalAlignment, verticalAlignment);
     }
 
     @Override
-    public void operationPosition(AbstractFrame<?> parentFrame, ScaleOffset parentRealPosition){
+    public void operationPosition(AbstractFrame<?> parentFrame, ScaleOffset parentRealPosition) {
         super.operationPosition(parentFrame, parentRealPosition);
         operationTextRenderPosition();
     }
 
     @Override
-    public void onMouseButtonEvent(MouseButtonEvent event){
-        if (isMouseInRange()){
+    public void onMouseButtonEvent(MouseButtonEvent event) {
+        boolean wasFocused = isInFocus;
+        if (isMouseInRange()) {
             event.cancel();
             isInFocus = true;
+            if (!wasFocused) {
+                cursorVisible = true;
+                cursorBlinkTask = MainGui.getInstance().runInfiniteLoopTask(() -> cursorVisible = !cursorVisible, 0, 500);
+            }
         } else {
             isInFocus = false;
+            if (wasFocused && cursorBlinkTask != null) {
+                cursorBlinkTask.cancel();
+                cursorBlinkTask = null;
+            }
+            cursorVisible = false;
         }
     }
+
     @Override
-    public void onKeyEvent(KeyEvent event){
-        if (isInFocus && event.getAction() != InputAction.RELEASE){
-            Key key = event.getKey();
-            if (!key.isNull()){
-                char keyName = event.getKey().getName();
-                currentInputText += keyName;
-                operationTextRenderPosition();
-                event.cancel();
-            } else if (key.equals(Key.BACKSPACE) && !currentInputText.isEmpty()){
-                currentInputText = currentInputText.substring(0, currentInputText.length() - 1);
-                operationTextRenderPosition();
-                event.cancel();
+    public void onKeyEvent(KeyEvent event) {
+        if (!isInFocus || event.getAction() == InputAction.RELEASE) {
+            return;
+        }
+        cursorVisible = true;
+        Key key = event.getKey();
+        if (!key.isNull()) {
+            char inputChar = key.getName();
+            if (event.getModifiers().isCapsLockEnabled()){
+                inputChar = reverseCase(inputChar);
             }
+            if (event.getModifiers().isShiftPressed()){
+                inputChar = reverseCase(inputChar);
+            }
+            currentInputText = currentInputText.substring(0, cursorPosition) + inputChar + currentInputText.substring(cursorPosition);
+            cursorPosition++;
+            operationTextRenderPosition();
+            event.cancel();
+        } else if (key.equals(Key.BACKSPACE)) {
+            if (cursorPosition > 0) {
+                currentInputText = currentInputText.substring(0, cursorPosition - 1) + currentInputText.substring(cursorPosition);
+                cursorPosition--;
+                operationTextRenderPosition();
+            }
+            event.cancel();
+        } else if (key.equals(Key.DELETE)) {
+            if (cursorPosition < currentInputText.length()) {
+                currentInputText = currentInputText.substring(0, cursorPosition) + currentInputText.substring(cursorPosition + 1);
+                operationTextRenderPosition();
+            }
+            event.cancel();
+        } else if (key.equals(Key.LEFT)) {
+            if (cursorPosition > 0) {
+                cursorPosition--;
+                operationTextRenderPosition();
+            }
+            event.cancel();
+        } else if (key.equals(Key.RIGHT)) {
+            if (cursorPosition < currentInputText.length()) {
+                cursorPosition++;
+                operationTextRenderPosition();
+            }
+            event.cancel();
+        } else if (key.equals(Key.HOME)) {
+            cursorPosition = 0;
+            operationTextRenderPosition();
+            event.cancel();
+        } else if (key.equals(Key.END)) {
+            cursorPosition = currentInputText.length();
+            operationTextRenderPosition();
+            event.cancel();
+        }
+    }
+
+    private static char reverseCase(char c) {
+        if (Character.isUpperCase(c)) {
+            return Character.toLowerCase(c);
+        } else if (Character.isLowerCase(c)) {
+            return Character.toUpperCase(c);
+        } else {
+            return c;
         }
     }
 
@@ -124,46 +201,55 @@ public final class TextBox extends AbstractFrame<TextBox> implements TextDisplay
         sendSignal(SignalType.SET_NO_INPUT_TEXT, noInputText);
         return this;
     }
+
     public TextBox setCanFrameBackgroundDisplay(boolean canFrameBackgroundDisplay) {
         this.canFrameBackgroundDisplay = canFrameBackgroundDisplay;
         sendSignal(SignalType.SET_CAN_FRAME_BACKGROUND_DISPLAY, canFrameBackgroundDisplay);
         return this;
     }
+
     public TextBox setFont(Font font) {
         this.font = font;
         sendSignal(SignalType.SET_FONT, font);
         return this;
     }
+
     public TextBox setFontSize(int fontSize) {
         this.fontSize = fontSize;
         sendSignal(SignalType.SET_FONT_SIZE, fontSize);
         return this;
     }
-    public TextBox setItalicSlant(double italicSlant){
+
+    public TextBox setItalicSlant(double italicSlant) {
         this.italicSlant = italicSlant;
         sendSignal(SignalType.SET_ITALIC_SLANT, italicSlant);
         return this;
     }
-    public TextBox setBoldStrength(int boldStrength){
+
+    public TextBox setBoldStrength(int boldStrength) {
         this.boldStrength = boldStrength;
         sendSignal(SignalType.SET_BOLD_STRENGTH, boldStrength);
         return this;
     }
-    public TextBox setHorizontalAlignment(HorizontalAlignment horizontalAlignment){
+
+    public TextBox setHorizontalAlignment(HorizontalAlignment horizontalAlignment) {
         this.horizontalAlignment = horizontalAlignment;
         sendSignal(SignalType.SET_HORIZONTAL_ALIGNMENT);
         return this;
     }
-    public TextBox setVerticalAlignment(VerticalAlignment verticalAlignment){
+
+    public TextBox setVerticalAlignment(VerticalAlignment verticalAlignment) {
         this.verticalAlignment = verticalAlignment;
         sendSignal(SignalType.SET_VERTICAL_ALIGNMENT);
         return this;
     }
+
     public TextBox setNoInputTextColor(RGBA noInputTextColor) {
         this.noInputTextColor = noInputTextColor;
         sendSignal(SignalType.SET_NO_INPUT_TEXT_COLOR, noInputTextColor);
         return this;
     }
+
     public TextBox setInputTextColor(RGBA inputTextColor) {
         this.inputTextColor = inputTextColor;
         sendSignal(SignalType.SET_INPUT_TEXT_COLOR, inputTextColor);
@@ -173,27 +259,35 @@ public final class TextBox extends AbstractFrame<TextBox> implements TextDisplay
     public String getNoInputText() {
         return noInputText;
     }
+
     public String getInputText() {
         return currentInputText;
     }
+
     public Font getFont() {
         return font;
     }
+
     public int getFontSize() {
         return fontSize;
     }
+
     public HorizontalAlignment getHorizontalAlignment() {
         return horizontalAlignment;
     }
+
     public VerticalAlignment getVerticalAlignment() {
         return verticalAlignment;
     }
+
     public RGBA getNoInputTextColor() {
         return noInputTextColor;
     }
+
     public RGBA getInputTextColor() {
         return inputTextColor;
     }
+
     public boolean canFrameBackgroundDisplay() {
         return canFrameBackgroundDisplay;
     }
