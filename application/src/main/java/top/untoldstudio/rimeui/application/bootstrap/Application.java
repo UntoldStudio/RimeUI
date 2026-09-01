@@ -46,7 +46,7 @@ public final class Application {
 
         window.setWindowIcon("/texture/icon.png");
 
-        TextBox box = new TextBox(ScaleOffset.fromScale(0.5, 0.5), ScaleOffset.fromScale(0.5, 0.5)).setAnchor(0.5, 0.5);
+        TextBox box = new TextBox(ScaleOffset.fromScale(0.5, 0.5), ScaleOffset.fromScale(0.5, 0.5)).setAnchor(0.5, 0.5).setCanFrameBackgroundDisplay(false);
         RimeUI.getMainGui().addChild(box);
 
         Bootstrap.buildDefaultGuiNodes();

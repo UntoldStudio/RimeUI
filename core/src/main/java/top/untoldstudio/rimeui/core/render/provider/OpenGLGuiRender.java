@@ -413,15 +413,16 @@ public final class OpenGLGuiRender extends GuiRender {
         }
         if (atlasCursorY + height > atlasHeight) {
             expandAtlas();
-            glBindTexture(GL_TEXTURE_2D, fontAtlasTextureId);
         }
 
         ByteBuffer pixelBuffer = bitmap.buffer(pitch * height);
         if (pixelBuffer == null) return;
 
+        glBindTexture(GL_TEXTURE_2D, fontAtlasTextureId);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
         glPixelStorei(GL_UNPACK_ROW_LENGTH, pitch);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, atlasCursorX, atlasCursorY, width, height,
-                GL_RED, GL_UNSIGNED_BYTE, pixelBuffer);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, atlasCursorX, atlasCursorY, width, height, GL_RED, GL_UNSIGNED_BYTE, pixelBuffer);
         glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
         float u0 = (float) atlasCursorX / atlasWidth;

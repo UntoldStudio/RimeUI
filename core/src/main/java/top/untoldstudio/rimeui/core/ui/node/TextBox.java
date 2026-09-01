@@ -36,7 +36,7 @@ public final class TextBox extends AbstractFrame<TextBox> implements TextDisplay
     private HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
     private VerticalAlignment verticalAlignment = VerticalAlignment.CENTER;
     private RGBA noInputTextColor = RGBA.GRAY;
-    private RGBA inputTextColor = RGBA.WHITE;
+    private RGBA inputTextColor = RGBA.BLACK;
     private boolean isInFocus = false;
 
     @Override
@@ -104,7 +104,7 @@ public final class TextBox extends AbstractFrame<TextBox> implements TextDisplay
     }
     @Override
     public void onKeyEvent(KeyEvent event){
-        if (isInFocus){
+        if (isInFocus && event.getAction() != InputAction.RELEASE){
             Key key = event.getKey();
             if (!key.isNull()){
                 char keyName = event.getKey().getName();
