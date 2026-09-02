@@ -23,7 +23,7 @@ import top.untoldstudio.rimeui.core.serialization.JsonFont;
 import java.nio.ByteBuffer;
 
 public record Font(FT_Face face, String fontPath, ByteBuffer memoryBuffer) {
-    public static final Font JETBRAINS_MONO = FontManager.loadFont("/font/jetbrains_mono.ttf");
+    public static final Font DEFAULT_FONT = FontManager.loadFont("/font/wen_quan_wei_mi_hei.ttf");
 
     public JsonFont toJsonFont() {
         return new JsonFont(fontPath);

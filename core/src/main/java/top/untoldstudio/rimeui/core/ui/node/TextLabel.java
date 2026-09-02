@@ -31,7 +31,7 @@ import top.untoldstudio.rimeui.core.ui.AbstractFrame;
 
 public final class TextLabel extends AbstractFrame<TextLabel> implements InputBlocker<TextLabel>, TextDisplayable {
     private boolean canFrameBackgroundDisplay = false;
-    private Font font = Font.JETBRAINS_MONO;
+    private Font font = Font.DEFAULT_FONT;
     private String text;
     private int fontSize = 14;
     private RGBA textColor = RGBA.WHITE;

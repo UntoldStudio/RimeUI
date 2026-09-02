@@ -26,14 +26,12 @@ import top.untoldstudio.rimeui.core.ui.AbstractFrame;
 import top.untoldstudio.rimeui.core.ui.MainGui;
 import top.untoldstudio.rimeui.core.ui.task.LoopTask;
 
-import javax.swing.plaf.synth.SynthButtonUI;
-
 public final class TextBox extends AbstractFrame<TextBox> implements TextDisplayable {
     private String noInputText = "Please Enter Text";
     private String currentInputText = "";
     private ScaleOffset textRenderPosition;
     private boolean canFrameBackgroundDisplay = true;
-    private Font font = Font.JETBRAINS_MONO;
+    private Font font = Font.DEFAULT_FONT;
     private int fontSize = 14;
     private double italicSlant = 0;
     private int boldStrength = 0;
