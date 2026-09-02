@@ -6,10 +6,9 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "RenderSystemMixin",
-    "KeyboardHandlerMixin",
-    "MouseHandlerMixin",
     "WindowMixin",
-    "MainMixin"
+    "MainMixin",
+    "CursorTypeAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -17,9 +17,6 @@ package top.untoldstudio.rimeui.application.bootstrap;
 
 import top.untoldstudio.rimeui.core.RimeUI;
 import top.untoldstudio.rimeui.core.data.ScaleOffset;
-import top.untoldstudio.rimeui.core.event.GLFWEventListener;
-import top.untoldstudio.rimeui.core.ui.DoubleConsumer;
-import top.untoldstudio.rimeui.core.ui.MainGui;
 import top.untoldstudio.rimeui.core.ui.Window;
 import top.untoldstudio.rimeui.core.ui.node.TextBox;
 
@@ -27,9 +24,6 @@ import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 import static org.lwjgl.opengl.GL32C.*;
 
-/**
- * 注意:application模块是我们的GUI编辑器而非给你的示例...
- */
 public final class Application {
     private static Application instance;
     private final Window window;
@@ -39,10 +33,6 @@ public final class Application {
         isRunning = true;
         long windowHandle = window.getWindowHandle();
         RimeUI.initOpenGL(windowHandle);
-
-        GLFWEventListener listener = new GLFWEventListener(windowHandle);
-        listener.registerCallback();
-        listener.setEnabled(true);
 
         window.setWindowIcon("/texture/icon.png");
 

@@ -21,48 +21,60 @@ import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWScrollCallback;
+import top.untoldstudio.rimeui.core.ui.MainGui;
 
 public class GLFWEventListener {
     private static GLFWEventListener instance;
     private final long window;
-    private static boolean enabled = false;
-    private final GLFWKeyCallback keyCallback = GLFWKeyCallback.create((currentWindow, key, scancode, action, modifiers) -> {
-        if (!enabled) return;
-        InputEventListener.onKeyEvent(key, action, modifiers);
-    });
-    private final GLFWMouseButtonCallback mouseButtonCallback = GLFWMouseButtonCallback.create((currentWindow, button, action, modifiers) -> {
-        if (!enabled) return;
-        InputEventListener.onMouseButtonEvent(button, action, modifiers);
-    });
-    private final GLFWCursorPosCallback cursorPositionCallback = GLFWCursorPosCallback.create((currentWindow, x, y) -> {
-        if (!enabled) return;
-        InputEventListener.onMouseMoveEvent(x, y);
-    });
-    private final GLFWScrollCallback scrollCallback = GLFWScrollCallback.create((currentWindow, x, y) -> {
-        if (!enabled) return;
-        InputEventListener.onMouseScrollEvent(x, y);
-    });
+
+    private final GLFWKeyCallback keyCallback;
+    private final GLFWMouseButtonCallback mouseButtonCallback;
+    private final GLFWCursorPosCallback cursorPositionCallback;
+    private final GLFWScrollCallback scrollCallback;
+    private GLFWKeyCallback oldKeyCallback = null;
+    private GLFWMouseButtonCallback oldMouseButtonCallback = null;
+    private GLFWCursorPosCallback oldCursorPositionCallback = null;
+    private GLFWScrollCallback oldScrollCallback = null;
 
     public GLFWEventListener(long window) {
         instance = this;
         this.window = window;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-    public void setEnabled(boolean enabled) {
-        GLFWEventListener.enabled = enabled;
-    }
-
-    /**
-     * WARN:它会把你所有已注册的回调顶掉,且不会把事件对象给你让你检查是否取消以取消宿主的后续处理,如果你不想这么做,请直接调用{@link InputEventListener}的方法以获取事件返回值,如果你使用了我们的NeoForge模组绑定你就不需要手动接入输入,我们的模组做了
-     */
-    public void registerCallback(){
-        glfwSetKeyCallback(window, keyCallback);
-        glfwSetMouseButtonCallback(window, mouseButtonCallback);
-        glfwSetCursorPosCallback(window, cursorPositionCallback);
-        glfwSetScrollCallback(window, scrollCallback);
+        keyCallback = GLFWKeyCallback.create((currentWindow, key, scancode, action, modifiers) -> {
+            if (MainGui.getInstance() == null) return;
+            KeyEvent event = new KeyEvent(key, action, modifiers);
+            MainGui.getInstance().onKeyEvent(event);
+            if (!event.isCancelled() && oldKeyCallback != null) {
+                oldKeyCallback.invoke(window, key, scancode, action, modifiers);
+            }
+        });
+        mouseButtonCallback = GLFWMouseButtonCallback.create((currentWindow, button, action, modifiers) -> {
+            if (MainGui.getInstance() == null) return;
+            MouseButtonEvent event = new MouseButtonEvent(button, action, modifiers);
+            MainGui.getInstance().onMouseButtonEvent(event);
+            if (!event.isCancelled() && oldMouseButtonCallback != null) {
+                oldMouseButtonCallback.invoke(window, button, action, modifiers);
+            }
+        });
+        cursorPositionCallback = GLFWCursorPosCallback.create((currentWindow, x, y) -> {
+            if (MainGui.getInstance() == null) return;
+            MouseMoveEvent event = new MouseMoveEvent(x, y);
+            MainGui.getInstance().onMouseMoveEvent(event);
+            if (!event.isCancelled() && oldCursorPositionCallback != null) {
+                oldCursorPositionCallback.invoke(window, x, y);
+            }
+        });
+        scrollCallback = GLFWScrollCallback.create((currentWindow, x, y) -> {
+            if (MainGui.getInstance() == null) return;
+            MouseScrollEvent event = new MouseScrollEvent(x, y);
+            MainGui.getInstance().onMouseScrollEvent(event);
+            if (!event.isCancelled() && oldScrollCallback != null) {
+                oldScrollCallback.invoke(window, x, y);
+            }
+        });
+        oldKeyCallback = glfwSetKeyCallback(window, keyCallback);
+        oldMouseButtonCallback = glfwSetMouseButtonCallback(window, mouseButtonCallback);
+        oldCursorPositionCallback = glfwSetCursorPosCallback(window, cursorPositionCallback);
+        oldScrollCallback = glfwSetScrollCallback(window, scrollCallback);
     }
 
     public void clean(){
@@ -70,6 +82,10 @@ public class GLFWEventListener {
         mouseButtonCallback.free();
         cursorPositionCallback.free();
         scrollCallback.free();
+    }
+
+    public long getWindow() {
+        return window;
     }
 
     public static GLFWEventListener getInstance() {

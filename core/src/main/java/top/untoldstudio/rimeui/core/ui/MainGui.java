@@ -43,6 +43,7 @@ public final class MainGui {
     private long externalSettingCursor = -1;
     private boolean isLastMouseMoveEventCanceled = false;
     private final PriorityBlockingQueue<Task> tasks = new PriorityBlockingQueue<>();
+    private final GLFWEventListener listener;
 
     public void render() {
         render.saveContext();
@@ -244,6 +245,7 @@ public final class MainGui {
         this.render = render;
         this.window = window;
         this.mouse = new Mouse(window.getWindowHandle());
+        this.listener = new GLFWEventListener(window.getWindowHandle());
     }
 
     public static MainGui getInstance() {
@@ -274,5 +276,9 @@ public final class MainGui {
         window.close();
         render.cleanup();
         TextureManager.cleanup();
+    }
+
+    public GLFWEventListener getListener() {
+        return listener;
     }
 }
