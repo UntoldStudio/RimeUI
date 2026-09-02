@@ -26,6 +26,8 @@ import top.untoldstudio.rimeui.core.ui.AbstractFrame;
 import top.untoldstudio.rimeui.core.ui.MainGui;
 import top.untoldstudio.rimeui.core.ui.task.LoopTask;
 
+import javax.swing.plaf.synth.SynthButtonUI;
+
 public final class TextBox extends AbstractFrame<TextBox> implements TextDisplayable {
     private String noInputText = "Please Enter Text";
     private String currentInputText = "";
@@ -138,10 +140,19 @@ public final class TextBox extends AbstractFrame<TextBox> implements TextDisplay
         }
         cursorVisible = true;
         Key key = event.getKey();
-        if (!key.isNameNull()) {
+        InputModifiers modifiers = event.getModifiers();
+        if (key == Key.V && modifiers.isControlPressed()){
+            String clipboard = MainGui.getInstance().getWindow().getClipboard();
+            if (clipboard != null && !clipboard.isEmpty()) {
+                currentInputText = new StringBuilder(currentInputText).insert(cursorPosition, clipboard).toString();
+                cursorPosition += clipboard.length();
+                operationTextRenderPosition();
+                event.cancel();
+            }
+        } else if (!key.isNameNull()) {
             char inputChar = key.getName();
             if (event.getModifiers().isCapsLockEnabled()){
-                inputChar = reverseCase(inputChar);
+                inputChar = Character.toUpperCase(inputChar);
             }
             if (event.getModifiers().isShiftPressed()){
                 inputChar = reverseCase(inputChar);

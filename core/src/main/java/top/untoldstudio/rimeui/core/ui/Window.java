@@ -61,6 +61,10 @@ public final class Window {
         glfwSetInputMode(windowHandle, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
     }
 
+    public String getClipboard(){
+        return glfwGetClipboardString(windowHandle);
+    }
+
     public static Window create(String title, int width, int height){
         if (!glfwInit()){
             throw new IllegalStateException("Unable to initialize GLFW");
