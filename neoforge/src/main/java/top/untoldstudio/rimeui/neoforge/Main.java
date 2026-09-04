@@ -18,7 +18,6 @@ package top.untoldstudio.rimeui.neoforge;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(Main.MOD_ID)
 public final class Main {
@@ -28,7 +27,6 @@ public final class Main {
     public Main(IEventBus modEventBus, ModContainer modContainer) {
         instance = this;
         modEventBus.register(new ModEventHandler());
-        NeoForge.EVENT_BUS.register(new GameEventHandler());
     }
 
     public static Main getInstance() {
