@@ -16,6 +16,7 @@
 package top.untoldstudio.rimeui.core.serialization.node;
 
 import com.google.gson.annotations.SerializedName;
+import top.untoldstudio.rimeui.core.data.RGBA;
 import top.untoldstudio.rimeui.core.serialization.JsonAbstractFrame;
 import top.untoldstudio.rimeui.core.ui.node.ScrollFrame;
 
