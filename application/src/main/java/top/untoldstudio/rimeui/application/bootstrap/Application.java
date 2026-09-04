@@ -16,9 +16,8 @@
 package top.untoldstudio.rimeui.application.bootstrap;
 
 import top.untoldstudio.rimeui.core.RimeUI;
-import top.untoldstudio.rimeui.core.data.ScaleOffset;
 import top.untoldstudio.rimeui.core.ui.Window;
-import top.untoldstudio.rimeui.core.ui.node.TextBox;
+import top.untoldstudio.rimeui.core.ui.node.Frame;
 
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
@@ -28,6 +27,7 @@ public final class Application {
     private static Application instance;
     private final Window window;
     private boolean isRunning;
+    private Frame userCustomNodeParent;
 
     public void run(){
         isRunning = true;
@@ -35,9 +35,6 @@ public final class Application {
         RimeUI.initOpenGL(windowHandle);
 
         window.setWindowIcon("/texture/icon.png");
-
-        TextBox box = new TextBox(ScaleOffset.fromScale(0.5, 0.5), ScaleOffset.fromScale(0.5, 0.5)).setAnchor(0.5, 0.5);
-        RimeUI.getMainGui().addChild(box);
 
         Bootstrap.buildDefaultGuiNodes();
 
@@ -63,5 +60,13 @@ public final class Application {
 
     public static Application getInstance() {
         return instance;
+    }
+
+    public Frame getUserCustomNodeParent() {
+        return userCustomNodeParent;
+    }
+
+    public void setUserCustomNodeParent(Frame userCustomNodeParent) {
+        this.userCustomNodeParent = userCustomNodeParent;
     }
 }

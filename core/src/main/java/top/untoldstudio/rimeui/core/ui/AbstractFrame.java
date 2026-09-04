@@ -157,14 +157,14 @@ public abstract class AbstractFrame<T extends AbstractFrame<T>> extends GuiNode<
     }
     public void operationPosition(AbstractFrame<?> parentFrame, ScaleOffset parentRealPosition) {
         if (parentFrame != null) {
-            realSize = ScaleOffset.fromOffset((int) Math.round(size.xScale() * parentFrame.getRealSize().getXPixelInWindow()) + size.xOffset(), (int) Math.round(size.yScale() * parentFrame.getRealSize().getYPixelInWindow()) + size.yOffset());
+            realSize = ScaleOffset.fromOffset((int) Math.round(size.xScale() * parentFrame.getRealSize().getXPixelInParent()) + size.xOffset(), (int) Math.round(size.yScale() * parentFrame.getRealSize().getYPixelInParent()) + size.yOffset());
             realPosition = ScaleOffset.fromOffset(
-                    parentRealPosition.getXPixelInWindow() + (int) Math.round(position.xScale() * parentFrame.getRealSize().getXPixelInWindow()) + position.xOffset() - (int) Math.round(realSize.getXPixelInWindow() * xAnchor),
-                    parentRealPosition.getYPixelInWindow() + (int) Math.round(position.yScale() * parentFrame.getRealSize().getYPixelInWindow()) + position.yOffset() - (int) Math.round(realSize.getYPixelInWindow() * yAnchor)
+                    parentRealPosition.getXPixelInParent() + (int) Math.round(position.xScale() * parentFrame.getRealSize().getXPixelInParent()) + position.xOffset() - (int) Math.round(realSize.getXPixelInParent() * xAnchor),
+                    parentRealPosition.getYPixelInParent() + (int) Math.round(position.yScale() * parentFrame.getRealSize().getYPixelInParent()) + position.yOffset() - (int) Math.round(realSize.getYPixelInParent() * yAnchor)
             );
         } else {
-            realSize = ScaleOffset.fromOffset(size.getXPixelInWindow(), size.getYPixelInWindow());
-            realPosition = ScaleOffset.fromOffset(position.getXPixelInWindow() - (int) Math.round(realSize.getXPixelInWindow() * xAnchor), position.getYPixelInWindow() - (int) Math.round(realSize.getYPixelInWindow() * yAnchor));
+            realSize = ScaleOffset.fromOffset(size.getXPixelInParent(), size.getYPixelInParent());
+            realPosition = ScaleOffset.fromOffset(position.getXPixelInParent() - (int) Math.round(realSize.getXPixelInParent() * xAnchor), position.getYPixelInParent() - (int) Math.round(realSize.getYPixelInParent() * yAnchor));
         }
         realPositionMax = realPosition.add(realSize);
         letChildrenOperationPosition();

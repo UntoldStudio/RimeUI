@@ -38,8 +38,8 @@ public final class HBox extends LayoutBox<HBox> {
         int currentOffset = frameStartSpacing;
 
         for (AbstractFrame<?> frame : sortedFrameList){
-            frame.setPosition(ScaleOffset.fromOffset(currentOffset, frame.getPosition().getYPixelInWindow(this)));
-            currentOffset += frame.getSize().getXPixelInWindow(this) + frameSpacing;
+            frame.setPosition(ScaleOffset.fromOffset(currentOffset, frame.getPosition().getYPixelInParent(this)));
+            currentOffset += frame.getSize().getXPixelInParent(this) + frameSpacing;
         }
     }
 

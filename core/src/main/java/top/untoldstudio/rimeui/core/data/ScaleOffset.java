@@ -107,41 +107,41 @@ public record ScaleOffset(
         return new ScaleOffset(this.xScale - xScale, this.xOffset - xOffset, this.yScale - yScale, this.yOffset - yOffset);
     }
 
-    public int getScaleXPixelInWindow(){
+    public int getScaleXPixelInParent(){
         return MathTool.round(MainGui.getInstance().getWindowWidth() * xScale);
     }
-    public double getScaledXInWindow(){
-        return (double) getXPixelInWindow() / (double) MainGui.getInstance().getWindowWidth();
+    public double getScaledXInParent(){
+        return (double) getXPixelInParent() / (double) MainGui.getInstance().getWindowWidth();
     }
-    public double getScaledYInWindow(){
-        return (double) getYPixelInWindow() / (double) MainGui.getInstance().getWindowHeight();
+    public double getScaledYInParent(){
+        return (double) getYPixelInParent() / (double) MainGui.getInstance().getWindowHeight();
     }
-    public int getXPixelInWindow(){
-        return getScaleXPixelInWindow() + xOffset;
+    public int getXPixelInParent(){
+        return getScaleXPixelInParent() + xOffset;
     }
-    public int getScaleYPixelInWindow(){
+    public int getScaleYPixelInParent(){
         return MathTool.round(MainGui.getInstance().getWindowHeight() * yScale);
     }
-    public int getYPixelInWindow(){
-        return getScaleYPixelInWindow() + yOffset;
+    public int getYPixelInParent(){
+        return getScaleYPixelInParent() + yOffset;
     }
 
-    public int getScaleXPixelInWindow(AbstractFrame<?> frame) {
-        return MathTool.round(frame.getRealSize().getXPixelInWindow() * xScale);
+    public int getScaleXPixelInParent(AbstractFrame<?> frame) {
+        return MathTool.round(frame.getRealSize().getXPixelInParent() * xScale);
     }
-    public int getScaleYPixelInWindow(AbstractFrame<?> frame) {
-        return MathTool.round(frame.getRealSize().getYPixelInWindow() * yScale);
+    public int getScaleYPixelInParent(AbstractFrame<?> frame) {
+        return MathTool.round(frame.getRealSize().getYPixelInParent() * yScale);
     }
-    public int getXPixelInWindow(AbstractFrame<?> frame) {
-        return getScaleXPixelInWindow(frame) + xOffset;
+    public int getXPixelInParent(AbstractFrame<?> frame) {
+        return getScaleXPixelInParent(frame) + xOffset;
     }
-    public int getYPixelInWindow(AbstractFrame<?> frame) {
-        return getScaleYPixelInWindow(frame) + yOffset;
+    public int getYPixelInParent(AbstractFrame<?> frame) {
+        return getScaleYPixelInParent(frame) + yOffset;
     }
-    public double getScaledXInWindow(AbstractFrame<?> frame) {
-        return (double) getXPixelInWindow(frame) / frame.getRealSize().getXPixelInWindow();
+    public double getScaledXInParent(AbstractFrame<?> frame) {
+        return (double) getXPixelInParent(frame) / frame.getRealSize().getXPixelInParent();
     }
-    public double getScaledYInWindow(AbstractFrame<?> frame) {
-        return (double) getYPixelInWindow(frame) / frame.getRealSize().getYPixelInWindow();
+    public double getScaledYInParent(AbstractFrame<?> frame) {
+        return (double) getYPixelInParent(frame) / frame.getRealSize().getYPixelInParent();
     }
 }

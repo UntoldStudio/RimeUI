@@ -26,14 +26,14 @@ public interface TextDisplayable extends GuiInterface {
         int stringWidth = font.getStringWidth(text, fontSize, italicSlant, boldStrength);
         int stringHeight = font.getStringHeight(text, fontSize, italicSlant, boldStrength);
         int horizontalAlignmentPixel = switch (horizontalAlignment) {
-            case HorizontalAlignment.LEFT -> realPosition.getXPixelInWindow();
-            case HorizontalAlignment.RIGHT -> realPositionMax.getXPixelInWindow() - stringWidth;
-            case HorizontalAlignment.CENTER -> (realPosition.getXPixelInWindow() + realPositionMax.getXPixelInWindow() - stringWidth) / 2;
+            case HorizontalAlignment.LEFT -> realPosition.getXPixelInParent();
+            case HorizontalAlignment.RIGHT -> realPositionMax.getXPixelInParent() - stringWidth;
+            case HorizontalAlignment.CENTER -> (realPosition.getXPixelInParent() + realPositionMax.getXPixelInParent() - stringWidth) / 2;
         };
         int verticalAlignmentPixel = switch (verticalAlignment) {
-            case VerticalAlignment.TOP -> realPosition.getYPixelInWindow();
-            case VerticalAlignment.BOTTOM -> realPositionMax.getYPixelInWindow() - stringHeight;
-            case VerticalAlignment.CENTER -> (realPosition.getYPixelInWindow() + realPositionMax.getYPixelInWindow() - stringHeight) / 2;
+            case VerticalAlignment.TOP -> realPosition.getYPixelInParent();
+            case VerticalAlignment.BOTTOM -> realPositionMax.getYPixelInParent() - stringHeight;
+            case VerticalAlignment.CENTER -> (realPosition.getYPixelInParent() + realPositionMax.getYPixelInParent() - stringHeight) / 2;
         };
         return ScaleOffset.fromOffset(horizontalAlignmentPixel, verticalAlignmentPixel);
     }

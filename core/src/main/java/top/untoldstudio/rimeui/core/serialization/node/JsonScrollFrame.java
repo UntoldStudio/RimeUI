@@ -41,7 +41,7 @@ public final class JsonScrollFrame extends JsonAbstractFrame {
         frame.setScrollProgress(scrollProgress);
         frame.setScrollSpeed(scrollSpeed);
         frame.setIsBlockInput(isBlockInput);
-        frame.setScrollBarWidth(scrollBar.getSize().getXPixelInWindow());
+        frame.setScrollBarWidth(scrollBar.getSize().getXPixelInParent());
         frame.setScrollBarTexture(scrollBar.getDefaultImageData().toImageData());
         frame.setScrollBarVisible(scrollBar.isVisible());
         super.fillParentGuiNodeField(frame);

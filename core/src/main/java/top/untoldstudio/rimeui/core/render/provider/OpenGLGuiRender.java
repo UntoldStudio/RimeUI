@@ -476,8 +476,8 @@ public final class OpenGLGuiRender extends GuiRender {
         int windowWidth = MainGui.getInstance().getWindowWidth();
         int windowHeight = MainGui.getInstance().getWindowHeight();
         if (isUseRenderMapping) {
-            glViewport(renderRegionMin.getXPixelInWindow(), renderRegionMin.getYPixelInWindow(),
-                    renderRegionSize.getXPixelInWindow(), renderRegionSize.getYPixelInWindow());
+            glViewport(renderRegionMin.getXPixelInParent(), renderRegionMin.getYPixelInParent(),
+                    renderRegionSize.getXPixelInParent(), renderRegionSize.getYPixelInParent());
         } else {
             glViewport(0, 0, windowWidth, windowHeight);
         }
@@ -522,8 +522,8 @@ public final class OpenGLGuiRender extends GuiRender {
             int windowWidth = MainGui.getInstance().getWindowWidth();
             int windowHeight = MainGui.getInstance().getWindowHeight();
             if (isUseRenderMapping) {
-                glViewport(renderRegionMin.getXPixelInWindow(), renderRegionMin.getYPixelInWindow(),
-                        renderRegionSize.getXPixelInWindow(), renderRegionSize.getYPixelInWindow());
+                glViewport(renderRegionMin.getXPixelInParent(), renderRegionMin.getYPixelInParent(),
+                        renderRegionSize.getXPixelInParent(), renderRegionSize.getYPixelInParent());
             } else {
                 glViewport(0, 0, windowWidth, windowHeight);
             }
@@ -850,10 +850,10 @@ public final class OpenGLGuiRender extends GuiRender {
         commands.add(new StateCommand(() -> {
             glEnable(GL_SCISSOR_TEST);
             glScissor(
-                    position.getXPixelInWindow(),
-                    windowHeight - position.getYPixelInWindow() - size.getYPixelInWindow(),
-                    size.getXPixelInWindow(),
-                    size.getYPixelInWindow()
+                    position.getXPixelInParent(),
+                    windowHeight - position.getYPixelInParent() - size.getYPixelInParent(),
+                    size.getXPixelInParent(),
+                    size.getYPixelInParent()
             );
         }));
     }

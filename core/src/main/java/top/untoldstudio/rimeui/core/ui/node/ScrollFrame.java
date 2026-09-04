@@ -62,7 +62,8 @@ public final class ScrollFrame extends AbstractFrame<ScrollFrame> implements Inp
         frame.setIsBlockInput(isBlockInput);
         frame.setScrollBarVisible(scrollBar.isVisible());
         frame.setScrollBarTexture(getScrollBarTexture());
-        frame.setScrollBarWidth(scrollBar.getSize().getXPixelInWindow());
+        frame.setScrollBarWidth(scrollBar.getSize().getXPixelInParent());
+        frame.setScrollBarColor(scrollBar.getBackgroundColor());
         return frame;
     }
 
@@ -96,7 +97,7 @@ public final class ScrollFrame extends AbstractFrame<ScrollFrame> implements Inp
     @Override
     public ScaleOffset getRealPosition() {
         ScaleOffset base = super.getRealPosition();
-        return base.withYOffset(base.yOffset() - (int) ((int) ((scrollScale - 1) * realSize.getYPixelInWindow()) * (1 - scrollProgress)));
+        return base.withYOffset(base.yOffset() - (int) ((int) ((scrollScale - 1) * realSize.getYPixelInParent()) * (1 - scrollProgress)));
     }
 
     @Override
@@ -132,9 +133,18 @@ public final class ScrollFrame extends AbstractFrame<ScrollFrame> implements Inp
     }
 
     public ScrollFrame setScrollBarWidth(int width) {
-        if (scrollBar.getSize().getXPixelInWindow() != width) {
-            scrollBar.setSize(ScaleOffset.fromOffset(width, scrollBar.getSize().getYPixelInWindow()));
+        ScaleOffset currentSize = scrollBar.getSize();
+        if (currentSize.getXPixelInParent() != width) {
+            scrollBar.setSize(new ScaleOffset(0, width, currentSize.yScale(), currentSize.yOffset()));
             sendSignal(SignalType.SET_SCROLL_BAR_WIDTH);
+        }
+        return this;
+    }
+
+    public ScrollFrame setScrollBarColor(RGBA color) {
+        if (scrollBar.getBackgroundColor() != color) {
+            scrollBar.setBackgroundColor(color);
+            sendSignal(SignalType.SET_SCROLL_BAR_COLOR);
         }
         return this;
     }
@@ -160,7 +170,7 @@ public final class ScrollFrame extends AbstractFrame<ScrollFrame> implements Inp
     }
 
     public int getScrollBarWidth() {
-        return scrollBar.getPosition().getXPixelInWindow();
+        return scrollBar.getPosition().getXPixelInParent();
     }
 
     public ImageData getScrollBarTexture() {
@@ -177,6 +187,9 @@ public final class ScrollFrame extends AbstractFrame<ScrollFrame> implements Inp
     }
     public double getScrollSpeed() {
         return scrollSpeed;
+    }
+    public RGBA getScrollBarColor() {
+        return scrollBar.getBackgroundColor();
     }
 
     public ScrollFrame setIsBlockInput(boolean isAcceptInput) {
@@ -212,6 +225,6 @@ public final class ScrollFrame extends AbstractFrame<ScrollFrame> implements Inp
 
     @Override
     public ScrollFrame setIsClipChildren(boolean clipChildren) {
-        throw new UnsupportedOperationException("You cannot set clipped a ScrollFrame");
+        return this;
     }
 }

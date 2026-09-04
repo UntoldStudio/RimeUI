@@ -88,9 +88,9 @@ public final class TextBox extends AbstractFrame<TextBox> implements TextDisplay
         render.drawString(hasInput ? currentInputText : noInputText, font, textRenderPosition, fontSize, hasInput ? inputTextColor : noInputTextColor, italicSlant, boldStrength);
 
         if (isInFocus && cursorVisible) {
-            int cursorX = textRenderPosition.getXPixelInWindow() + font.getCursorX(currentInputText, cursorPosition, fontSize, italicSlant, boldStrength);
+            int cursorX = textRenderPosition.getXPixelInParent() + font.getCursorX(currentInputText, cursorPosition, fontSize, italicSlant, boldStrength);
             int cursorHeight = fontSize + 2;
-            int cursorY = textRenderPosition.getYPixelInWindow() - 1;
+            int cursorY = textRenderPosition.getYPixelInParent() - 1;
             ScaleOffset cursorMin = ScaleOffset.fromOffset(cursorX, cursorY);
             ScaleOffset cursorMax = ScaleOffset.fromOffset(cursorX + 1, cursorY + cursorHeight);
             render.drawSquare(cursorMin, cursorMax, inputTextColor);

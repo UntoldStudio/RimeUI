@@ -38,8 +38,8 @@ public final class VBox extends LayoutBox<VBox> {
         int currentOffset = frameStartSpacing;
 
         for (AbstractFrame<?> frame : sortedFrameList){
-            frame.setPosition(ScaleOffset.fromOffset(frame.getPosition().getXPixelInWindow(this), currentOffset));
-            currentOffset += frame.getSize().getYPixelInWindow(this) + frameSpacing;
+            frame.setPosition(ScaleOffset.fromOffset(frame.getPosition().getXPixelInParent(this), currentOffset));
+            currentOffset += frame.getSize().getYPixelInParent(this) + frameSpacing;
         }
     }
 
